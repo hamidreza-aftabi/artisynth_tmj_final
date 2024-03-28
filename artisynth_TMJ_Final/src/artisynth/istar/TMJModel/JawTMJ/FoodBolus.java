@@ -74,7 +74,7 @@ public class FoodBolus extends RenderableComponentBase
 
    static
     {
-      myProps.addReadOnly("forceNorm *",
+     myProps.addReadOnly("forceNorm *",
                   "norm of total force applied by bolus (N)", "%8.2f");
       myProps.addReadOnly("normal *",
          "direction of force applied by bolus", "%8.4f");
