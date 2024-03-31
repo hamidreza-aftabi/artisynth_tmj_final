@@ -287,14 +287,34 @@ public class JawModelFEM extends JawModel{
    
    //update intertia and center of mass for the new geometry
    public void setNewJawDynamicProps(){
-      rigidBodies().get("jaw").setInertiaFromMass (0.2);
+      rigidBodies ().get ("jaw").setDensity (0.000002330);
+      //rigidBodies().get("jaw").setInertiaFromMass (0.2);
       rigidBodies().get("jaw").setRotaryDamping (100);
       rigidBodies().get("jaw").setFrameDamping (50);
    }
 
+  
    
-   
+   public void setNewResectedJawDynamicProps(){
+      rigidBodies ().get("jaw_resected").setDensity (0.000002330);
+      rigidBodies().get("jaw_resected").setDynamic (true);  
+      //rigidBodies().get("jaw_resected").setInertiaFromMass (0.1);
+      //rigidBodies().get("jaw_resected").setRotaryDamping (100);
+      //rigidBodies().get("jaw_resected").setFrameDamping (50);
+   }
 
+   
+   
+   public void setNewDonorDynamicProps(){
+      rigidBodies ().get("donor").setDensity (0.000002330);
+      rigidBodies().get("donor").setDynamic (true);   
+      //rigidBodies().get("donor").setInertiaFromMass (0.1);
+      //rigidBodies().get("donor").setRotaryDamping (100);
+      //rigidBodies().get("donor").setFrameDamping (50);
+   }
+
+   
+   
    public FemModel3d createAndAddFemBody(String name, String meshName) {
       FemModel3d model = (FemModel3d) get(name);
 
@@ -1534,8 +1554,8 @@ public class JawModelFEM extends JawModel{
       super();
       this.setName (name);
 
-      
       setGravity(0, 0, -gravityVal * unitConversion);
+
 
       JawModel.muscleList = readStringList(ArtisynthPath.getSrcRelativePath(JawModelFEM.class,"geometry/"+muscleListFilename));
       JawModel.bodyInfoList = readBodyInfoList(ArtisynthPath.getSrcRelativePath(JawModelFEM.class,"geometry/"+bodyListFilename));
@@ -1568,7 +1588,10 @@ public class JawModelFEM extends JawModel{
      
       
       setNewJawDynamicProps();
-     
+      setNewResectedJawDynamicProps ();
+      setNewDonorDynamicProps ();
+      
+
       
       
       ArrayList<FrameMarker>markers = JawModel.assembleMarkers(muscleList, muscleInfo, myRigidBodies, amiraTranformation, ArtisynthPath.getSrcRelativePath (JawModelFEM.class, ""));
@@ -1737,7 +1760,6 @@ public class JawModelFEM extends JawModel{
       setupRenderProps();
       
      
-      rigidBodies ().get ("jaw").setDensity (0.000002330);
       
       if (usePlate ==  true) {
          
@@ -1752,7 +1774,7 @@ public class JawModelFEM extends JawModel{
             
        }
    
-      editMuscleMacForce();
+      editMuscleMaxForce();
     
    }
    
@@ -1936,7 +1958,7 @@ public class JawModelFEM extends JawModel{
       RenderProps.setPointColor (insertion_point, new Color(0.2f,0.2f,1f));
    }
    
-   void editMuscleMacForce(){
+   void editMuscleMaxForce(){
 
       for (Muscle m : myAttachedMuscles) {   
          AxialMuscleMaterial m_material = (AxialMuscleMaterial) m.getMaterial ();
