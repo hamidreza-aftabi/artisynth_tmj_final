@@ -1,5 +1,6 @@
 skull "skull_with_cartilage.obj"
-jaw "resected_mandible_transformed.obj"
+jaw "resected_mandible_left_transformed.obj"
+donor "resected_donor_transformed.obj"
 plate "rbright_plate3.obj"
 hyoid "hyoid.obj"
 vertebrae "vertebrae.obj"
