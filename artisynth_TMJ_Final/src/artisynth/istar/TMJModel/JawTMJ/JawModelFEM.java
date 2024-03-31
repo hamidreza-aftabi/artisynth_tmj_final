@@ -1592,7 +1592,7 @@ public class JawModelFEM extends JawModel{
       setNewDonorDynamicProps ();
       
 
-      
+   
       
       ArrayList<FrameMarker>markers = JawModel.assembleMarkers(muscleList, muscleInfo, myRigidBodies, amiraTranformation, ArtisynthPath.getSrcRelativePath (JawModelFEM.class, ""));
       HashMap<String, FrameMarker> myMarkerInfo = new LinkedHashMap<String, FrameMarker>();
@@ -1766,6 +1766,7 @@ public class JawModelFEM extends JawModel{
          rigidBodies ().get ("plate").setDensity (0.00000442);
          rigidBodies ().get ("plate").setDynamic (true);
          attachFrame (rigidBodies ().get ("plate"), rigidBodies ().get ("jaw"));
+
          RenderProps.setFaceColor (rigidBodies ().get ("plate"), Color.GRAY);
       }
          else {
