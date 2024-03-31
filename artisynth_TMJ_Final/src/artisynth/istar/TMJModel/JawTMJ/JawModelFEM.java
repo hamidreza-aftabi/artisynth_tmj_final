@@ -80,9 +80,9 @@ public class JawModelFEM extends JawModel{
   
    protected String recType ="bright";
    
-   protected boolean useFEMDisc = true;
+   protected boolean useFEMDisc = false;
    
-   protected boolean usePlate = true;
+   protected boolean usePlate = false;
 
    protected double defaultScarK = 200;
 
