@@ -84,7 +84,7 @@ public class JawModelFEM extends JawModel{
    
    protected boolean usePlate = false;
 
-   protected double defaultScarK = 200;
+   protected double defaultScarK = 0;
 
    FrameMarker ml;
    FrameMarker mr;
@@ -466,13 +466,14 @@ public class JawModelFEM extends JawModel{
       CollisionBehavior behav4 = new CollisionBehavior (true, 0);
       CollisionBehavior behav5 = new CollisionBehavior (true, 0);
       CollisionBehavior behav6 = new CollisionBehavior (true, 0); 
-      CollisionBehavior behav7 = new CollisionBehavior (true, 0);
       
       behav1.setMethod(Method.VERTEX_PENETRATION);
       behav2.setMethod(Method.VERTEX_PENETRATION);
       behav3.setMethod(Method.VERTEX_PENETRATION);
       behav4.setMethod(Method.VERTEX_PENETRATION);
       behav5.setMethod(Method.VERTEX_PENETRATION);
+      behav6.setMethod(Method.VERTEX_PENETRATION);
+
 
       
       //orogonal Code
@@ -508,10 +509,11 @@ public class JawModelFEM extends JawModel{
             behav3.setForceBehavior (EFContact_FE);
             behav4.setForceBehavior (EFContact_FE);
             behav5.setForceBehavior (EFContact_FE);   
+            behav6.setForceBehavior (EFContact_FE);   
             getCollisionManager ().setColliderType (ColliderType.AJL_CONTOUR);
             
             //behav1.setMethod (Method.DEFAULT);
-            setCollisionBehavior (rigidBodies ().get ("jaw"), (FemModel3d)models().get ("disc_right"), behav1);
+            setCollisionBehavior (rigidBodies ().get ("jaw_resected"), (FemModel3d)models().get ("disc_right"), behav1);
             behav1.setName ("mand_disc_right");
             
             //behav2.setMethod (Method.DEFAULT);
@@ -529,6 +531,10 @@ public class JawModelFEM extends JawModel{
             behav5.setMethod (Method.DEFAULT);      
             setCollisionBehavior (rigidBodies ().get ("skull"), rigidBodies ().get ("jaw"), behav5);
             behav5.setName ("skull_mandible");
+            
+            behav6.setMethod (Method.DEFAULT);      
+            setCollisionBehavior (rigidBodies ().get ("skull"), rigidBodies ().get ("jaw_resected"), behav6);
+            behav6.setName ("skull_mandible_right");
 
          }
        
@@ -553,10 +559,11 @@ public class JawModelFEM extends JawModel{
              behav3.setForceBehavior (EFContact);
              behav4.setForceBehavior (EFContact);
              behav5.setForceBehavior (EFContact_FE);  
+             behav6.setForceBehavior (EFContact_FE);  
              getCollisionManager ().setColliderType (ColliderType.AJL_CONTOUR);
              
              //behav1.setMethod (Method.DEFAULT);
-             setCollisionBehavior (rigidBodies ().get ("jaw"), rigidBodies ().get ("disc_right_rigid"), behav1);
+             setCollisionBehavior (rigidBodies ().get ("jaw_resected"), rigidBodies ().get ("disc_right_rigid"), behav1);
              behav1.setName ("mand_disc_right");
              
              //behav2.setMethod (Method.DEFAULT);
@@ -574,6 +581,11 @@ public class JawModelFEM extends JawModel{
              //behav5.setMethod (Method.DEFAULT);      
              setCollisionBehavior (rigidBodies ().get ("skull"), rigidBodies ().get ("jaw"), behav5);
              behav5.setName ("skull_mandible");
+             
+             
+             setCollisionBehavior (rigidBodies ().get ("skull"), rigidBodies ().get ("jaw_resected"), behav6);
+             behav6.setName ("skull_mandible_right");
+             
              
              /*
              behav6.setMethod (Method.DEFAULT);      
@@ -594,8 +606,12 @@ public class JawModelFEM extends JawModel{
       rigidBodies ().get ("jaw").getMeshComp (1).setIsCollidable (true);
       rigidBodies ().get ("jaw").getMeshComp (1).setName ("ContactMesh");
       
+      rigidBodies ().get ("jaw_resected").getMeshComp (0).setIsCollidable (false);
+      rigidBodies ().get ("jaw_resected").getMeshComp (1).setIsCollidable (true);
+      rigidBodies ().get ("jaw_resected").getMeshComp (1).setName ("ContactMesh_Right");
+      
       //attach cartilage to respective bones
-      attachFrame (rigidBodies ().get ("mandible_cartilage_right"), rigidBodies ().get ("jaw"));
+      attachFrame (rigidBodies ().get ("mandible_cartilage_right"), rigidBodies ().get ("jaw_resected"));
       attachFrame (rigidBodies ().get ("mandible_cartilage_left"), rigidBodies ().get ("jaw"));
       attachFrame (rigidBodies ().get ("skull_cartilage_right"), rigidBodies ().get ("skull"));
       attachFrame (rigidBodies ().get ("skull_cartilage_left"), rigidBodies ().get ("skull"));
@@ -634,7 +650,7 @@ public class JawModelFEM extends JawModel{
       RigidTransform3d XPWr = new RigidTransform3d (trans, new AxisAngle (new Vector3d(1,0,0), Math.toRadians (180)));
       XPWr.mulRotation (new RotationMatrix3d(new AxisAngle(new Vector3d(0,1,0),Math.toRadians (-0))));
       //XPWr.setTranslation (-20.85772, -67.02249, -43.405483);
-      PlanarConnector conr = new PlanarConnector (rigidBodies ().get ("jaw"), pCAr, XPWr);
+      PlanarConnector conr = new PlanarConnector (rigidBodies ().get ("jaw_resected"), pCAr, XPWr);
       
       conr.setPlaneSize (20);
       conr.getRenderProps ().setAlpha (0.7);
@@ -869,7 +885,7 @@ public class JawModelFEM extends JawModel{
        cylinder2.getRenderProps ().setLineColor (Color.BLUE);
        cylinder2.getRenderProps ().setDrawEdges (true);
        addRigidBody (cylinder2);
-       attachFrame(cylinder2, rigidBodies ().get ("jaw"));
+       attachFrame(cylinder2, rigidBodies ().get ("jaw_resected"));
        
        //////////////SLACKLENGTH////////////////////
        createLigament(lig_left_ant,(FemModel3d)models ().get ("disc_left"), m_ml_l, 4, cylinder,1.5,0.6);   
@@ -1259,7 +1275,7 @@ public class JawModelFEM extends JawModel{
       
        ArrayList<Integer> attached_points_r_man = readIntList(ArtisynthPath.getSrcRelativePath(JawModelFEM.class,"geometry"+"/capsule_r_fixedNodes_man_wedge_fine_19.txt"));   
        for (int i : attached_points_r_man){
-          attachPoint (caps_right.getNode (i), rigidBodies().get ("jaw"));
+          attachPoint (caps_right.getNode (i), rigidBodies().get ("jaw_resected"));
           caps_right.getNode (i).setDynamic (false);
           RenderProps.setPointColor (caps_right.getNode (i), Color.GREEN);
           RenderProps.setPointStyle (caps_right.getNode (i), PointStyle.SPHERE);
@@ -1319,7 +1335,7 @@ public class JawModelFEM extends JawModel{
       
       behav2.setMethod (Method.DEFAULT);
       behav2.setName ("caps_cond_right");
-      setCollisionBehavior (rigidBodies ().get ("jaw"), (FemModel3d)models().get ("capsule_r"), behav2);
+      setCollisionBehavior (rigidBodies ().get ("jaw_resected"), (FemModel3d)models().get ("capsule_r"), behav2);
       
       
       
@@ -1402,27 +1418,38 @@ public class JawModelFEM extends JawModel{
       tm_mL.setLocation(tmp_loc);
       
       
+      Vector3d centroid2= new Vector3d();
+      rigidBodies ().get ("jaw_resected").getMesh ().computeCentroid (centroid2);
+      RigidTransform3d XComToBody2 = new RigidTransform3d();      
+      XComToBody2.p.set(centroid2);
+      RigidTransform3d XBodyToWorld2 = new RigidTransform3d();
+      rigidBodies ().get ("jaw_resected").getPose(XBodyToWorld);
+      RigidTransform3d XComToWorld2 = new RigidTransform3d();
+      XComToWorld2.mul(XBodyToWorld2, XComToBody2);
+      RigidTransform3d XMeshToCom2 = new RigidTransform3d();
+      XMeshToCom2.invert(XComToWorld2);
+   
       
-      FrameMarker sphm_mR= new FrameMarker (rigidBodies ().get("jaw"), new Point3d(-39.32017, -18.560082, -33.919064));
+      FrameMarker sphm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-39.32017, -18.560082, -33.919064));
       sphm_mR.setName ("sphm_mR");
       sphm_mR.getLocation(tmp_loc);
-      tmp_loc.transform(XMeshToCom);
+      tmp_loc.transform(XMeshToCom2);
       sphm_mR.setLocation(tmp_loc);
       
       
 
-      FrameMarker stm_mR= new FrameMarker (rigidBodies ().get("jaw"), new Point3d(-42.62647, -11.426282, -53.767444));
+      FrameMarker stm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-42.62647, -11.426282, -53.767444));
       stm_mR.setName ("stm_mR");
       stm_mR.getLocation(tmp_loc);
-      tmp_loc.transform(XMeshToCom);
+      tmp_loc.transform(XMeshToCom2);
       stm_mR.setLocation(tmp_loc);
       
       
       
-      FrameMarker tm_mR= new FrameMarker (rigidBodies ().get("jaw"), new Point3d(-50.26127, -4.3128816, -21.000664));
+      FrameMarker tm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-50.26127, -4.3128816, -21.000664));
       tm_mR.setName ("tm_mR");
       tm_mR.getLocation(tmp_loc);
-      tmp_loc.transform(XMeshToCom);
+      tmp_loc.transform(XMeshToCom2);
       tm_mR.setLocation(tmp_loc);
       
 
@@ -1446,6 +1473,9 @@ public class JawModelFEM extends JawModel{
       ell_l.getRenderProps ().setFaceStyle (FaceStyle.NONE);
       ell_l.getRenderProps ().setLineColor (Color.BLUE);
       ell_l.getRenderProps ().setDrawEdges (true);
+      addRigidBody (ell_l);
+      attachFrame(ell_l, rigidBodies ().get ("jaw"));
+
             
       RigidEllipsoid ell_r = new RigidEllipsoid ("tm_R_wrap", 3*4, 5,5, 0);
       ell_r.setDynamic (false);
@@ -1454,8 +1484,8 @@ public class JawModelFEM extends JawModel{
       ell_r.getRenderProps ().setLineColor (Color.BLUE);
       ell_r.getRenderProps ().setDrawEdges (true);
       addRigidBody (ell_r);
-      RenderProps.setVisible(ell_r, false);
-      attachFrame(ell_r, rigidBodies ().get ("jaw"));
+      //RenderProps.setVisible(ell_r, false);
+      attachFrame(ell_r, rigidBodies ().get ("jaw_resected"));
         
       sphm_R.setFirstPoint (sphm_mR);
       sphm_R.setSecondPoint (sphm_sR);
@@ -1571,7 +1601,7 @@ public class JawModelFEM extends JawModel{
       }
       
       
-      String meshFilename = (ArtisynthPath.getSrcRelativePath(JawModelFEM.class,"geometry"+"/mandible_with_cartilage2.obj"));
+      String meshFilename = (ArtisynthPath.getSrcRelativePath(JawModelFEM.class,"geometry"+"/mandible_resected_left_with_cartilage2.obj"));
       PolygonalMesh mesh = new PolygonalMesh();
       try {
          mesh.read(new BufferedReader(new FileReader(meshFilename)));
@@ -1583,8 +1613,23 @@ public class JawModelFEM extends JawModel{
       mesh.triangulate ();
       mesh.transform (amiraTranformation);
     
-      
       rigidBodies ().get ("jaw").addMesh (mesh);
+
+      
+      String meshFilename2 = (ArtisynthPath.getSrcRelativePath(JawModelFEM.class,"geometry"+"/mandible_resected_right_with_cartilage2.obj"));
+      PolygonalMesh mesh2 = new PolygonalMesh();
+      try {
+         mesh2.read(new BufferedReader(new FileReader(meshFilename2)));
+      } catch (IOException e) {
+         e.printStackTrace();
+         return;
+      }
+      mesh2.setFixed(true);
+      mesh2.triangulate ();
+      mesh2.transform (amiraTranformation);
+      
+      rigidBodies ().get ("jaw_resected").addMesh (mesh2);
+
      
       
       setNewJawDynamicProps();
@@ -1739,7 +1784,7 @@ public class JawModelFEM extends JawModel{
       
       if(useFEMJoint==false){
          //attach cartilage to respective bones
-         attachFrame (rigidBodies ().get ("mandible_cartilage_right"), rigidBodies ().get ("jaw"));
+         attachFrame (rigidBodies ().get ("mandible_cartilage_right"), rigidBodies ().get ("jaw_resected"));
          attachFrame (rigidBodies ().get ("mandible_cartilage_left"), rigidBodies ().get ("jaw"));
          attachFrame (rigidBodies ().get ("skull_cartilage_right"), rigidBodies ().get ("skull"));
          attachFrame (rigidBodies ().get ("skull_cartilage_left"), rigidBodies ().get ("skull"));
@@ -1759,7 +1804,8 @@ public class JawModelFEM extends JawModel{
       
       setupRenderProps();
       
-     
+      attachFrame (rigidBodies ().get ("jaw_resected"), rigidBodies ().get ("jaw"));
+
       
       if (usePlate ==  true) {
          
@@ -1993,7 +2039,7 @@ public class JawModelFEM extends JawModel{
      condyleLeft.setLocation(tmp_loc);
      */
      
-      FrameMarker condyleright = new FrameMarker(rigidBodies ().get ("jaw"), new Point3d (-45.08047, -4.3705816, -3.1194639));
+      FrameMarker condyleright = new FrameMarker(rigidBodies ().get ("jaw_resected"), new Point3d (-45.08047, -4.3705816, -3.1194639));
     /*
      Point3d tmp_loc2  = new Point3d ();
      condyleright.getLocation (tmp_loc2);
