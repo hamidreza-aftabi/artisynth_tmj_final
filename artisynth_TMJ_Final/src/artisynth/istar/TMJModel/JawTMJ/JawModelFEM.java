@@ -1417,40 +1417,29 @@ public class JawModelFEM extends JawModel{
       tmp_loc.transform(XMeshToCom);
       tm_mL.setLocation(tmp_loc);
       
-      
-      Vector3d centroid2= new Vector3d();
-      rigidBodies ().get ("jaw_resected").getMesh ().computeCentroid (centroid2);
-      RigidTransform3d XComToBody2 = new RigidTransform3d();      
-      XComToBody2.p.set(centroid2);
-      RigidTransform3d XBodyToWorld2 = new RigidTransform3d();
-      rigidBodies ().get ("jaw_resected").getPose(XBodyToWorld);
-      RigidTransform3d XComToWorld2 = new RigidTransform3d();
-      XComToWorld2.mul(XBodyToWorld2, XComToBody2);
-      RigidTransform3d XMeshToCom2 = new RigidTransform3d();
-      XMeshToCom2.invert(XComToWorld2);
-   
+     
       
       FrameMarker sphm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-39.32017, -18.560082, -33.919064));
       sphm_mR.setName ("sphm_mR");
-      sphm_mR.getLocation(tmp_loc);
-      tmp_loc.transform(XMeshToCom2);
-      sphm_mR.setLocation(tmp_loc);
+      //sphm_mR.getLocation(tmp_loc);
+      //tmp_loc.transform(XMeshToCom);
+      sphm_mR.setLocation(new Point3d (1.37317, 4.14462, 0.120469));
       
       
 
       FrameMarker stm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-42.62647, -11.426282, -53.767444));
       stm_mR.setName ("stm_mR");
-      stm_mR.getLocation(tmp_loc);
-      tmp_loc.transform(XMeshToCom2);
-      stm_mR.setLocation(tmp_loc);
+      //stm_mR.getLocation(tmp_loc);
+      //tmp_loc.transform(XMeshToCom);
+      stm_mR.setLocation( new Point3d (-3.06595, 12.3885, -13.5142));
       
       
       
       FrameMarker tm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-50.26127, -4.3128816, -21.000664));
       tm_mR.setName ("tm_mR");
-      tm_mR.getLocation(tmp_loc);
-      tmp_loc.transform(XMeshToCom2);
-      tm_mR.setLocation(tmp_loc);
+      //tm_mR.getLocation(tmp_loc);
+      //tmp_loc.transform(XMeshToCom);
+      tm_mR.setLocation(new Point3d(-9.56666, 18.3916, 13.0395));
       
 
 
