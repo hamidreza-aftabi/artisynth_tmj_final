@@ -1623,7 +1623,7 @@ public class JawModelFEM extends JawModel{
       
       setNewJawDynamicProps();
       setNewResectedJawDynamicProps ();
-      setNewDonorDynamicProps ();
+      //setNewDonorDynamicProps ();
       
 
    
@@ -1793,7 +1793,7 @@ public class JawModelFEM extends JawModel{
       
       setupRenderProps();
       
-      attachFrame (rigidBodies ().get ("jaw_resected"), rigidBodies ().get ("jaw"));
+      //attachFrame (rigidBodies ().get ("jaw_resected"), rigidBodies ().get ("jaw"));
 
       
       if (usePlate ==  true) {

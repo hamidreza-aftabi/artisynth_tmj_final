@@ -18,19 +18,42 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import artisynth.core.femmodels.FemFactory;
+import artisynth.core.femmodels.FemModel;
+import artisynth.core.femmodels.FemModel3d;
+import artisynth.core.femmodels.FemNode3d;
+import artisynth.core.femmodels.HexElement;
+import artisynth.core.femmodels.FemModel.Ranging;
+import artisynth.core.femmodels.FemModel.SurfaceRender;
 import artisynth.core.gui.ControlPanel;
 import artisynth.core.inverse.TrackingController;
+import artisynth.core.materials.LinearMaterial;
 import artisynth.core.mechmodels.AxialSpring;
 import artisynth.core.mechmodels.BodyConnector;
+import artisynth.core.mechmodels.CollisionManager;
+import artisynth.core.mechmodels.MechModel;
 import artisynth.core.mechmodels.Muscle;
 import artisynth.core.mechmodels.MuscleExciter;
 import artisynth.core.mechmodels.PlanarConnector;
+import artisynth.core.mechmodels.PointAttachable;
+import artisynth.core.mechmodels.RigidBody;
+import artisynth.core.mechmodels.CollisionManager.ColliderType;
+import artisynth.core.mechmodels.MechSystemSolver.PosStabilization;
+import artisynth.core.modelbase.ComponentUtils;
 import artisynth.core.probes.NumericInputProbe;
 import artisynth.core.util.ArtisynthIO;
 import artisynth.core.util.ArtisynthPath;
 import artisynth.core.workspace.RootModel;
+import maspack.geometry.Face;
 import maspack.geometry.PolygonalMesh;
+import maspack.matrix.Point3d;
+import maspack.matrix.RigidTransform3d;
+import maspack.matrix.Vector3d;
 import maspack.properties.PropertyList;
+import maspack.render.RenderProps;
+import maspack.render.Renderer.LineStyle;
+import maspack.util.DoubleInterval;
+import maspack.util.PathFinder;
 
 
 public class JawFemDemo extends RootModel implements ActionListener {
@@ -38,6 +61,41 @@ public class JawFemDemo extends RootModel implements ActionListener {
    
    JawModelFEM myJawModel; 
    TrackingController myTrackingController;
+   
+   boolean myUseCollisions = true;
+
+   boolean myShowDonorStress = true;
+   
+   boolean myUseScrews = true;
+
+   
+   
+   double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
+   double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
+
+   double myBoneDensity = 1900.0 * DENSITY_TO_mmKS;
+   double myBoneE = 17*1e9 * PRESSURE_TO_mmKS;
+   double myTitaniumDensity = 4420.0 * DENSITY_TO_mmKS;
+   double myTitaniumE = 100*1e9 * PRESSURE_TO_mmKS;
+   double myTitaniumNu = 0.3;
+
+   
+   double myBoneNu = 0.3;
+   
+   FemModel3d myDonor0;
+   FemModel3d myPlate;
+   RigidBody myMandibleRight;
+   RigidBody myMandibleLeft;
+
+
+
+   private static Color PALE_BLUE = new Color (0.6f, 0.6f, 1.0f);
+   private static Color GOLD = new Color (1f, 0.8f, 0.1f);
+
+   String myGeoDir = PathFinder.getSourceRelativePath (
+      JawFemDemo.class, "geometry/");
+   
+   
    ArrayList<String> MuscleAbbreviation = new ArrayList<String>();
    protected String workingDirname = "data/";
    String probesFilename ;
@@ -68,9 +126,11 @@ public class JawFemDemo extends RootModel implements ActionListener {
    public JawFemDemo () {
    }
 
+   
    public JawFemDemo (String name){
       super(null);
    }
+   
    
    @Override
    public void build (String[] args) throws IOException {
@@ -82,8 +142,28 @@ public class JawFemDemo extends RootModel implements ActionListener {
       
       //addClosingForce ();
       addOpening();
+      
+      
+      addFemDonorPlate();
+      
+      
+      myJawModel.setStabilization (
+         PosStabilization.GlobalStiffness); // more accurate stabilization
+      
+      ControlPanel panel1 = new ControlPanel("options");
 
-
+      if (myShowDonorStress) {
+         // set donor FEM models to display stress on their surfaces
+         myDonor0.setSurfaceRendering (SurfaceRender.Stress);
+         myDonor0.setStressPlotRanging (Ranging.Fixed);
+         myDonor0.setStressPlotRange (new DoubleInterval(0, 1000));
+        
+         // allow stress ranges to be controlled in the control panel
+         panel1.addWidget ("stressRanging0", myDonor0, "stressPlotRanging");
+         panel1.addWidget ("stressRange0", myDonor0, "stressPlotRange");
+         
+      }
+      
       for (double i=0.01; i<=2*t; i=i+0.01 ){
          addWayPoint (i);
       }
@@ -92,7 +172,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
       loadProbes("probe.art");
      
       //addControlPanel();
-      
       
       condyleMusclesLeft.put("lip","Left Inferior Lateral Pterygoid");
       condyleMusclesLeft.put("lsp","Left Superior Lateral Pterygoid");
@@ -217,7 +296,289 @@ public class JawFemDemo extends RootModel implements ActionListener {
    }
    
    
+ 
+   
+   /**
+    * Create a FEM model from a triangular surface mesh using Tetgen.
+    *
+    * @param mech MechModel to add the FEM model to
+    * @param name name of the FEM model
+    * @param meshName name of the mesh file in the geometry folder
+    * @param density of the FEM
+    * @param E Young's modulus for the FEM material
+    * @param nu Possion's ratio for the FEM material
+    */
+   public FemModel3d createFemModel (
+      MechModel mech, String name, String meshName,
+      double density, double E, double nu) {
 
+      // create the fem and set its material properties
+      FemModel3d fem = new FemModel3d (name);
+      fem.setDensity (density);
+      fem.setMaterial (new LinearMaterial (E, nu));
+
+      // load the triangular surface mesh and then call createFromMesh,
+      // which uses tetgen to create a tetrahedral volumetric mesh:
+      PolygonalMesh surface = loadMesh (meshName);
+      FemFactory.createFromMesh (fem, surface, /*tetgen quality=*/1.5);
+
+      // damping parameters are important for stabilty
+      fem.setMassDamping (1.0);
+      fem.setStiffnessDamping (0);
+
+      // enable computation of nodal stresses. Do this so that stresses will be
+      // computed even if they are not being rendered.
+      fem.setComputeNodalStress (true);
+
+      // turn on surface rendering and set surface color to light blue
+      RenderProps.setFaceColor (fem, PALE_BLUE);
+      fem.setSurfaceRendering (FemModel.SurfaceRender.Shaded);
+      RenderProps.setSphericalPoints (fem, 0.35, Color.BLUE);
+
+      mech.addModel (fem);
+      return fem;
+   }
+
+   
+
+   
+   /**
+    * Load a polygonal mesh with the given name from the geometry folder.
+    */
+   private PolygonalMesh loadMesh (String meshName) {
+      PolygonalMesh mesh = null;
+      String meshPath = myGeoDir + meshName;
+      try {
+         mesh = new PolygonalMesh (meshPath);
+      }
+      catch (IOException e) {
+         System.out.println ("Can't open or load "+meshPath);
+      }
+      mesh.transform (myJawModel.amiraTranformation);
+      return mesh;
+   }
+
+   
+   /**
+    * Attach an FEM model to another body (either an FEM or a rigid body)
+    * by attaching a subset of its nodes to that body.
+    *
+    * @param mech MechModel containing all the components
+    * @param fem FEM model to be connected
+    * @param body body to attach the FEM to. Can be a rigid body
+    * or another FEM.
+    * @param nodeNums numbers of the FEM nodes which should be attached
+    * to the body
+    */
+   public void attachFemToBody (
+      MechModel mech, FemModel3d fem, PointAttachable body, int[] nodeNums) {
+
+      for (int num : nodeNums) {
+         mech.attachPoint (fem.getNodeByNumber(num), body);
+      }
+   }
+
+   /**
+    * Attach an FEM model to another body (either an FEM or a rigid body) by
+    * attaching all surface nodes that are within a certain distance of the
+    * body's surface mesh.
+    *
+    * @param mech MechModel containing all the components
+    * @param fem FEM model to be connected
+    * @param body body to attach the FEM to. Can be a rigid body
+    * or another FEM.
+    * @param dist distance to the body surface for attaching nodes
+    */
+   public void attachFemToBody (
+      MechModel mech, FemModel3d fem, PointAttachable body, double dist) {
+      
+      PolygonalMesh surface = null;
+      if (body instanceof RigidBody) {
+         surface = ((RigidBody)body).getSurfaceMesh();
+      }
+      else if (body instanceof FemModel3d) {
+         surface = ((FemModel3d)body).getSurfaceMesh();
+      }
+      else {
+         throw new IllegalArgumentException (
+            "body is neither a rigid body nor an FEM model");
+      }
+      for (FemNode3d n : fem.getNodes()) {
+         if (fem.isSurfaceNode (n)) {
+            double d = surface.distanceToPoint (n.getPosition());
+            if (d < dist) {
+               mech.attachPoint (n, body);
+               // set the attached points to render as red spheres
+               RenderProps.setSphericalPoints (n, 0.5, Color.RED);
+            }
+         }
+      }
+   }
+
+   
+   
+   
+   public void addFemDonorPlate() {
+     
+      //donor
+      myDonor0 = createFemModel (
+         myJawModel, "donor0", "resected_donor_transformed_remeshed.obj", myBoneDensity, myBoneE, myBoneNu);
+      
+      
+      //plate
+      String platePath = myGeoDir + "plate_final.art";
+      try {
+         // read the FEM using the loadComponent utility
+         myPlate = ComponentUtils.loadComponent (
+            platePath, null, FemModel3d.class);
+         // set the material properties to correspond to titanium 
+         myPlate.setName ("plate");
+         myPlate.setDensity (myTitaniumDensity);
+         myPlate.setMaterial (new LinearMaterial (myTitaniumE, myTitaniumNu));
+         myPlate.setMassDamping (10.0);
+         myPlate.setStiffnessDamping (0.0);
+         
+         // set render properties for the plate
+         RenderProps.setFaceColor (myPlate, GOLD);
+         RenderProps.setPointRadius (myPlate, 0.5);         
+      }
+      catch (IOException e) {
+         System.out.println ("Can't open or load "+platePath);
+         e.printStackTrace(); 
+      }
+      myJawModel.addModel (myPlate);
+      
+      //attach the plate to the left and right mandible segments. We use
+      // explicitly defined nodes to do this, since the plate may be some
+      // distance from the segments.
+           
+      myMandibleRight = (RigidBody)myJawModel.findComponent (
+      "rigidBodies/jaw_resected");
+      
+      myMandibleLeft = (RigidBody)myJawModel.findComponent (
+      "rigidBodies/jaw");
+
+      
+      int[] leftAttachNodes = {78,57,56,77,76,55};
+      
+      attachFemToBody (myJawModel, myPlate, myMandibleLeft, leftAttachNodes);
+      
+      int[] rightAttachNodes = {69,48,70,49,71,50};
+     
+      attachFemToBody (myJawModel, myPlate, myMandibleRight, rightAttachNodes);
+
+      attachPlateToDonorSegments (myJawModel);
+
+      // set up donor segment interactions
+      setDonorSegmentInteractions (myJawModel);
+ 
+   }
+   
+   
+   /**
+    * Helper method to attach the plate to the donor segments.
+    */
+   private void attachPlateToDonorSegments (MechModel mech) {
+      if (myUseScrews) {
+         // attach plate to donor segments using rigid bodies representing
+         // screws
+         double screwLen = 10.0;
+         double attachTol = 2.0;
+         int[] seg0Elems = new int[] {9, 11};
+         for (int num : seg0Elems) {
+            attachElemToSegment (
+               mech, (HexElement)myPlate.getElementByNumber(num),
+               myDonor0, screwLen, attachTol);
+         }
+
+      }
+      
+   }
+
+   
+   
+   
+   /**
+    * Helper method to set the interactions between donor segments and the
+    * mandible segments.
+    */
+   private void setDonorSegmentInteractions (MechModel mech) {
+      if (myUseCollisions) {
+         // set the interactions using collisions
+         mech.setCollisionBehavior (myDonor0, myMandibleRight, true);
+         mech.setCollisionBehavior (myDonor0, myMandibleLeft, true);
+
+         CollisionManager cm = mech.getCollisionManager();
+         // use AJL collisions so we can render pressure maps:
+         cm.setColliderType (ColliderType.AJL_CONTOUR);
+         // set collision manager render properties in case we want to render
+         // contact info at some point
+         RenderProps.setLineColor (cm, Color.GREEN);
+         RenderProps.setLineRadius (cm, 0.5);
+         RenderProps.setLineStyle (cm, LineStyle.SOLID_ARROW);
+         RenderProps.setVisible (cm, true);        
+      }
+     
+   }
+
+   /**
+    * Attach a hex element of plate FEM to one of the donor segment FEMs using
+    * a rigid body representation of a screw. The hex element and nearby nodes
+    * of the donor FEM at then all connected to the screw.
+    *
+    * @param mech MechModel containing all the components
+    * @param hex hex element of the plate FEM
+    * @param donorFem FEM model of the donor segment
+    * @param screwLen length of the cylinder representing the screw
+    * @param attachTol distance tolerance for attaching donor FEM
+    * nodes to the screw
+    */
+   private void attachElemToSegment (
+      MechModel mech, HexElement hex, FemModel3d donorFem,
+      double screwLen, double attachTol) {
+
+      // compute centroid of the hex element
+      Point3d cent = new Point3d();
+      hex.computeCentroid (cent);
+
+      // compute normal pointing toward the donor FEM. From the construction of
+      // plate FEM, we know that this is given by the outward facing normal of
+      // the quad face given by the first four hex nodes.
+      Vector3d nrm = new Vector3d();
+      FemNode3d[] nodes = hex.getNodes();
+      Face.computeNormal (
+         nrm, nodes[0].getPosition(), nodes[1].getPosition(),
+         nodes[2].getPosition(), nodes[3].getPosition());
+
+      // represent the screw as a cylinder with radius 1/10 of it length.
+      RigidBody screw = RigidBody.createCylinder (
+         null, screwLen/10, screwLen, myTitaniumDensity, 10);
+      // Set the pose of the screw so that it lies along the normal starting at
+      // the hex centroid.
+      RigidTransform3d TSW = new RigidTransform3d ();
+      TSW.p.set (cent);
+      TSW.R.setZDirection (nrm);
+      TSW.mulXyz (0, 0, screwLen/2);
+      screw.setPose (TSW);
+
+      mech.addRigidBody (screw); // add to the MechModel
+
+      // attach to the screw all donor FEM nodes that are within attachTol of
+      // its surface
+      PolygonalMesh smesh = screw.getSurfaceMesh();
+      int nattach = 0;
+      for (FemNode3d n : donorFem.getNodes()) {
+         if (smesh.distanceToPoint (n.getPosition()) <= attachTol) {
+            mech.attachPoint (n, screw);
+            nattach++;
+         }
+      }
+      System.out.println ("screw attached attached with" + nattach + " points");
+      // also attach the screw to the hex element
+      mech.attachFrame (screw, hex);
+   }
+
+   
    @Override
    public void actionPerformed(ActionEvent event) {
                    
