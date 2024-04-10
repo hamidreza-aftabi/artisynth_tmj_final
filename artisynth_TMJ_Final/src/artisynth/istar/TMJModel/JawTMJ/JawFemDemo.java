@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import artisynth.core.femmodels.FemElement;
+import artisynth.core.femmodels.FemElement3d;
 import artisynth.core.femmodels.FemFactory;
 import artisynth.core.femmodels.FemModel;
 import artisynth.core.femmodels.FemModel3d;
@@ -48,6 +50,7 @@ import maspack.geometry.Face;
 import maspack.geometry.PolygonalMesh;
 import maspack.matrix.Point3d;
 import maspack.matrix.RigidTransform3d;
+import maspack.matrix.SymmetricMatrix3d;
 import maspack.matrix.Vector3d;
 import maspack.properties.PropertyList;
 import maspack.render.RenderProps;
@@ -97,6 +100,10 @@ public class JawFemDemo extends RootModel implements ActionListener {
    
    
    ArrayList<String> MuscleAbbreviation = new ArrayList<String>();
+   ArrayList<Integer> RightSurfaceElemnets = new ArrayList<Integer>();
+   ArrayList<Integer> LeftSurfaceElemnets = new ArrayList<Integer>();
+
+
    protected String workingDirname = "data/";
    String probesFilename ;
 
@@ -122,8 +129,31 @@ public class JawFemDemo extends RootModel implements ActionListener {
    JButton button;
    
    
-   double t=0.75;  //0.5 prot; 0.75 open; 0.225 brux
+   protected static PropertyList myProps = new PropertyList (JawFemDemo.class, RootModel.class);
+  
+   
+   public PropertyList getAllPropertyInfo() {
+      return myProps;
+   }
+
+   
+   static {
+      myProps.addReadOnly ("maxMechanicalStim", "Max Mechanical Stimulus");
+
+    }
+   
+   public double getMaxMechanicalStim() {
+      
+      return computeStressStrainDonor0();
+     
+   }
+   
+   
+   
+   double t=0.75; 
+   
    public JawFemDemo () {
+      
    }
 
    
@@ -145,8 +175,9 @@ public class JawFemDemo extends RootModel implements ActionListener {
       
       
       addFemDonorPlate();
-      
-      
+            
+      computeStressStrainDonor0();
+  
       myJawModel.setStabilization (
          PosStabilization.GlobalStiffness); // more accurate stabilization
       
@@ -296,6 +327,68 @@ public class JawFemDemo extends RootModel implements ActionListener {
    }
    
    
+   public double computeStressStrainDonor0(){
+      
+      myDonor0.setComputeNodalStress (true);
+      myDonor0.setComputeNodalStrain (true);
+     
+      Point3d cent = new Point3d();
+      double totalStrainEnergyDensity = 0; // Initialize total strain energy density
+      double MaxStrainEnergyDensity =0;
+      
+      for (int i=0; i<myDonor0.numElements(); i++) {      
+        
+         FemElement3d elem = myDonor0.getElementByNumber(i);
+         elem.computeCentroid (cent);
+         PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
+
+         if (surfaceRight.distanceToPoint (cent) < 2) {
+            RightSurfaceElemnets.add (i);
+            RenderProps.setLineColor (elem, Color.MAGENTA);
+            FemNode3d[] nodes = elem.getNodes ();
+            
+            double elementStrainEnergyDensity = 0; // Element-specific strain energy density
+
+            for (FemNode3d node : nodes) {
+               SymmetricMatrix3d stressTensor = node.getStress();
+               SymmetricMatrix3d strainTensor = node.getStrain();
+
+               // Compute the double dot product of stress and strain tensors
+               double dotProduct = 0;
+               for (int row = 0; row < 3; row++) {
+                   for (int col = 0; col < 3; col++) {
+                       dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
+                   }
+               }
+
+               // Assuming uniform stress/strain across the element, so average over nodes
+               elementStrainEnergyDensity += dotProduct / 2;
+           }
+
+            // Average the strain energy density across all nodes for this element
+            elementStrainEnergyDensity /= nodes.length;
+            
+
+            // Add this element's strain energy to the total
+            totalStrainEnergyDensity += elementStrainEnergyDensity;
+            
+            if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
+               MaxStrainEnergyDensity = elementStrainEnergyDensity;
+            }
+            
+            
+         }
+         
+         
+      }
+
+      
+      
+      return  MaxStrainEnergyDensity/(1000*0.0002) ; // Initialize total strain energy density
+ 
+      
+   }
+   
  
    
    /**
@@ -333,7 +426,7 @@ public class JawFemDemo extends RootModel implements ActionListener {
       // turn on surface rendering and set surface color to light blue
       RenderProps.setFaceColor (fem, PALE_BLUE);
       fem.setSurfaceRendering (FemModel.SurfaceRender.Shaded);
-      RenderProps.setSphericalPoints (fem, 0.35, Color.BLUE);
+      RenderProps.setSphericalPoints (fem, 0.25, Color.BLUE);
 
       mech.addModel (fem);
       return fem;
@@ -378,6 +471,7 @@ public class JawFemDemo extends RootModel implements ActionListener {
       }
    }
 
+   
    /**
     * Attach an FEM model to another body (either an FEM or a rigid body) by
     * attaching all surface nodes that are within a certain distance of the
