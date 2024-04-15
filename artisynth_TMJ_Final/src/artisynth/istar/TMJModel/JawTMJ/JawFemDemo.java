@@ -180,7 +180,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
       //addClosingForce ();
       addOpening();
       
-      
       addFemDonorPlate();
             
       computeStressStrainDonor0();
@@ -212,6 +211,12 @@ public class JawFemDemo extends RootModel implements ActionListener {
       //addControlPanel();
       
       loadBoluses();
+      
+      PlanarConnector LBITE = (PlanarConnector) myJawModel.bodyConnectors().get("LBITE");
+      LBITE.setEnabled (true);
+      RenderProps.setVisible (LBITE, true);
+      
+      
 
       
       condyleMusclesLeft.put("lip","Left Inferior Lateral Pterygoid");
@@ -742,12 +747,10 @@ public class JawFemDemo extends RootModel implements ActionListener {
 
    public void createBoluses() {
       // TODO: create bolus using occlusal plane angle
-      Point3d rightbitePos = myJawModel.frameMarkers().get("rbite")
-            .getLocation ();
+      //Point3d rightbitePos = myJawModel.frameMarkers().get("rbite").getLocation ();
       Point3d leftbitePos = myJawModel.frameMarkers().get("lbite")
             .getLocation();
-      createFoodBolus("rightbolus", rightbitePos, (PlanarConnector) myJawModel
-            .bodyConnectors().get("RBITE"));
+      //createFoodBolus("rightbolus", rightbitePos, (PlanarConnector) myJawModel.bodyConnectors().get("RBITE"));
       createFoodBolus("leftbolus", leftbitePos, (PlanarConnector) myJawModel
             .bodyConnectors().get("LBITE"));
       updateBoluses();
@@ -756,7 +759,7 @@ public class JawFemDemo extends RootModel implements ActionListener {
    public void updateBoluses() {
       System.out.println("bolus dirs updated");
       if (myFoodBoluses.size() >= 2) {
-         updateBolusDirection("RBITE", myFoodBoluses.get(0));
+         //updateBolusDirection("RBITE", myFoodBoluses.get(0));
          updateBolusDirection("LBITE", myFoodBoluses.get(1));
       }
    }

@@ -627,9 +627,6 @@ public class JawModelFEM extends JawModel{
    //create planar constraints for simplified tooth contact
    protected void createBiteConstraints (){
  
-     
-
-    
       Vector3d pCAr = new Vector3d();
       
       for (FrameMarker mrk : frameMarkers()) {
@@ -643,9 +640,8 @@ public class JawModelFEM extends JawModel{
          }
       }
       
-      
-      
-      
+           
+      /*
       Vector3d trans = new Vector3d(-17.540899, -66.518233,  -43.405483);
       RigidTransform3d XPWr = new RigidTransform3d (trans, new AxisAngle (new Vector3d(1,0,0), Math.toRadians (180)));
       XPWr.mulRotation (new RotationMatrix3d(new AxisAngle(new Vector3d(0,1,0),Math.toRadians (-0))));
@@ -657,8 +653,10 @@ public class JawModelFEM extends JawModel{
       conr.getRenderProps ().setFaceColor (Color.GRAY);
       conr.setUnilateral (true);
       conr.setName ("RBITE");
+      conr.setEnabled (true);
+      RenderProps.setVisible (conr, true);
   
-      
+        */
       
       
       Vector3d pCAl = new Vector3d();
@@ -669,13 +667,9 @@ public class JawModelFEM extends JawModel{
             pCAl.x = mrk.getLocation ().x;
             pCAl.y = mrk.getLocation ().y;
             pCAl.z = mrk.getLocation ().z;
-         
-  
+
          }
       }
-      
-    
-  
       
       Vector3d trans2 = new Vector3d(24.785562, -69.041624, -43.405483);      
       RigidTransform3d XPWl = new RigidTransform3d (trans2, new AxisAngle (new Vector3d(1,0,0), Math.toRadians (180)));
@@ -689,8 +683,7 @@ public class JawModelFEM extends JawModel{
       conl.setUnilateral (true);
       conl.setName ("LBITE");
 
-   
-      
+
       Vector3d pCA = new Vector3d(-2.26103, -44.0217, 6.87158);
       RigidTransform3d XPW = new RigidTransform3d (pCA, new AxisAngle (new Vector3d(1,0,0), Math.toRadians (180)));
       PlanarConnector con = new PlanarConnector (rigidBodies ().get ("jaw"), pCA, XPW);
@@ -759,8 +752,9 @@ public class JawModelFEM extends JawModel{
       con5.setEnabled (false);
       RenderProps.setVisible (con5, false);
       
-      addBodyConnector (conr);
+      
       addBodyConnector (conl);
+      //addBodyConnector (conr);
       //addBodyConnector (con);
       //addBodyConnector (con2);
       //addBodyConnector (con3);
@@ -774,19 +768,19 @@ public class JawModelFEM extends JawModel{
       //create framemarkers for contact points of constraints
       FrameMarker m1=new FrameMarker (rigidBodies().get("jaw"), new Point3d(2.3768318, -99.827457, -40.301746)); 
       FrameMarker ml=new FrameMarker (rigidBodies().get("jaw"), new Point3d(24.785562, -69.041624, -43.405483));
-      FrameMarker mr=new FrameMarker (rigidBodies().get("jaw"), new Point3d(-17.540899, -66.518233, -43.405483));
+      //FrameMarker mr=new FrameMarker (rigidBodies().get("jaw_resected"), new Point3d(-17.540899, -66.518233, -43.405483));
   
       
       m1.setName ("lowerincisor");
       ml.setName ("lbite");
-      mr.setName ("rbite");
+      //mr.setName ("rbite");
 
       RenderProps.setPointColor (ml, Color.BLUE);
-      RenderProps.setPointColor (mr, Color.BLUE);
+      //RenderProps.setPointColor (mr, Color.BLUE);
       
       addFrameMarker (m1);
       addFrameMarker (ml);
-      addFrameMarker (mr);
+      //addFrameMarker (mr);
       
 
    }
@@ -1620,10 +1614,8 @@ public class JawModelFEM extends JawModel{
       rigidBodies ().get ("jaw_resected").addMesh (mesh2);
 
      
-      
       setNewJawDynamicProps();
       setNewResectedJawDynamicProps ();
-      //setNewDonorDynamicProps ();
       
 
    
@@ -1786,8 +1778,7 @@ public class JawModelFEM extends JawModel{
          addFixedMarkers();
 
       }
-      
-      
+          
      
       createBiteConstraints();
       
