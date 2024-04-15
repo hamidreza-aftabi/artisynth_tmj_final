@@ -20,6 +20,7 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
 import artisynth.core.femmodels.FemElement;
+import artisynth.core.mechmodels.FrameMarker;
 import artisynth.core.femmodels.FemElement3d;
 import artisynth.core.femmodels.FemFactory;
 import artisynth.core.femmodels.FemModel;
@@ -209,6 +210,9 @@ public class JawFemDemo extends RootModel implements ActionListener {
       loadProbes("probe.art");
      
       //addControlPanel();
+      
+      loadBoluses();
+
       
       condyleMusclesLeft.put("lip","Left Inferior Lateral Pterygoid");
       condyleMusclesLeft.put("lsp","Left Superior Lateral Pterygoid");
@@ -705,6 +709,96 @@ public class JawFemDemo extends RootModel implements ActionListener {
    }
 
    
+   ///////// FOOD BOLUS
+   
+   public boolean bolusesLoaded = false;
+
+   ArrayList<FoodBolus> myFoodBoluses = new ArrayList<FoodBolus>();
+
+   protected double bolusDiameter = 8; // mm
+
+   protected double bolusMaxResistance = 130; // N
+
+   protected double bolusStiffness = bolusMaxResistance / (bolusDiameter);
+
+   protected double bolusDamping = 0.01;
+
+   
+   public void loadBoluses() {
+      if (bolusesLoaded) return;
+      createBoluses();
+      for (FoodBolus fb : myFoodBoluses) {
+         myJawModel.addForceEffector(fb);
+         // System.out.println(fb.getName() + " P = "
+         // + fb.getPlane().toString("%8.2f"));
+         if (fb.getName().equals("leftbolus")) fb.setActive(true);
+         else
+            fb.setActive(false);
+      }
+      bolusesLoaded = true;
+   }
+   
+   
+
+   public void createBoluses() {
+      // TODO: create bolus using occlusal plane angle
+      Point3d rightbitePos = myJawModel.frameMarkers().get("rbite")
+            .getLocation ();
+      Point3d leftbitePos = myJawModel.frameMarkers().get("lbite")
+            .getLocation();
+      createFoodBolus("rightbolus", rightbitePos, (PlanarConnector) myJawModel
+            .bodyConnectors().get("RBITE"));
+      createFoodBolus("leftbolus", leftbitePos, (PlanarConnector) myJawModel
+            .bodyConnectors().get("LBITE"));
+      updateBoluses();
+   }
+   
+   public void updateBoluses() {
+      System.out.println("bolus dirs updated");
+      if (myFoodBoluses.size() >= 2) {
+         updateBolusDirection("RBITE", myFoodBoluses.get(0));
+         updateBolusDirection("LBITE", myFoodBoluses.get(1));
+      }
+   }
+   
+   
+   
+   public void updateBolusDirection(String constraintName, FoodBolus bolus) {
+      PlanarConnector bite = (PlanarConnector) myJawModel.bodyConnectors()
+            .get(constraintName);
+      if (bite != null && bolus != null) {
+         bolus.setPlane(bite);
+         // RigidTransform3d XPB = bite.getXDB();
+         // // System.out.println(constraintName + " X =\n" +
+         // XPB.toString("%8.2f"));
+         // bolus.setPlane( getPlaneFromX (XPB));
+         // // System.out.println(bolus.getName() + "plane =\n" +
+         // bolus.myPlane.toString("%8.2f"));
+      }
+   }
+   
+   
+   public void createFoodBolus(String bolusName, Point3d location,
+      PlanarConnector plane) {
+   FoodBolus fb = new FoodBolus(bolusName, plane, bolusDiameter,
+         bolusMaxResistance, bolusDamping);
+
+   RenderProps bolusPtProps = new RenderProps(myJawModel.getRenderProps());
+   bolusPtProps.setPointRadius(0.0);
+   bolusPtProps.setPointColor(Color.BLACK);
+
+   RigidBody jaw = myJawModel.rigidBodies().get("jaw");
+   FrameMarker bolusContactPt = new FrameMarker();
+   myJawModel.addFrameMarker(bolusContactPt, jaw, location);
+   bolusContactPt.setName(bolusName + "ContactPoint");
+   bolusContactPt.setRenderProps(new RenderProps(bolusPtProps));
+
+   fb.setCollidingPoint(bolusContactPt);
+   myFoodBoluses.add(fb);
+}
+
+   
+   
    @Override
    public void actionPerformed(ActionEvent event) {
                    
@@ -761,7 +855,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
    
    
    
-
    
    public void checkBoxJob(HashMap<String,String> corrMuscles, JCheckBox cb) {
            
@@ -769,10 +862,9 @@ public class JawFemDemo extends RootModel implements ActionListener {
                    disableCorrMuscles(corrMuscles);
                    //loadProbes("adapted11_l.art");
                    System.out.print("-slected");
-                   
+                  
            } 
-           
-           
+                     
    }
 
    
@@ -789,8 +881,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
    }
    
    
-
-
    
    public void disableCorrMuscles(HashMap<String,String> corrMucle) {
            
@@ -803,9 +893,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
 
     
 
-   
-   
-   
    public void addClosingForce() throws IOException{      
       for (BodyConnector p : myJawModel.bodyConnectors ()){     
          if (p.getName ().equals ("BiteICP")==false){
