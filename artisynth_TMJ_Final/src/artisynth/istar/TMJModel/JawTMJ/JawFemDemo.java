@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -103,6 +104,11 @@ public class JawFemDemo extends RootModel implements ActionListener {
    ArrayList<Integer> RightSurfaceElemnets = new ArrayList<Integer>();
    ArrayList<Integer> LeftSurfaceElemnets = new ArrayList<Integer>();
 
+   HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
+   HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
+   
+   HashSet<FemNode3d> nodesOnSurfaceLeft =   new HashSet<FemNode3d>();
+   HashSet<FemElement3d> elemsNearSurfaceLeft =  new HashSet<FemElement3d>();
 
    protected String workingDirname = "data/";
    String probesFilename ;
@@ -331,62 +337,88 @@ public class JawFemDemo extends RootModel implements ActionListener {
       
       myDonor0.setComputeNodalStress (true);
       myDonor0.setComputeNodalStrain (true);
-     
-      Point3d cent = new Point3d();
+           
       double totalStrainEnergyDensity = 0; // Initialize total strain energy density
       double MaxStrainEnergyDensity =0;
       
-      for (int i=0; i<myDonor0.numElements(); i++) {      
-        
-         FemElement3d elem = myDonor0.getElementByNumber(i);
-         elem.computeCentroid (cent);
-         PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
+      
+      PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
+      PolygonalMesh surfaceLeft = myMandibleLeft.getSurfaceMesh();
 
-         if (surfaceRight.distanceToPoint (cent) < 2) {
-            RightSurfaceElemnets.add (i);
-            RenderProps.setLineColor (elem, Color.MAGENTA);
-            FemNode3d[] nodes = elem.getNodes ();
-            
-            double elementStrainEnergyDensity = 0; // Element-specific strain energy density
+      //Finding Surface Nodes and elements 
+      
+      for ( FemNode3d node : myDonor0. getNodes ()) {
+       
+      double d = surfaceRight. distanceToPoint (node. getPosition ());
+      double d1 = surfaceLeft. distanceToPoint (node. getPosition ());
 
-            for (FemNode3d node : nodes) {
-               SymmetricMatrix3d stressTensor = node.getStress();
-               SymmetricMatrix3d strainTensor = node.getStrain();
-
-               // Compute the double dot product of stress and strain tensors
-               double dotProduct = 0;
-               for (int row = 0; row < 3; row++) {
-                   for (int col = 0; col < 3; col++) {
-                       dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
-                   }
-               }
-
-               // Assuming uniform stress/strain across the element, so average over nodes
-               elementStrainEnergyDensity += dotProduct / 2;
-           }
-
-            // Average the strain energy density across all nodes for this element
-            elementStrainEnergyDensity /= nodes.length;
-            
-
-            // Add this element's strain energy to the total
-            totalStrainEnergyDensity += elementStrainEnergyDensity;
-            
-            if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
-               MaxStrainEnergyDensity = elementStrainEnergyDensity;
+          if (d < .1) {
+             nodesOnSurfaceRight.add (node);  
+             RenderProps.setPointColor (node, Color.PINK);
+          }
+          else if  (d1 < 0.1) {
+             nodesOnSurfaceLeft.add (node);  
+             RenderProps.setPointColor (node, Color.PINK);
+          }
+      }
+      
+      
+      for (FemElement3d element : myDonor0.getElements()) {
+          for (FemNode3d node : element.getNodes()) {
+             if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
+                 elemsNearSurfaceRight.add (element);
+                 RenderProps.setLineColor (element, Color.MAGENTA);
+             }
+             
+             else if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
+                elemsNearSurfaceLeft.add (element);
+                RenderProps.setLineColor (element, Color.MAGENTA);
             }
             
+               
+          }
+      }
+      
+      
+      
+      //Strain Energy Density and Mechanical Stimulus Computations
+      
+      for (FemElement3d element : elemsNearSurfaceRight) {
+        
+         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
+
+         for (FemNode3d node :element.getNodes ()) {
             
+            SymmetricMatrix3d stressTensor = node.getStress();
+            SymmetricMatrix3d strainTensor = node.getStrain();
+
+            double dotProduct = 0;
+
+            
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
+                }
+            } 
+            
+            elementStrainEnergyDensity += dotProduct / 2;
+          
          }
          
+         elementStrainEnergyDensity /= 4;
          
+         totalStrainEnergyDensity += elementStrainEnergyDensity;
+         
+         if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
+            MaxStrainEnergyDensity = elementStrainEnergyDensity;
+         }
+
       }
 
       
-      
-      return  MaxStrainEnergyDensity/(1000*0.0002) ; // Initialize total strain energy density
- 
-      
+      //return  MaxStrainEnergyDensity/(1000 * 0.0002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
+
+      return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mj/mm^3): Divided by unit Conversion
    }
    
  
