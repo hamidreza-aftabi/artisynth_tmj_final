@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import artisynth.core.femmodels.FemCutPlane;
 import artisynth.core.femmodels.FemElement;
 import artisynth.core.mechmodels.FrameMarker;
 import artisynth.core.femmodels.FemElement3d;
@@ -27,6 +28,7 @@ import artisynth.core.femmodels.FemModel;
 import artisynth.core.femmodels.FemModel3d;
 import artisynth.core.femmodels.FemNode3d;
 import artisynth.core.femmodels.HexElement;
+import artisynth.core.fields.ScalarNodalField;
 import artisynth.core.femmodels.FemModel.Ranging;
 import artisynth.core.femmodels.FemModel.SurfaceRender;
 import artisynth.core.gui.ControlPanel;
@@ -67,9 +69,12 @@ public class JawFemDemo extends RootModel implements ActionListener {
    JawModelFEM myJawModel; 
    TrackingController myTrackingController;
    
+   boolean myShowDonorStress = false;
+
+   boolean myShowCutplaneMechStim = true;
+   
    boolean myUseCollisions = true;
 
-   boolean myShowDonorStress = true;
    
    boolean myUseScrews = true;
 
@@ -87,11 +92,15 @@ public class JawFemDemo extends RootModel implements ActionListener {
    
    double myBoneNu = 0.3;
    
+   double t=0.75; 
+
+   
    FemModel3d myDonor0;
    FemModel3d myPlate;
    RigidBody myMandibleRight;
    RigidBody myMandibleLeft;
 
+   //ScalarNodalField integField = new ScalarNodalField (myDonor0);
 
 
    private static Color PALE_BLUE = new Color (0.6f, 0.6f, 1.0f);
@@ -145,19 +154,25 @@ public class JawFemDemo extends RootModel implements ActionListener {
 
    
    static {
-      myProps.addReadOnly ("maxMechanicalStim", "Max Mechanical Stimulus");
+      myProps.addReadOnly ("maxMechanicalStimRight", "Max Mechanical Stimulus");
+      myProps.addReadOnly ("maxMechanicalStimLeft", "Max Mechanical Stimulus");
 
     }
    
-   public double getMaxMechanicalStim() {
+   public double getMaxMechanicalStimRight() {
       
-      return computeStressStrainDonor0();
+      return computeStressStrainDonor0Right();
+     
+   }
+   
+   public double getMaxMechanicalStimLeft() {
+      
+      return computeStressStrainDonor0Left();
      
    }
    
    
    
-   double t=0.75; 
    
    public JawFemDemo () {
       
@@ -172,22 +187,29 @@ public class JawFemDemo extends RootModel implements ActionListener {
    @Override
    public void build (String[] args) throws IOException {
       super.build (args);
+     
       setWorkingDir();
       myJawModel = new JawModelFEM("jawmodel");
       addModel (myJawModel);
       getRoot (this).setMaxStepSize (0.001);
       
+    
+      
       //addClosingForce ();
       addOpening();
       
       addFemDonorPlate();
-            
-      computeStressStrainDonor0();
-  
+             
+      computeStressStrainDonor0Right();
+      
+      computeStressStrainDonor0Left();
+
+      myDonor0.setComputeNodalStress (true);
+      myDonor0.setComputeNodalStrain (true);
+      
       myJawModel.setStabilization (
          PosStabilization.GlobalStiffness); // more accurate stabilization
       
-      ControlPanel panel1 = new ControlPanel("options");
 
       if (myShowDonorStress) {
          // set donor FEM models to display stress on their surfaces
@@ -196,10 +218,55 @@ public class JawFemDemo extends RootModel implements ActionListener {
          myDonor0.setStressPlotRange (new DoubleInterval(0, 1000));
         
          // allow stress ranges to be controlled in the control panel
+         ControlPanel panel1 = new ControlPanel("options");
+
          panel1.addWidget ("stressRanging0", myDonor0, "stressPlotRanging");
          panel1.addWidget ("stressRange0", myDonor0, "stressPlotRange");
          
       }
+   
+       if (myShowCutplaneMechStim) {
+
+     
+         ScalarNodalField integField = new ScalarNodalField (myDonor0);
+         myDonor0.addField(integField);
+
+        for (FemNode3d node :myDonor0.getNodes ()) {
+            
+            SymmetricMatrix3d stressTensor = node.getStress();
+            SymmetricMatrix3d strainTensor = node.getStrain();
+
+            double dotProduct = 0;
+
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
+                }
+            } 
+
+            integField.setValue (node, node.getVonMisesStress ());
+                      
+         }
+         
+           FemCutPlane cutplane = new FemCutPlane (
+           new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
+           myDonor0. addCutPlane (cutplane);
+          
+           integField.setVisualization (ScalarNodalField.Visualization.SURFACE);
+           integField.addRenderMeshComp (cutplane);
+           cutplane. setSurfaceRendering (SurfaceRender.None);
+           cutplane. setAxisLength (25);
+           RenderProps.setLineWidth (cutplane , 2);
+           
+           
+           ControlPanel panel = new ControlPanel ();
+           panel.addWidget (integField , " visualization ");
+           panel.addWidget (integField , " renderRange ");
+           panel.addWidget (integField , " colorMap ");
+           addControlPanel ( panel);
+           
+      }
+      
       
       for (double i=0.01; i<=2*t; i=i+0.01 ){
          addWayPoint (i);
@@ -211,11 +278,7 @@ public class JawFemDemo extends RootModel implements ActionListener {
       //addControlPanel();
       
       loadBoluses();
-      
-      PlanarConnector LBITE = (PlanarConnector) myJawModel.bodyConnectors().get("LBITE");
-      LBITE.setEnabled (true);
-      RenderProps.setVisible (LBITE, true);
-      
+            
       
 
       
@@ -339,10 +402,96 @@ public class JawFemDemo extends RootModel implements ActionListener {
      frame.add(panel);
      frame.setVisible(true);
 
+       
    }
    
+
    
-   public double computeStressStrainDonor0(){
+   
+   
+public double computeStressStrainDonor0Left(){
+      
+      myDonor0.setComputeNodalStress (true);
+      myDonor0.setComputeNodalStrain (true);
+      
+      
+      double totalStrainEnergyDensity = 0; // Initialize total strain energy density
+      double MaxStrainEnergyDensity =0;
+      
+      
+      
+      PolygonalMesh surfaceLeft = myMandibleLeft.getSurfaceMesh();
+
+      //Finding Surface Nodes and elements 
+      
+      for ( FemNode3d node : myDonor0. getNodes ()) {
+       
+      double d = surfaceLeft. distanceToPoint (node. getPosition ());
+
+          if (d < .1) {
+             nodesOnSurfaceLeft.add (node);  
+             RenderProps.setPointColor (node, Color.PINK);
+          }
+   
+      }
+      
+      
+      for (FemElement3d element : myDonor0.getElements()) {
+          for (FemNode3d node : element.getNodes()) {
+             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
+                 elemsNearSurfaceLeft.add (element);
+                 RenderProps.setLineColor (element, Color.MAGENTA);
+             }
+               
+          }
+      }
+      
+      
+      //Strain Energy Density and Mechanical Stimulus Computations
+      
+      for (FemElement3d element : elemsNearSurfaceLeft) {
+        
+         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
+         
+
+         for (FemNode3d node :element.getNodes ()) {
+            
+            SymmetricMatrix3d stressTensor = node.getStress();
+            SymmetricMatrix3d strainTensor = node.getStrain();
+
+            double dotProduct = 0;
+
+            
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
+                }
+            } 
+            
+            elementStrainEnergyDensity += dotProduct / 2;
+          
+         }
+         
+         elementStrainEnergyDensity /= 4;
+         
+         totalStrainEnergyDensity += elementStrainEnergyDensity;
+         
+         if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
+            MaxStrainEnergyDensity = elementStrainEnergyDensity;
+         }
+
+      }
+
+      
+      return  MaxStrainEnergyDensity/(1000 * 0.0002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
+
+      //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mj/mm^3): Divided by unit Conversion
+      
+}
+
+
+   
+   public double computeStressStrainDonor0Right(){
       
       myDonor0.setComputeNodalStress (true);
       myDonor0.setComputeNodalStrain (true);
@@ -352,23 +501,18 @@ public class JawFemDemo extends RootModel implements ActionListener {
       
       
       PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
-      PolygonalMesh surfaceLeft = myMandibleLeft.getSurfaceMesh();
 
       //Finding Surface Nodes and elements 
       
       for ( FemNode3d node : myDonor0. getNodes ()) {
        
       double d = surfaceRight. distanceToPoint (node. getPosition ());
-      double d1 = surfaceLeft. distanceToPoint (node. getPosition ());
 
           if (d < .1) {
              nodesOnSurfaceRight.add (node);  
              RenderProps.setPointColor (node, Color.PINK);
           }
-          else if  (d1 < 0.1) {
-             nodesOnSurfaceLeft.add (node);  
-             RenderProps.setPointColor (node, Color.PINK);
-          }
+   
       }
       
       
@@ -378,15 +522,11 @@ public class JawFemDemo extends RootModel implements ActionListener {
                  elemsNearSurfaceRight.add (element);
                  RenderProps.setLineColor (element, Color.MAGENTA);
              }
-             
-             else if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
-                elemsNearSurfaceLeft.add (element);
-                RenderProps.setLineColor (element, Color.MAGENTA);
-            }
-            
                
           }
       }
+      
+      
       
       
       
@@ -425,9 +565,9 @@ public class JawFemDemo extends RootModel implements ActionListener {
       }
 
       
-      //return  MaxStrainEnergyDensity/(1000 * 0.0002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
+      return  MaxStrainEnergyDensity/(1000 * 0.0002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
 
-      return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mj/mm^3): Divided by unit Conversion
+      //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mJ/mm^3): Divided by unit Conversion
    }
    
  
@@ -450,6 +590,7 @@ public class JawFemDemo extends RootModel implements ActionListener {
       FemModel3d fem = new FemModel3d (name);
       fem.setDensity (density);
       fem.setMaterial (new LinearMaterial (E, nu));
+      
 
       // load the triangular surface mesh and then call createFromMesh,
       // which uses tetgen to create a tetrahedral volumetric mesh:
@@ -462,12 +603,13 @@ public class JawFemDemo extends RootModel implements ActionListener {
 
       // enable computation of nodal stresses. Do this so that stresses will be
       // computed even if they are not being rendered.
-      fem.setComputeNodalStress (true);
+      //fem.setComputeNodalStress (true);
 
       // turn on surface rendering and set surface color to light blue
-      RenderProps.setFaceColor (fem, PALE_BLUE);
-      fem.setSurfaceRendering (FemModel.SurfaceRender.Shaded);
-      RenderProps.setSphericalPoints (fem, 0.25, Color.BLUE);
+      
+      //RenderProps.setFaceColor (fem, PALE_BLUE);
+      //fem.setSurfaceRendering (FemModel.SurfaceRender.Shaded);
+      RenderProps.setSphericalPoints (fem, 0.2, Color.BLUE);
 
       mech.addModel (fem);
       return fem;
@@ -741,6 +883,9 @@ public class JawFemDemo extends RootModel implements ActionListener {
             fb.setActive(false);
       }
       bolusesLoaded = true;
+      PlanarConnector LBITE = (PlanarConnector) myJawModel.bodyConnectors().get("LBITE");
+      LBITE.setEnabled (true);
+      RenderProps.setVisible (LBITE, true);
    }
    
    
