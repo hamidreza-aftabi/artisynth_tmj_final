@@ -46,9 +46,12 @@ import artisynth.core.mechmodels.RigidBody;
 import artisynth.core.mechmodels.CollisionManager.ColliderType;
 import artisynth.core.mechmodels.MechSystemSolver.PosStabilization;
 import artisynth.core.modelbase.ComponentUtils;
+import artisynth.core.modelbase.MonitorBase;
 import artisynth.core.probes.NumericInputProbe;
+import artisynth.core.renderables.ColorBar;
 import artisynth.core.util.ArtisynthIO;
 import artisynth.core.util.ArtisynthPath;
+import artisynth.core.util.ScalarRange;
 import artisynth.core.workspace.RootModel;
 import maspack.geometry.Face;
 import maspack.geometry.PolygonalMesh;
@@ -57,10 +60,13 @@ import maspack.matrix.RigidTransform3d;
 import maspack.matrix.SymmetricMatrix3d;
 import maspack.matrix.Vector3d;
 import maspack.properties.PropertyList;
+import maspack.render.RenderList;
 import maspack.render.RenderProps;
 import maspack.render.Renderer.LineStyle;
+import maspack.render.color.RainbowColorMap;
 import maspack.util.DoubleInterval;
 import maspack.util.PathFinder;
+import maspack.widgets.IntegerField;
 
 
 public class JawFemDemo extends RootModel implements ActionListener {
@@ -68,17 +74,16 @@ public class JawFemDemo extends RootModel implements ActionListener {
    
    JawModelFEM myJawModel; 
    TrackingController myTrackingController;
+   ScalarNodalField integField;
    
    boolean myShowDonorStress = false;
 
-   boolean myShowCutplaneMechStim = true;
    
    boolean myUseCollisions = true;
 
    
    boolean myUseScrews = true;
-
-   
+  
    
    double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
    double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
@@ -99,8 +104,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
    FemModel3d myPlate;
    RigidBody myMandibleRight;
    RigidBody myMandibleLeft;
-
-   //ScalarNodalField integField = new ScalarNodalField (myDonor0);
 
 
    private static Color PALE_BLUE = new Color (0.6f, 0.6f, 1.0f);
@@ -165,15 +168,69 @@ public class JawFemDemo extends RootModel implements ActionListener {
      
    }
    
+   
    public double getMaxMechanicalStimLeft() {
       
       return computeStressStrainDonor0Left();
      
    }
+  
    
    
+private class StressUpdateMonitor extends MonitorBase {
+   private FemModel3d fem;
+   private ScalarNodalField field;
+
    
+   public StressUpdateMonitor(FemModel3d fem, ScalarNodalField field) {
+      this.fem = fem;
+      this.field = field;
+   }
+
+
    
+   @Override
+   public void apply(double t0, double t1) {
+      // Update the scalar field based on current nodal stresses
+      
+    
+      for (FemNode3d node : fem.getNodes()) {
+         
+         SymmetricMatrix3d stressTensor = node.getStress();
+         SymmetricMatrix3d strainTensor = node.getStrain();
+       
+         double dotProduct = 0;
+         
+         for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
+            }
+        } 
+
+         field.setValue (node, dotProduct/(2 * 1000 * 0.0002));
+         System.out.println (dotProduct/(2 * 1000 * 0.0002));
+     
+      }
+       
+   }
+
+   @Override
+   public void initialize(double t) {
+      // Initialization code if needed
+   }
+}
+
+/*
+   @Override
+   public void prerender ( RenderList list ) {
+     super.prerender (list );
+     ColorBar cbar = ( ColorBar)( renderables ().get("colorBar"));
+     cbar.setColorMap (integField. getColorMap ());
+     cbar.updateLabels (integField.getValueRange ().getLowerBound (), integField.getValueRange().getUpperBound());
+   }
+   */
+
+
    public JawFemDemo () {
       
    }
@@ -194,6 +251,8 @@ public class JawFemDemo extends RootModel implements ActionListener {
       getRoot (this).setMaxStepSize (0.001);
       
     
+      myJawModel.setStabilization (
+         PosStabilization.GlobalStiffness); // more accurate stabilization
       
       //addClosingForce ();
       addOpening();
@@ -206,11 +265,8 @@ public class JawFemDemo extends RootModel implements ActionListener {
 
       myDonor0.setComputeNodalStress (true);
       myDonor0.setComputeNodalStrain (true);
-      
-      myJawModel.setStabilization (
-         PosStabilization.GlobalStiffness); // more accurate stabilization
-      
 
+      
       if (myShowDonorStress) {
          // set donor FEM models to display stress on their surfaces
          myDonor0.setSurfaceRendering (SurfaceRender.Stress);
@@ -224,13 +280,12 @@ public class JawFemDemo extends RootModel implements ActionListener {
          panel1.addWidget ("stressRange0", myDonor0, "stressPlotRange");
          
       }
-   
-       if (myShowCutplaneMechStim) {
+      
+      integField = new ScalarNodalField (myDonor0);
+      myDonor0.addField(integField);
+  
 
-     
-         ScalarNodalField integField = new ScalarNodalField (myDonor0);
-         myDonor0.addField(integField);
-
+         /*
         for (FemNode3d node :myDonor0.getNodes ()) {
             
             SymmetricMatrix3d stressTensor = node.getStress();
@@ -247,26 +302,43 @@ public class JawFemDemo extends RootModel implements ActionListener {
             integField.setValue (node, node.getVonMisesStress ());
                       
          }
-         
-           FemCutPlane cutplane = new FemCutPlane (
-           new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
-           myDonor0. addCutPlane (cutplane);
-          
-           integField.setVisualization (ScalarNodalField.Visualization.SURFACE);
-           integField.addRenderMeshComp (cutplane);
-           cutplane. setSurfaceRendering (SurfaceRender.None);
-           cutplane. setAxisLength (25);
-           RenderProps.setLineWidth (cutplane , 2);
-           
-           
-           ControlPanel panel = new ControlPanel ();
-           panel.addWidget (integField , " visualization ");
-           panel.addWidget (integField , " renderRange ");
-           panel.addWidget (integField , " colorMap ");
-           addControlPanel ( panel);
-           
-      }
+         */
       
+        
+      FemCutPlane cutplane = new FemCutPlane (
+      new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
+      myDonor0. addCutPlane (cutplane);
+          
+      integField.setVisualization (ScalarNodalField.Visualization.SURFACE);
+      integField.addRenderMeshComp (cutplane);
+      cutplane. setSurfaceRendering (SurfaceRender.None);
+      cutplane. setAxisLength (25);
+      integField.setRenderRange (new ScalarRange (ScalarRange.Updating.FIXED));
+      RenderProps.setLineWidth (cutplane , 2);
+      integField.setRenderRange (new ScalarRange (0, .04));    
+      //RainbowColorMap rainbowMap = new RainbowColorMap();
+      //field.setColorMap(hueColorMap);
+      
+      
+      ColorBar cbar = new ColorBar ();
+      cbar. setName("colorBar");
+      cbar. setNumberFormat ("%.3f"); // 2 decimal places
+      cbar. populateLabels (0.0 , .04 , 10); // Start with range [0,1], 10 ticks
+      cbar. setLocation (-100, 0.1, 20, 0.8) ;
+      addRenderable (cbar);
+      cbar. setColorMap (integField. getColorMap ());
+     
+      
+      /*
+      ControlPanel panel = new ControlPanel ();
+      panel.addWidget (integField , " visualization ");
+      panel.addWidget (integField , " renderRange ");
+      panel.addWidget (integField , " colorMap ");
+      addControlPanel ( panel);
+      */
+     
+      addMonitor(new StressUpdateMonitor(myDonor0, integField));
+
       
       for (double i=0.01; i<=2*t; i=i+0.01 ){
          addWayPoint (i);
@@ -279,8 +351,6 @@ public class JawFemDemo extends RootModel implements ActionListener {
       
       loadBoluses();
             
-      
-
       
       condyleMusclesLeft.put("lip","Left Inferior Lateral Pterygoid");
       condyleMusclesLeft.put("lsp","Left Superior Lateral Pterygoid");
@@ -406,9 +476,7 @@ public class JawFemDemo extends RootModel implements ActionListener {
    }
    
 
-   
-   
-   
+
 public double computeStressStrainDonor0Left(){
       
       myDonor0.setComputeNodalStress (true);

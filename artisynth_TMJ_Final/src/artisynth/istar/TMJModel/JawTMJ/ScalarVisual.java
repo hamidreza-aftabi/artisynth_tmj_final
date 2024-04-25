@@ -33,7 +33,10 @@ import maspack.util.DoubleInterval;
  * Illustrates visualization of a scalar nodal field.
  */
 public class  ScalarVisual extends RootModel {
-
+   
+   FemModel3d fem;
+   ScalarNodalField field;
+   FemCutPlane cutplane;
    
 private class StressUpdateMonitor extends MonitorBase {
    private FemModel3d fem;
@@ -60,14 +63,16 @@ private class StressUpdateMonitor extends MonitorBase {
    }
 }
 
-@Override
 
+
+
+@Override
    public void build (String[] args) {
       MechModel mech = new MechModel ("mech");
       addModel (mech);
 
       // create a hex FEM cylinder to use for the field
-      FemModel3d fem = FemFactory.createHexCylinder (
+      fem = FemFactory.createHexCylinder (
          null, /*height=*/1.0, /*radius=*/0.5, /*nh=*/5, /*nt=*/10);
       fem.setMaterial (new LinearMaterial (10000, 0.45));
       fem.setName ("fem");
@@ -85,7 +90,7 @@ private class StressUpdateMonitor extends MonitorBase {
       
       // create a scalar field whose value is r^2, where r is the radial
       // distance from FEM axis
-      ScalarNodalField field = new ScalarNodalField (fem);
+      field = new ScalarNodalField (fem);
       fem.addField (field);
       for (FemNode3d n : fem.getNodes()) {
          field.setValue (n, n.getStress ().get (0, 0));
@@ -95,7 +100,7 @@ private class StressUpdateMonitor extends MonitorBase {
       
       // create a FemCutPlane to provide the visualization surface, rotated
       // into the z-x plane.
-      FemCutPlane cutplane = new FemCutPlane (
+       cutplane = new FemCutPlane (
          new RigidTransform3d (0,0,0, 0,0,Math.toRadians(90)));
       fem.addCutPlane (cutplane);
 
@@ -110,7 +115,7 @@ private class StressUpdateMonitor extends MonitorBase {
       
       
        ColorBar cbar = new ColorBar ();
-       cbar. setName(" colorBar ");
+       cbar. setName("colorBar");
        cbar. setNumberFormat ("%.2f"); // 2 decimal places
        cbar. populateLabels (0.0 , 50, 10); // Start with range [0,1], 10 ticks
        cbar. setLocation (-100, 0.1, 20, 0.8) ;
@@ -143,6 +148,14 @@ private class StressUpdateMonitor extends MonitorBase {
    }
    
 
+@Override
+public void prerender ( RenderList list ) {
+  super.prerender (list );
+  ColorBar cbar = ( ColorBar)( renderables ().get("colorBar"));
+  cbar.setColorMap (field.getColorMap ());
+  cbar.updateLabels (field.getValueRange ().getLowerBound (),field.getValueRange ().getUpperBound());
+  System.out.println (field.getValueRange ().getUpperBound());
+}
      
    
  
