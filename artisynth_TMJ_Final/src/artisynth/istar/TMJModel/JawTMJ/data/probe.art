@@ -857,6 +857,26 @@
     ]
     data=[
     ]
+    plotTraceInfo=[
+      [ order=0 label="axialSprings/lad:forceNorm" visible=true color=Red ]
+      [ order=1 label="axialSprings/lip:forceNorm" visible=true color=Green ]
+      [ order=2 label="axialSprings/lsp:forceNorm" visible=true color=Blue ]
+      [ order=3 label="axialSprings/lat:forceNorm" visible=true color=Cyan ]
+      [ order=4 label="axialSprings/lmt:forceNorm" visible=true color=Magenta ]
+      [ order=5 label="axialSprings/lpt:forceNorm" visible=true color=Gold1 ]
+      [ order=6 label="axialSprings/ldm:forceNorm" visible=true color=Teal ]
+      [ order=7 label="axialSprings/lsm:forceNorm" visible=true color=Ocean ]
+      [ order=8 label="axialSprings/lmp:forceNorm" visible=true color=DarkViolet ]
+      [ order=9 label="axialSprings/rad:forceNorm" visible=true color=DeepPink ]
+      [ order=10 label="axialSprings/rip:forceNorm" visible=true color=Orange ]
+      [ order=11 label="axialSprings/rsp:forceNorm" visible=true color=DarkOliveGreen4 ]
+      [ order=12 label="axialSprings/rat:forceNorm" visible=true color=WebBlue ]
+      [ order=13 label="axialSprings/rmt:forceNorm" visible=true color=MediumPurple1 ]
+      [ order=14 label="axialSprings/rpt:forceNorm" visible=true color=WebMaroon ]
+      [ order=15 label="axialSprings/rdm:forceNorm" visible=true color=Gold3 ]
+      [ order=16 label="axialSprings/rsm:forceNorm" visible=true color=Chartreuse3 ]
+      [ order=17 label="axialSprings/rmp:forceNorm" visible=true color=SteelBlue ]
+    ]
   ]
   NumericOutputProbe [ 
     startTime=0.0
@@ -881,6 +901,11 @@
     ]
     data=[
     ]
+    plotTraceInfo=[
+      [ order=0 label="frameMarkers/lowerincisor:displacement.x" visible=true color=Red ]
+      [ order=1 label="frameMarkers/lowerincisor:displacement.y" visible=true color=Green ]
+      [ order=2 label="frameMarkers/lowerincisor:displacement.z" visible=true color=Blue ]
+    ]
   ]
   NumericOutputProbe [ 
     startTime=0.0
@@ -904,6 +929,24 @@
       "P0"
     ]
     data=[
+    ]
+    plotTraceInfo=[
+      [ order=0 label="rigidBodies/jaw:pose[0]" visible=true color=Red ]
+      [ order=1 label="rigidBodies/jaw:pose[1]" visible=true color=Green ]
+      [ order=2 label="rigidBodies/jaw:pose[2]" visible=true color=Blue ]
+      [ order=3 label="rigidBodies/jaw:pose[3]" visible=true color=Cyan ]
+      [ order=4 label="rigidBodies/jaw:pose[4]" visible=true color=Magenta ]
+      [ order=5 label="rigidBodies/jaw:pose[5]" visible=true color=Gold1 ]
+      [ order=6 label="rigidBodies/jaw:pose[6]" visible=true color=Teal ]
+      [ order=7 label="rigidBodies/jaw:pose[7]" visible=true color=Ocean ]
+      [ order=8 label="rigidBodies/jaw:pose[8]" visible=true color=DarkViolet ]
+      [ order=9 label="rigidBodies/jaw:pose[9]" visible=true color=DeepPink ]
+      [ order=10 label="rigidBodies/jaw:pose[10]" visible=true color=Orange ]
+      [ order=11 label="rigidBodies/jaw:pose[11]" visible=true color=DarkOliveGreen4 ]
+      [ order=12 label="rigidBodies/jaw:pose[12]" visible=true color=WebBlue ]
+      [ order=13 label="rigidBodies/jaw:pose[13]" visible=true color=MediumPurple1 ]
+      [ order=14 label="rigidBodies/jaw:pose[14]" visible=true color=WebMaroon ]
+      [ order=15 label="rigidBodies/jaw:pose[15]" visible=true color=Gold3 ]
     ]
   ]
   PointTracingProbe [ 
@@ -931,6 +974,11 @@
     ]
     data=[
     ]
+    plotTraceInfo=[
+      [ order=0 label="frameMarkers/lowerincisor:position.x" visible=true color=Red ]
+      [ order=1 label="frameMarkers/lowerincisor:position.y" visible=true color=Green ]
+      [ order=2 label="frameMarkers/lowerincisor:position.z" visible=true color=Blue ]
+    ]
   ]
   NumericOutputProbe [ 
     startTime=0.0
@@ -952,6 +1000,11 @@
       "P0"
     ]
     data=[
+    ]
+    plotTraceInfo=[
+      [ order=0 label="frameMarkers/CondyleLeft:displacement.x" visible=true color=Red ]
+      [ order=1 label="frameMarkers/CondyleLeft:displacement.y" visible=true color=Green ]
+      [ order=2 label="frameMarkers/CondyleLeft:displacement.z" visible=true color=Blue ]
     ]
   ]
   NumericOutputProbe [ 
@@ -975,53 +1028,24 @@
     ]
     data=[
     ]
+    plotTraceInfo=[
+      [ order=0 label="frameMarkers/CondyleRight:displacement.x" visible=true color=Red ]
+      [ order=1 label="frameMarkers/CondyleRight:displacement.y" visible=true color=Green ]
+      [ order=2 label="frameMarkers/CondyleRight:displacement.z" visible=true color=Blue ]
+    ]
   ]
   NumericOutputProbe [ 
     startTime=0.0
     stopTime=0.7
-    updateInterval=0.001
-    name="Inverse Target Positions"
-    attachedFile="Inverse_Targets.txt"
+    updateInterval=0.01
+    name="LeftPerc"
+    attachedFile=""
     displayRange=[ -1.2 1.2 ]
     track=6
     model=null
-    vsize=15
-    props=[
-      "models/jawmodel/frameMarkers/lowerincisor:position"
-      "models/jawmodel/frameMarkers/lbite:position"
-      "models/jawmodel/frameMarkers/rbite:position"
-      "models/jawmodel/frameMarkers/CondyleLeft:position"
-      "models/jawmodel/frameMarkers/CondyleRight:position"
-    ]
-    variables=[
-      P0
-      P1
-      P2
-      P3
-      P4
-    ]
-    drivers=[
-      "P0"
-      "P1"
-      "P2"
-      "P3"
-      "P4"
-    ]
-    data=[
-    ]
-  ]
-  NumericOutputProbe [ 
-    startTime=0.0
-    stopTime=0.7
-    updateInterval=0.001
-    name="Bolus Resistance"
-    attachedFile=""
-    displayRange=[ -1.2 1.2 ]
-    track=7
-    model=null
     vsize=1
     props=[
-      "models/jawmodel/forceEffectors/leftbolus:forceNorm"
+      "percMechanicalStimLeftBuiltin"
     ]
     variables=[
       P0
@@ -1032,7 +1056,32 @@
     data=[
     ]
     plotTraceInfo=[
-      [ order=0 label="forceEffectors/leftbolus:forceNorm" visible=true color=Red ]
+      [ order=0 label="JawFemDemoOptimize:percMechanicalStimLeftBuiltin" visible=true color=Red ]
+    ]
+  ]
+  NumericOutputProbe [ 
+    startTime=0.0
+    stopTime=0.7
+    updateInterval=0.01
+    name="RightPerc"
+    attachedFile=""
+    displayRange=[ -1.2 1.2 ]
+    track=7
+    model=null
+    vsize=1
+    props=[
+      "percMechanicalStimRightBuiltin"
+    ]
+    variables=[
+      P0
+    ]
+    drivers=[
+      "P0"
+    ]
+    data=[
+    ]
+    plotTraceInfo=[
+      [ order=0 label="JawFemDemoOptimize:percMechanicalStimRightBuiltin" visible=true color=Red ]
     ]
   ]
   WayPointProbe [ 

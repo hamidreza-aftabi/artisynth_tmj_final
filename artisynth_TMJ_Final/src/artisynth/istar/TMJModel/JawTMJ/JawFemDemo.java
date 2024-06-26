@@ -766,12 +766,14 @@ public double computeStressStrainDonor0Left(){
    public void addFemDonorPlate() {
      
       //donor
-      myDonor0 = createFemModel (
-         myJawModel, "donor0", "resected_donor_transformed_remeshed.obj", myBoneDensity, myBoneE, myBoneNu);
+    //  myDonor0 = createFemModel (
+    //     myJawModel, "donor0", "resected_donor_transformed_remeshed3.obj", myBoneDensity, myBoneE, myBoneNu);
       
+      myDonor0 = createFemModel (
+         myJawModel, "donor0", "case4_donor_inf_remeshed_transformed.obj", myBoneDensity, myBoneE, myBoneNu);
       
       //plate
-      String platePath = myGeoDir + "plate_final.art";
+      String platePath = myGeoDir + "plate_final_case4_inf.art";
       try {
          // read the FEM using the loadComponent utility
          myPlate = ComponentUtils.loadComponent (

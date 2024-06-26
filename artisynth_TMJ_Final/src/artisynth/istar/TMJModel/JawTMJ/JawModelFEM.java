@@ -52,8 +52,6 @@ import artisynth.core.mechmodels.MechSystemSolver.Integrator;
 import artisynth.core.mechmodels.ExcitationComponent;
 import artisynth.core.util.ArtisynthIO;
 import artisynth.core.util.ArtisynthPath;
-import artisynth.istar.TMJModel.JawTMJ.ElasticFoundationForceBehavior;
-import artisynth.istar.TMJModel.JawTMJ.JawModel;
 import maspack.geometry.PolygonalMesh;
 import maspack.matrix.AxisAngle;
 import maspack.matrix.Point3d;
@@ -71,6 +69,8 @@ import maspack.util.NumberFormat;
 import maspack.util.ReaderTokenizer;
 import artisynth.core.util.ScalarRange;
 import artisynth.core.util.ScanToken;
+import artisynth.istar.TMJModel.JawTMJ.ElasticFoundationForceBehavior;
+import artisynth.istar.TMJModel.JawTMJ.JawModel;
 
 public class JawModelFEM extends JawModel{
   
@@ -602,11 +602,11 @@ public class JawModelFEM extends JawModel{
       }
       
 
-      rigidBodies ().get ("jaw").getMeshComp (0).setIsCollidable (false);
+      rigidBodies ().get ("jaw").getMeshComp (0).setIsCollidable (true);
       rigidBodies ().get ("jaw").getMeshComp (1).setIsCollidable (true);
       rigidBodies ().get ("jaw").getMeshComp (1).setName ("ContactMesh");
       
-      rigidBodies ().get ("jaw_resected").getMeshComp (0).setIsCollidable (false);
+      rigidBodies ().get ("jaw_resected").getMeshComp (0).setIsCollidable (true);
       rigidBodies ().get ("jaw_resected").getMeshComp (1).setIsCollidable (true);
       rigidBodies ().get ("jaw_resected").getMeshComp (1).setName ("ContactMesh_Right");
       
