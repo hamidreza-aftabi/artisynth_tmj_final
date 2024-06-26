@@ -8,7 +8,7 @@ setArtisynthClasspath (getenv ('ARTISYNTH_HOME'));
 
 
 % Path to save the optimization results
-resultsFile = 'bayesoptResults.mat';
+resultsFile = 'bayesoptResults_25_TMJ_FIXED.mat';
 
 % Number of total iterations
 totalIterations = 25;

@@ -6,13 +6,13 @@ addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
 
 % Load or initialize the simulation parameters and state
-resultsFile = 'zero_sensitivity_offset.mat';
+resultsFile = 'five_sensitivity_offset.mat';
 if exist(resultsFile, 'file')
-    load params_zero_offset.mat;
+    load params_five_offset.mat;
     load(resultsFile, 'sensitivity_result', 'currentIteration', 'totalIterations');
 else
     % Load initial parameters from the .mat file if starting fresh
-    load params_zero_offset.mat;
+    load params_five_offset.mat;
     sensitivity_result = struct('losses', [], 'left_percents', [], 'right_percents', []);
     currentIteration = 0;
     totalIterations = 5;  % Define the total number of iterations here

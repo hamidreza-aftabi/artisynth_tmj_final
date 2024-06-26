@@ -1387,6 +1387,18 @@ public class JawModelFEM extends JawModel{
       XMeshToCom.invert(XComToWorld);
       
      
+      Vector3d centroid1= new Vector3d();
+      rigidBodies ().get ("jaw_resected").getMesh ().computeCentroid (centroid1);
+      RigidTransform3d XComToBody1 = new RigidTransform3d();      
+      XComToBody1.p.set(centroid1);
+      RigidTransform3d XBodyToWorld1 = new RigidTransform3d();
+      rigidBodies ().get ("jaw_resected").getPose(XBodyToWorld1);
+      RigidTransform3d XComToWorld1 = new RigidTransform3d();
+      XComToWorld1.mul(XBodyToWorld1, XComToBody1);
+      RigidTransform3d XMeshToCom1 = new RigidTransform3d();
+      XMeshToCom1.invert(XComToWorld1);
+      
+      
       
       FrameMarker sphm_mL= new FrameMarker (rigidBodies ().get("jaw"), new Point3d(46.98093, -24.014082, -31.215364));
       sphm_mL.setName ("sphm_mL");
@@ -1415,25 +1427,31 @@ public class JawModelFEM extends JawModel{
       
       FrameMarker sphm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-39.32017, -18.560082, -33.919064));
       sphm_mR.setName ("sphm_mR");
-      //sphm_mR.getLocation(tmp_loc);
-      //tmp_loc.transform(XMeshToCom);
-      sphm_mR.setLocation(new Point3d (1.37317, 4.14462, 0.120469));
+      Point3d sphm_loc  = new Point3d ();
+      sphm_mR.getLocation(sphm_loc);
+      sphm_loc.transform(XMeshToCom1);
+      sphm_mR.setLocation(sphm_loc);
+      //sphm_mR.setLocation(new Point3d (1.37317, 4.14462, 0.120469));
       
       
 
       FrameMarker stm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-42.62647, -11.426282, -53.767444));
       stm_mR.setName ("stm_mR");
-      //stm_mR.getLocation(tmp_loc);
-      //tmp_loc.transform(XMeshToCom);
-      stm_mR.setLocation( new Point3d (-3.06595, 12.3885, -13.5142));
+      Point3d stm_loc  = new Point3d ();
+      stm_mR.getLocation(stm_loc);
+      stm_loc.transform(XMeshToCom1);
+      stm_mR.setLocation(stm_loc);
+      //stm_mR.setLocation( new Point3d (-3.06595, 12.3885, -13.5142));
       
       
       
       FrameMarker tm_mR= new FrameMarker (rigidBodies ().get("jaw_resected"), new Point3d(-50.26127, -4.3128816, -21.000664));
       tm_mR.setName ("tm_mR");
-      //tm_mR.getLocation(tmp_loc);
-      //tmp_loc.transform(XMeshToCom);
-      tm_mR.setLocation(new Point3d(-9.56666, 18.3916, 13.0395));
+      Point3d tm_loc  = new Point3d ();
+      tm_mR.getLocation(tm_loc);
+      tm_loc.transform(XMeshToCom1);
+      tm_mR.setLocation(tm_loc);
+      //tm_mR.setLocation(new Point3d(-9.56666, 18.3916, 13.0395));
       
 
 
