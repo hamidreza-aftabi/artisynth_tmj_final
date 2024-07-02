@@ -8,8 +8,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -44,6 +47,7 @@ import artisynth.core.mechmodels.Muscle;
 import artisynth.core.mechmodels.MuscleExciter;
 import artisynth.core.mechmodels.PlanarConnector;
 import artisynth.core.mechmodels.PointAttachable;
+import artisynth.core.mechmodels.PointList;
 import artisynth.core.mechmodels.RigidBody;
 import artisynth.core.mechmodels.CollisionBehavior.Method;
 import artisynth.core.mechmodels.CollisionManager.ColliderType;
@@ -167,15 +171,20 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
    
    static {
+      myProps.addReadOnly ("maxNodalStress", "Max Nodal Stress");
       myProps.addReadOnly ("maxMechanicalStimRightBuiltin", "Max Mechanical Stimulus");
       myProps.addReadOnly ("maxMechanicalStimLeftBuiltin", "Max Mechanical Stimulus");
       myProps.addReadOnly ("percMechanicalStimLeftBuiltin", "Max Mechanical Stimulus");
       myProps.addReadOnly ("percMechanicalStimRightBuiltin", "Max Mechanical Stimulus");
 
-
     }
    
 
+ public double getMaxNodalStress() {
+      
+      return computeMaxNodalStress();
+     
+   }
    
   public double getMaxMechanicalStimRightBuiltin() {
       
@@ -481,6 +490,60 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
   
    }
+   
+   
+   public double computeMaxNodalStress() {
+      
+   // Assuming 'femModel' is your FEM model
+      FemModel3d femModel = myDonor0 ; // Initialize your FEM model here
+
+   // Get the list of all nodes in the model
+      PointList<FemNode3d> nodePointList = femModel.getNodes();
+
+      // Create a list to store stress values of nodes
+      List<Double> stressValues = new ArrayList<>();
+
+      // Map to store nodes with their respective stress values
+      Map<FemNode3d, Double> nodeStressMap = new HashMap<>();
+
+      // Loop through nodes and get stress values
+      for (FemNode3d node : nodePointList) {
+          // Assuming getStress() returns the stress value for the node
+          double stress = node.getMAPStress (); // Replace with actual method to get node stress
+          stressValues.add(stress);
+          nodeStressMap.put(node, stress);
+      }
+
+      // Sort stress values in descending order
+      Collections.sort(stressValues, Collections.reverseOrder());
+
+      // Calculate the number of top 1% nodes
+      int topNodesCount = (int) Math.ceil(0.01 * stressValues.size());
+
+      // Get the stress value threshold for the top 1% nodes
+      double thresholdStress = stressValues.get(topNodesCount - 1);
+
+      // Calculate the sum and count of top 1% stress values
+      double sumStress = 0.0;
+      int count = 0;
+
+      for (Map.Entry<FemNode3d, Double> entry : nodeStressMap.entrySet()) {
+          if (entry.getValue() >= thresholdStress) {
+              sumStress += entry.getValue();
+              count++;
+          }
+      }
+
+      // Calculate the average stress for the top 1% nodes
+      double averageStress = sumStress / count;
+      
+      return averageStress;
+
+   }
+
+   
+   
+   
    
    
    
@@ -1213,6 +1276,7 @@ public double computeStressStrainDonor0RightBuiltin(){
       behav8.setForceBehavior (EFContact);
 
       CollisionManager cm = myJawModel.getCollisionManager();
+      
       // use AJL collisions so we can render pressure maps:
       cm.setColliderType (ColliderType.AJL_CONTOUR);
 

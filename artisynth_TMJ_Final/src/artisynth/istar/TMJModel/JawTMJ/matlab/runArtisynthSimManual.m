@@ -1,5 +1,6 @@
 function [loss,left_percent,right_percent] = runArtisynthSimManual(params)
     
+
     zOffset = double(params.zOffset);
     leftRoll = double(params.leftRoll);
     leftPitch = double(params.leftPitch);
@@ -123,14 +124,14 @@ function [loss,left_percent,right_percent] = runArtisynthSimManual(params)
         ah1.step();
     end
 
-    left_percent = ah1.getOprobeData('6');
-    right_percent = ah1.getOprobeData('7');
+    left_percent = ah1.getOprobeData('5');
+    right_percent = ah1.getOprobeData('6');
 
     % Calculate the loss
     %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
     %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
 
-    loss = - (0.6*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.4 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
 
     % Close the second Arisynth instance
     pause(3);

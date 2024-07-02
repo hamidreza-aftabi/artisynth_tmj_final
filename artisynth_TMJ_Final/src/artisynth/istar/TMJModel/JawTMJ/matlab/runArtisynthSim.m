@@ -1,5 +1,10 @@
 function loss = runArtisynthSim(params)
     
+    resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial6_Costhalf.mat';
+    textFile = 'left_right_percent_25_TMJ_FIXED_Trial6_Costhalf.txt';
+    logFile = 'log_25_TMJ_FIXED_Trial6_Costhalf.txt';
+
+ 
     zOffset = double(params.zOffset);
     leftRoll = double(params.leftRoll);
     leftPitch = double(params.leftPitch);
@@ -48,7 +53,7 @@ function loss = runArtisynthSim(params)
     root = ah.root();
     root.importFibulaOptimization();
     
-    import maspack.matrix.AxisAngle ;
+    import maspack.matrix.AxisAngle;
 
     planeL = ah.find('models/Reconstruction/resectionPlanes/planeL');
     planeL.setOrientation(AxisAngle ([init_axis_l, deg2rad(init_angle_l)]));
@@ -72,6 +77,7 @@ function loss = runArtisynthSim(params)
 
     pause(1);
 
+
     root.createFibulaOptimization(zOffset);
 
     % Perform simulation steps
@@ -87,6 +93,29 @@ function loss = runArtisynthSim(params)
     root.exportFiles();
     root.exportFemPlate();
 
+    left_mandible = ah.find('models/Reconstruction/rigidBodies/mandibleL');
+    right_mandible = ah.find('models/Reconstruction/rigidBodies/mandibleR');
+
+
+    if left_mandible.getMass() == 0 || right_mandible.getMass() == 0
+
+        disp('Graphic Error...');
+        fileID = fopen(logFile, 'a');
+        fprintf(fileID, 'Graphic Error:\n');
+        fprintf(fileID, '%.2f,', zOffset);
+        fprintf(fileID, '%.2f,', leftRoll);
+        fprintf(fileID, '%.2f,', leftPitch);
+        fprintf(fileID, '%.2f,', rightPitch);
+        fprintf(fileID, '\n');
+        fclose(fileID);
+        % Use system command to restart MATLAB
+        matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModified');
+        system(matlabCommand);
+        exit; % Close the current MATLAB session
+
+    end
+    
     sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
     destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
 
@@ -123,14 +152,40 @@ function loss = runArtisynthSim(params)
         ah1.step();
     end
 
-    left_percent = ah1.getOprobeData('6');
-    right_percent = ah1.getOprobeData('7');
+    left_percent = ah1.getOprobeData('5');
+    right_percent = ah1.getOprobeData('6');
+
+    if length(left_percent) == 1 || length(right_percent) == 1
+        disp('Biomedical Error...');
+        fileID = fopen(logFile, 'a');
+        fprintf(fileID, 'Biomedical Error:\n');
+        fprintf(fileID, '%.2f,', zOffset);
+        fprintf(fileID, '%.2f,', leftRoll);
+        fprintf(fileID, '%.2f,', leftPitch);
+        fprintf(fileID, '%.2f,', rightPitch);
+        fprintf(fileID, '\n');
+        fclose(fileID);
+        % Use system command to restart MATLAB
+        matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModified');
+        system(matlabCommand);
+        exit; % Close the current MATLAB session
+    end
+
+    % Append left and right percent to a text file
+    fileID = fopen(textFile, 'a');
+    fprintf(fileID, 'Left Percent:\n');
+    fprintf(fileID, '%.2f,', left_percent(:,2));
+    fprintf(fileID, '\nRight Percent:\n');
+    fprintf(fileID, '%.2f,', right_percent(:,2));
+    fprintf(fileID, '\n');
+    fclose(fileID);
 
     % Calculate the loss
     %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
     %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
 
-    loss = - (0.6*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.4 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
 
     % Close the second Arisynth instance
     pause(3);

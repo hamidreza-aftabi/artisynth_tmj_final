@@ -1,12 +1,16 @@
 function results = helperFunction(results, currentIteration)
 
+
 % Clear unnecessary variables to manage memory
 clearvars -except results currentIteration;
 
+resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial6_Costhalf.mat';
+
+
 % Define the optimizable variables
 zOffsetVar = optimizableVariable('zOffset', [-2, 4.9]);
-leftRollVar = optimizableVariable('leftRoll', [-15, 15]);
-leftPitchVar = optimizableVariable('leftPitch', [-15, 15]);
+leftRollVar = optimizableVariable('leftRoll', [-30, 30]);
+leftPitchVar = optimizableVariable('leftPitch', [-30, 30]);
 rightRollVar = optimizableVariable('rightRoll', [-15, 15]);
 rightPitchVar = optimizableVariable('rightPitch', [-15, 15]);
 
@@ -15,6 +19,8 @@ vars = [zOffsetVar, leftRollVar, leftPitchVar, rightRollVar, rightPitchVar];
 
 % Debugging output to confirm function execution
 disp('Helper function started.');
+
+rng('shuffle');
 
 % Check if we are resuming from a previous session
 if exist('results', 'var') && ~isempty(results)
@@ -33,7 +39,7 @@ else
 end
 
 % Save the optimization results
-save('bayesoptResults.mat', 'results', 'currentIteration');
+save(resultsFile, 'results', 'currentIteration');
 
 % Debugging output
 disp('Helper function completed.');
