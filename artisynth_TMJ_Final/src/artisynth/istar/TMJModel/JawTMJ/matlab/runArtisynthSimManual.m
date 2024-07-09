@@ -1,5 +1,17 @@
-function [loss,left_percent,right_percent] = runArtisynthSimManual(params)
     
+    addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
+    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
+
+    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
+    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+
+    bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+    toggleComment(bodyList, 'screw1', 'add');
+
+    toggleComment('bodyList.txt', 'screw1', 'add');
+
+    num_screws = 1;
+    num_segment = 1;
 
     zOffset = double(params.zOffset);
     leftRoll = double(params.leftRoll);
@@ -47,6 +59,11 @@ function [loss,left_percent,right_percent] = runArtisynthSimManual(params)
     end
     
     root = ah.root();
+   
+    root.getPlateBuilder().setNumScrews (num_screws);
+    root.getSegmentGenerator.setMaxSegments(num_segment);
+    root.getSegmentGenerator.setNumSegments (num_segment);
+
     root.importFibulaOptimization();
     
     import maspack.matrix.AxisAngle ;
@@ -88,10 +105,8 @@ function [loss,left_percent,right_percent] = runArtisynthSimManual(params)
     root.exportFiles();
     root.exportFemPlate();
 
-    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
-    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
-
-    fileList = {'donor_opt.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt.obj'};
+    
+    fileList = {'donor_opt0.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj'};
 
     for i = 1:length(fileList)
         sourceFile = fullfile(sourceDir, fileList{i});
@@ -138,4 +153,4 @@ function [loss,left_percent,right_percent] = runArtisynthSimManual(params)
     ah1.quit();
     ah1 = [];
     java.lang.System.gc();
-end
+    

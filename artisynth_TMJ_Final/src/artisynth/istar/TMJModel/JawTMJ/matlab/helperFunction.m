@@ -4,7 +4,7 @@ function results = helperFunction(results, currentIteration)
 % Clear unnecessary variables to manage memory
 clearvars -except results currentIteration;
 
-resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial6_Costhalf.mat';
+resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
 
 
 % Define the optimizable variables

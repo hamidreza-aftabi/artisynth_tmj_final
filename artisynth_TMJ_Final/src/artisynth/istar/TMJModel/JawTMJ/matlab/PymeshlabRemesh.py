@@ -7,10 +7,10 @@ destinationDir = 'C:\\Users\\Hamidreza\\git\\artisynth_tmj_final\\artisynth_TMJ_
 
 # List of files to be remeshed with specific target lengths
 file_list = {
-    'donor_opt.obj': 1.452,
+    'donor_opt0.obj': 1.452,
     'resected_mandible_l_opt.obj': 0.449,
     'resected_mandible_r_opt.obj': 0.687,
-    'screw_opt.obj': 5.479
+    'screw_opt0.obj': 5.479
 }
 
 for file_name, target_length in file_list.items():

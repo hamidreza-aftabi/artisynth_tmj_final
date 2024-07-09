@@ -1,10 +1,18 @@
 function loss = runArtisynthSim(params)
     
-    resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial6_Costhalf.mat';
-    textFile = 'left_right_percent_25_TMJ_FIXED_Trial6_Costhalf.txt';
+    resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
+    textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
     logFile = 'log_25_TMJ_FIXED_Trial6_Costhalf.txt';
 
- 
+    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
+    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+
+    bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+    toggleComment(bodyList, 'screw1', 'add');
+
+    num_screws = 1;
+    num_segment = 1;
+
     zOffset = double(params.zOffset);
     leftRoll = double(params.leftRoll);
     leftPitch = double(params.leftPitch);
@@ -51,6 +59,10 @@ function loss = runArtisynthSim(params)
     end
     
     root = ah.root();
+
+    root.getPlateBuilder().setNumScrews (num_screws);
+    root.getSegmentGenerator.setMaxSegments(num_segment);
+    root.getSegmentGenerator.setNumSegments (num_segment);
     root.importFibulaOptimization();
     
     import maspack.matrix.AxisAngle;
@@ -116,10 +128,9 @@ function loss = runArtisynthSim(params)
 
     end
     
-    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
-    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+    
 
-    fileList = {'donor_opt.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt.obj'};
+    fileList = {'donor_opt0.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj'};
 
     for i = 1:length(fileList)
         sourceFile = fullfile(sourceDir, fileList{i});

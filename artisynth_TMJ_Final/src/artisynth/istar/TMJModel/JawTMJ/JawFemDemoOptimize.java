@@ -1118,7 +1118,7 @@ public double computeStressStrainDonor0RightBuiltin(){
      //    myJawModel, "donor0", "case4_donor_inf_remeshed_transformed_boolean.obj", myBoneDensity, myBoneE, myBoneNu);
       
       myDonor0 = createFemModel (
-         myJawModel, "donor0", "donor_opt_remeshed.obj", myBoneDensity, myBoneE, myBoneNu);
+         myJawModel, "donor0", "donor_opt0_remeshed.obj", myBoneDensity, myBoneE, myBoneNu);
       
       //plate
       
@@ -1207,21 +1207,23 @@ public double computeStressStrainDonor0RightBuiltin(){
         //int hexElem =9;
         
         
-        RigidBody screw = (RigidBody)myJawModel.findComponent ("rigidBodies/screw");
+        RigidBody screw0 = (RigidBody)myJawModel.findComponent ("rigidBodies/screw0");
         
-        int  hexElem  = findClosestHexElementNumber(myPlate,screw);
+        int  hexElem0  = findClosestHexElementNumber(myPlate,screw0);
       
         //System.out.println (hexElem);
 
        
          attachElemToSegmentforRigid (
-             mech, screw,  (HexElement)myPlate.getElementByNumber(hexElem),
+             mech, screw0,  (HexElement)myPlate.getElementByNumber(hexElem0),
              myDonor0, attachTol);
          
-         screw.setDensity (myTitaniumDensity);
+         screw0.setDensity (myTitaniumDensity);
 
       
    }
+   
+   
 
    public  int findClosestHexElementNumber( FemModel3d myPlate, RigidBody screw) {
       double minDistance = Double.MAX_VALUE;
