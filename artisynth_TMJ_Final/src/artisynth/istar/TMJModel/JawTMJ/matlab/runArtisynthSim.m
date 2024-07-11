@@ -2,12 +2,17 @@ function loss = runArtisynthSim(params)
     
     resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
-    logFile = 'log_25_TMJ_FIXED_Trial6_Costhalf.txt';
+    logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
 
-    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
-    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
 
-    bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+    sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResult');
+    destinationDir = fullfile('..', 'geometry');
+    %sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
+    %destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+
+    bodyList = fullfile('..', 'geometry', 'bodyList.txt');
+    %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+    
     toggleComment(bodyList, 'screw1', 'add');
 
     num_screws = 1;
@@ -31,19 +36,11 @@ function loss = runArtisynthSim(params)
     init_angle_l = 100.22;
    
 
-    %plane_normal_l = find_plane_normal_from_axis_angle(newer_axis_l, newer_angle_l);
 
     % Right Plane
     init_axis_r = [0.67407 -0.37913 0.63395];
     init_angle_r = 144.41;
 
-    %plane_normal_r = find_plane_normal_from_axis_angle(newer_axis_r, newer_angle_r);
-
-    % Change resection file
-    %input_filename = 'resection_plane_initial.txt';
-    %output_filename = 'resection_plane_optimize.txt';
-
-    %modify_normals_in_file(input_filename, output_filename, plane_normal_l, plane_normal_r);
    
 
     % Set up Artisynth environment and run simulation

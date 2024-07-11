@@ -1,11 +1,13 @@
 clc;
 clear all;
 
-addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
-setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
-
-% Path to save the optimization results
 resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
+
+
+%addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
+addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
+
+setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
 
 % Number of total iterations
 totalIterations = 50;

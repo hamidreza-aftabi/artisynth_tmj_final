@@ -4,10 +4,14 @@ function loss = runArtisynthSimTwo(params)
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
     logFile = 'log_25_TMJ_FIXED_Trial6_Costhalf.txt';
 
-    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResultTwo';
-    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+    sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResult');
+    destinationDir = fullfile('..', 'geometry');
+    %sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
+    %destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
 
-    bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+    bodyList = fullfile('..', 'geometry', 'bodyList.txt');
+    %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+
     toggleComment(bodyList, 'screw1', 'remove');
 
     num_screws = 2;
