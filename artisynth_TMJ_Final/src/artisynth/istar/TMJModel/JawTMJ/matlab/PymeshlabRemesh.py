@@ -3,7 +3,6 @@ import pymeshlab
 from pathlib import Path
 
 
-
 # Define source and destination directories
 #sourceDir = 'C:\\Users\\Hamidreza\\git\\artisynth_istar\\src\\artisynth\\istar\\reconstruction\\optimizationResult'
 #destinationDir = 'C:\\Users\\Hamidreza\\git\\artisynth_tmj_final\\artisynth_TMJ_Final\\src\\artisynth\\istar\\TMJModel\\JawTMJ\\geometry'

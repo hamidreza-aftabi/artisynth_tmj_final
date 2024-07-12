@@ -4,7 +4,7 @@ function loss = runArtisynthSimTwo(params)
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
     logFile = 'log_25_TMJ_FIXED_Trial6_Costhalf.txt';
 
-    sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResult');
+    sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
     %sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';
     %destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
@@ -22,7 +22,7 @@ function loss = runArtisynthSimTwo(params)
     leftPitch = double(params.leftPitch);
     rightRoll = double(params.rightRoll);
     rightPitch = double(params.rightPitch);
-    RDPoffset = 0;
+    RDPoffset = -5;
 
 
     % Debugging information
@@ -69,7 +69,8 @@ function loss = runArtisynthSimTwo(params)
     root.getPlateBuilder().setNumScrews (num_screws);
     root.getSegmentGenerator.setMaxSegments(num_segment);
     root.getSegmentGenerator.setNumSegments (num_segment);
-    root.importFibulaOptimization();
+
+    root.importFibulaOptimizationTwo();
     
     import maspack.matrix.AxisAngle;
 
@@ -107,8 +108,11 @@ function loss = runArtisynthSimTwo(params)
 
     % Create screws and export files
     root.getPlatePanel.createScrews();
-    root.exportFiles();
-    root.exportFemPlate();
+    
+    ah.step();  
+
+    root.exportFilesTwo();
+    root.exportFemPlateTwo();
 
     left_mandible = ah.find('models/Reconstruction/rigidBodies/mandibleL');
     right_mandible = ah.find('models/Reconstruction/rigidBodies/mandibleR');

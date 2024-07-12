@@ -8,8 +8,8 @@
     bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
     toggleComment(bodyList, 'screw1', 'remove');
 
-    num_screws = 1;
-    num_segment = 1;
+    num_screws = 2;
+    num_segment = 2;
 
     zOffset = double(params.zOffset);
     leftRoll = double(params.leftRoll);
