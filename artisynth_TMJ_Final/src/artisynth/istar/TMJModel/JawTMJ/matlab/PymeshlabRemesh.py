@@ -24,10 +24,10 @@ destinationDir = target_path / 'artisynth_tmj_final' / 'artisynth_TMJ_Final' / '
 
 # List of files to be remeshed with specific target lengths
 file_list = {
-    'donor_opt0.obj': 1.452,
-    'resected_mandible_l_opt.obj': 0.449,
-    'resected_mandible_r_opt.obj': 0.687,
-    'screw_opt0.obj': 5.479
+    'donor_opt0.obj': 0.7,
+    'resected_mandible_l_opt.obj': 0.7,
+    'resected_mandible_r_opt.obj': 0.7,
+    'screw_opt0.obj': 0.7
 }
 
 for file_name, target_length in file_list.items():
@@ -43,7 +43,7 @@ for file_name, target_length in file_list.items():
         ms.load_new_mesh(input_mesh_path)
         
         # Set the specific target length percentage for the current file
-        target_length = pymeshlab.PercentageValue(target_length)
+        target_length = pymeshlab.PureValue(target_length)
 
         # Remesh the current mesh
         ms.meshing_isotropic_explicit_remeshing(adaptive = True, iterations=20, targetlen=target_length)
