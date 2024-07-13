@@ -2,7 +2,7 @@ function loss = runArtisynthSimTwo(params)
     
     resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
-    logFile = 'log_25_TMJ_FIXED_Trial6_Costhalf.txt';
+    logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
@@ -22,8 +22,6 @@ function loss = runArtisynthSimTwo(params)
     leftPitch = double(params.leftPitch);
     rightRoll = double(params.rightRoll);
     rightPitch = double(params.rightPitch);
-    RDPoffset = -5;
-
 
     % Debugging information
     fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
@@ -96,7 +94,7 @@ function loss = runArtisynthSimTwo(params)
 
     pause(1);
 
-    root.createFibulaOptimizationTwo(zOffset,RDPoffset);
+    root.createFibulaOptimizationTwo(zOffset);
 
     % Perform simulation steps
     for i = 1:100

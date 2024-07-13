@@ -1,11 +1,20 @@
     
-    addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
-    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
+    
+    %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
+    %setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
 
-    sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResultTwo';
-    destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+    addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
+    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));    
 
-    bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+    %sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResultTwo';
+    %destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+
+    sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
+    destinationDir = fullfile('..', 'geometry');
+
+    bodyList = fullfile('..', 'geometry', 'bodyList.txt');
+    %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+
     toggleComment(bodyList, 'screw1', 'remove');
 
     num_screws = 2;
@@ -16,7 +25,6 @@
     leftPitch = double(params.leftPitch);
     rightRoll = double(params.rightRoll);
     rightPitch = double(params.rightPitch);
-    RDPoffset = 0;
 
 
     % Debugging information
@@ -82,7 +90,7 @@
 
     pause(1);
 
-    root.createFibulaOptimizationTwo(zOffset,RDPoffset);
+    root.createFibulaOptimizationTwo(zOffset);
 
     % Perform simulation steps
     for i = 1:100
