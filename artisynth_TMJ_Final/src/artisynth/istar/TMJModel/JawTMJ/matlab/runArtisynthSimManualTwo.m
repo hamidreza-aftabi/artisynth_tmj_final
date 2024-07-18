@@ -7,7 +7,7 @@
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));    
 
     %sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResultTwo';
-    %destinationDir = 'C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
+    %destinationDir = 'C:\\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry';
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
@@ -109,6 +109,7 @@
     root.exportFilesTwo();
     root.exportFemPlateTwo();
 
+    pause(3);
    
 
     fileList = {'donor_opt0.obj', 'donor_opt1.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj','screw_opt1.obj'};
