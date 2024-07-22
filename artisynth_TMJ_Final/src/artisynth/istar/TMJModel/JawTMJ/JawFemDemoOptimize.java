@@ -310,6 +310,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
          */
       
 
+      /*
       FemCutPlane cutplane = new FemCutPlane (
       new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
       
@@ -338,6 +339,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       cbar. setColorMap (cutplane. getColorMap ());
      
    
+       */
       
       /*
       ControlPanel panel = new ControlPanel ();
