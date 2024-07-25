@@ -129,7 +129,7 @@ function loss = runArtisynthSimTwo(params)
         fclose(fileID);
         % Use system command to restart MATLAB
         matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
-        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModified');
+        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModifiedTwo');
         system(matlabCommand);
         exit; % Close the current MATLAB session
 
@@ -155,7 +155,7 @@ function loss = runArtisynthSimTwo(params)
 
     % Run the second Artisynth model
     try
-        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwoSeg');
+        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwo');
         if isempty(ah1)
             error('Failed to initialize the second Artisynth instance.');
         end
@@ -184,7 +184,7 @@ function loss = runArtisynthSimTwo(params)
         fclose(fileID);
         % Use system command to restart MATLAB
         matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
-        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModified');
+        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModifiedTwo');
         system(matlabCommand);
         exit; % Close the current MATLAB session
     end

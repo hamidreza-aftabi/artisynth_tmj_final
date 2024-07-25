@@ -1,5 +1,8 @@
     
     
+    defectType = "RB"; 
+    
+
     %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
     %setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -13,7 +16,16 @@
     %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
     bodyList = fullfile('..', 'geometry', 'bodyList.txt');
 
+    resetMuscles();
+    
     toggleComment(bodyList, 'screw1', 'remove');
+
+    if defectType == "RB"
+        
+        removeRBMuscles();
+
+    end
+
 
     num_screws = 2;
     num_segment = 2;
@@ -33,14 +45,16 @@
     % Calculate the new resection plane
 
     % Left Plane
-    init_axis_l = [-0.37445 -0.82382 -0.42556];
-    init_angle_l = 100.22;
-   
+    %init_axis_l = [-0.37445 -0.82382 -0.42556];
+    init_axis_l = [-0.35978 -0.83742 -0.41145];
+
+    %init_angle_l = 100.22;
+    init_angle_l = 99.373;
 
 
     % Right Plane
-    init_axis_r = [0.67407 -0.37913 0.63395];
-    init_angle_r = 144.41;
+    init_axis_r = [0.74092 -0.52003 0.42498];
+    init_angle_r = 149.41;
 
     
 
@@ -88,6 +102,19 @@
 
     pause(1);
 
+
+    [new_axis_l, new_angle_l] = rotate_axis_angle_around_local_x(init_axis_l, init_angle_l, leftRoll);
+    [newer_axis_l, newer_angle_l] = rotate_axis_angle_around_local_y(new_axis_l, new_angle_l, leftPitch);
+    planeL.setOrientation(AxisAngle ([newer_axis_l, deg2rad(newer_angle_l)]));
+
+    [new_axis_r, new_angle_r] = rotate_axis_angle_around_local_x(init_axis_r, init_angle_r, rightRoll);
+    [newer_axis_r, newer_angle_r] = rotate_axis_angle_around_local_y(new_axis_r, new_angle_r, rightPitch);
+    planeR.setOrientation(AxisAngle ([newer_axis_r, deg2rad(newer_angle_r)]));
+
+    ah.step();
+
+    pause(1);
+
     root.createFibulaOptimizationTwo(zOffset);
 
     % Perform simulation steps
@@ -95,29 +122,23 @@
         ah.step();
     end
 
-    
     % Pause to allow processes to finish
     pause(6);
 
     % Create screws and export files
     root.getPlatePanel.createScrews();
-
-    ah.step();
-
+    
     root.exportFilesTwo();
     root.exportFemPlateTwo();
 
-    pause(3);
-   
-
-    fileList = {'donor_opt0.obj', 'donor_opt1.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj','screw_opt1.obj'};
+    
+    fileList = {'donor_opt0.obj', 'donor_opt1.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj', 'screw_opt1.obj'};
 
     for i = 1:length(fileList)
         sourceFile = fullfile(sourceDir, fileList{i});
         copyfile(sourceFile, destinationDir);
     end
 
-    
     % Close the first Artisynth instance
     ah.quit();
     ah = [];
@@ -130,7 +151,7 @@
 
     % Run the second Artisynth model
     try
-        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwoSeg');
+        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwo');
         if isempty(ah1)
             error('Failed to initialize the second Artisynth instance.');
         end
@@ -140,10 +161,25 @@
         rethrow(ME);
     end
     
+     root = ah1.root();
+
+    if defectType == "RB"
+        sphm_R = ah1.find ('models/jawmodel/axialSprings/sphm_R');
+        sphm_R_parent = sphm_R.getParent();
+        sphm_R_parent.remove (sphm_R);
+
+        stm_R = ah1.find ('models/jawmodel/axialSprings/stm_R');
+        stm_R_parent = stm_R.getParent();
+        stm_R_parent.remove (stm_R);
+
+    end
+
+
     for i = 1:1400
         ah1.step();
     end
 
+    
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
@@ -158,6 +194,3 @@
     ah1.quit();
     ah1 = [];
     java.lang.System.gc();
-
-
-    

@@ -1,5 +1,7 @@
     
-    
+   defectType = "B"; 
+
+
     %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
     %setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -12,9 +14,17 @@
 
     %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
     bodyList = fullfile('..', 'geometry', 'bodyList.txt');
-
-    
+   
     toggleComment(bodyList, 'screw1', 'add');
+ 
+    resetMuscles();
+
+    if defectType == "B"
+
+        removeBMuscles();
+
+    end
+
 
     num_screws = 1;
     num_segment = 1;
@@ -33,9 +43,12 @@
     % Calculate the new resection plane
 
     % Left Plane
-    init_axis_l = [-0.37445 -0.82382 -0.42556];
-    init_angle_l = 100.22;
-   
+    %init_axis_l = [-0.37445 -0.82382 -0.42556];
+    init_axis_l = [-0.35978 -0.83742 -0.41145];
+
+    %init_angle_l = 100.22;
+    init_angle_l = 99.373;
+
 
     %plane_normal_l = find_plane_normal_from_axis_angle(newer_axis_l, newer_angle_l);
 
@@ -108,6 +121,7 @@
 
     % Create screws and export files
     root.getPlatePanel.createScrews();
+    
     root.exportFiles();
     root.exportFemPlate();
 

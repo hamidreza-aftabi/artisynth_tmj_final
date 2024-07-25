@@ -34,5 +34,5 @@ function toggleComment(filename, targetLineStart, action)
     end
     fclose(fid);
     
-    disp('File updated successfully.');
+    %disp('File updated successfully.');
 end
