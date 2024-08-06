@@ -4,6 +4,8 @@ function loss = runArtisynthSim(params)
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
     logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
 
+     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
+    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));    
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResult');
     destinationDir = fullfile('..', 'geometry');
@@ -62,7 +64,7 @@ function loss = runArtisynthSim(params)
     root.getSegmentGenerator.setNumSegments (num_segment);
     root.importFibulaOptimization();
     
-    import maspack.matrix.AxisAngle;
+    import maspack.matrix.AxisAngle.*;
 
     planeL = ah.find('models/Reconstruction/resectionPlanes/planeL');
     planeL.setOrientation(AxisAngle ([init_axis_l, deg2rad(init_angle_l)]));
