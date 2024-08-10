@@ -1,9 +1,12 @@
 function results = helperFunctionTwo(results, currentIteration)
 
-defectType = "RB"; 
 
 % Clear unnecessary variables to manage memory
 clearvars -except results currentIteration;
+
+
+defectType = "RB"; 
+
 
 resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
 
