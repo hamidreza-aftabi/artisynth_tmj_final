@@ -1,18 +1,21 @@
 function results = helperFunctionTwo(results, currentIteration)
 
+defectType = "RB"; 
 
 % Clear unnecessary variables to manage memory
 clearvars -except results currentIteration;
 
 resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
 
+if defectType == "RB"
+    % Define the optimizable variables
+    zOffsetVar = optimizableVariable('zOffset', [-2, 5]);
+    leftRollVar = optimizableVariable('leftRoll', [-25, 25]);
+    leftPitchVar = optimizableVariable('leftPitch', [-25, 25]);
+    rightRollVar = optimizableVariable('rightRoll', [-15, 15]);
+    rightPitchVar = optimizableVariable('rightPitch', [-15, 15]);
 
-% Define the optimizable variables
-zOffsetVar = optimizableVariable('zOffset', [-2, 4.9]);
-leftRollVar = optimizableVariable('leftRoll', [-30, 30]);
-leftPitchVar = optimizableVariable('leftPitch', [-30, 30]);
-rightRollVar = optimizableVariable('rightRoll', [-15, 15]);
-rightPitchVar = optimizableVariable('rightPitch', [-15, 15]);
+end
 
 % Combine all optimizable variables into an array
 vars = [zOffsetVar, leftRollVar, leftPitchVar, rightRollVar, rightPitchVar];

@@ -1,5 +1,8 @@
 function loss = runArtisynthSimTwo(params)
     
+    defectType = "RB"; 
+
+
     resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
     logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
@@ -13,6 +16,12 @@ function loss = runArtisynthSimTwo(params)
     %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
 
     toggleComment(bodyList, 'screw1', 'remove');
+
+    if defectType == "RB"
+        
+        removeRBMuscles();
+
+    end
 
     num_screws = 2;
     num_segment = 2;
@@ -28,20 +37,22 @@ function loss = runArtisynthSimTwo(params)
         zOffset, leftRoll, leftPitch, rightRoll, rightPitch);
     fprintf('ARTISYNTH_HOME = %s\n', getenv('ARTISYNTH_HOME'));
 
-    % Calculate the new resection plane
 
-    % Left Plane
-    init_axis_l = [-0.37445 -0.82382 -0.42556];
-    init_angle_l = 100.22;
-   
+    if defectType == "RB"
 
-    %plane_normal_l = find_plane_normal_from_axis_angle(newer_axis_l, newer_angle_l);
+        % Calculate the new resection plane
+    
+        % Left Plane
+        init_axis_l = [-0.35978 -0.83742 -0.41145];
+        init_angle_l = 99.373;
+       
+    
+        % Right Plane
+        init_axis_r = [0.74092 -0.52003 0.42498];
+        init_angle_r = 149.41;
+    
 
-    % Right Plane
-    init_axis_r = [0.67407 -0.37913 0.63395];
-    init_angle_r = 144.41;
-
-    %plane_normal_r = find_plane_normal_from_axis_angle(newer_axis_r, newer_angle_r);
+    end
 
     % Change resection file
     %input_filename = 'resection_plane_initial.txt';
@@ -163,6 +174,18 @@ function loss = runArtisynthSimTwo(params)
         disp('Error during second ArtiSynth initialization:');
         disp(ME.message);
         rethrow(ME);
+    end
+
+
+     if defectType == "RB"
+        sphm_R = ah1.find ('models/jawmodel/axialSprings/sphm_R');
+        sphm_R_parent = sphm_R.getParent();
+        sphm_R_parent.remove (sphm_R);
+
+        stm_R = ah1.find ('models/jawmodel/axialSprings/stm_R');
+        stm_R_parent = stm_R.getParent();
+        stm_R_parent.remove (stm_R);
+
     end
     
     for i = 1:1400

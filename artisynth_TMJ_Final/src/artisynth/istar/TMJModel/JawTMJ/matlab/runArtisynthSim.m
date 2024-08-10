@@ -1,11 +1,14 @@
 function loss = runArtisynthSim(params)
     
+   defectType = "B"; 
+
+    addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
+    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
+    
     resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
     textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
     logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
 
-     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
-    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));    
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResult');
     destinationDir = fullfile('..', 'geometry');
@@ -16,6 +19,14 @@ function loss = runArtisynthSim(params)
     %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
     
     toggleComment(bodyList, 'screw1', 'add');
+
+    resetMuscles();
+
+    if defectType == "B"
+
+        removeBMuscles();
+
+    end
 
     num_screws = 1;
     num_segment = 1;
@@ -33,17 +44,21 @@ function loss = runArtisynthSim(params)
 
     % Calculate the new resection plane
 
-    % Left Plane
-    init_axis_l = [-0.37445 -0.82382 -0.42556];
-    init_angle_l = 100.22;
-   
 
-
-    % Right Plane
-    init_axis_r = [0.67407 -0.37913 0.63395];
-    init_angle_r = 144.41;
-
-   
+     if defectType == "B"
+            % Left Plane
+            %init_axis_l = [-0.37445 -0.82382 -0.42556];
+            %init_angle_l = 100.22;
+            init_axis_l = [-0.35978 -0.83742 -0.41145];
+            init_angle_l = 99.373;
+        
+        
+            % Right Plane
+            %init_axis_r = [0.67407 -0.37913 0.63395];
+            %init_angle_r = 144.41;
+            init_axis_r = [0.67407 -0.37913 0.63395];
+            init_angle_r = 144.41;
+     end
 
     % Set up Artisynth environment and run simulation
     try
@@ -64,7 +79,7 @@ function loss = runArtisynthSim(params)
     root.getSegmentGenerator.setNumSegments (num_segment);
     root.importFibulaOptimization();
     
-    import maspack.matrix.AxisAngle.*;
+    import maspack.matrix.AxisAngle ;
 
     planeL = ah.find('models/Reconstruction/resectionPlanes/planeL');
     planeL.setOrientation(AxisAngle ([init_axis_l, deg2rad(init_angle_l)]));

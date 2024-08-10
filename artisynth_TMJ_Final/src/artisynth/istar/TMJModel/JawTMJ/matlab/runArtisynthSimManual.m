@@ -25,7 +25,6 @@
 
     end
 
-
     num_screws = 1;
     num_segment = 1;
 
@@ -44,9 +43,8 @@
 
     % Left Plane
     %init_axis_l = [-0.37445 -0.82382 -0.42556];
-    init_axis_l = [-0.35978 -0.83742 -0.41145];
-
     %init_angle_l = 100.22;
+    init_axis_l = [-0.35978 -0.83742 -0.41145];
     init_angle_l = 99.373;
 
 
