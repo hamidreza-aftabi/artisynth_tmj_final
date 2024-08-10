@@ -2,13 +2,13 @@ function loss = runArtisynthSim(params)
     
    defectType = "B"; 
 
+    resultsFile = 'Result_B_Defect_Trial_1.mat';
+    textFile = 'Percent_B_Defect_Trial_1.txt';
+    logFile = 'Log_B_Defect_Trial_1.txt';
+
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
     
-    resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
-    textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
-    logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
-
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResult');
     destinationDir = fullfile('..', 'geometry');

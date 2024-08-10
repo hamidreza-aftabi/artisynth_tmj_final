@@ -1,7 +1,7 @@
 clc;
 clear all;
 
-resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
+resultsFile = 'Result_B_Defect_Trial_1.mat';
 
 % Number of total iterations
 totalIterations = 50;
