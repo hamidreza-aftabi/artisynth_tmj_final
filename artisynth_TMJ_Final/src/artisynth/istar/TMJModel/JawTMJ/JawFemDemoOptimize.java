@@ -22,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
+import com.github.sardine.model.Set;
+
 import artisynth.core.femmodels.FemCutPlane;
 import artisynth.core.femmodels.FemElement;
 import artisynth.core.mechmodels.FrameMarker;
@@ -60,8 +62,10 @@ import artisynth.core.util.ArtisynthIO;
 import artisynth.core.util.ArtisynthPath;
 import artisynth.core.util.ScalarRange;
 import artisynth.core.workspace.RootModel;
+import maspack.geometry.BVFeatureQuery;
 import maspack.geometry.Face;
 import maspack.geometry.PolygonalMesh;
+import maspack.geometry.Vertex3d;
 import maspack.matrix.AffineTransform3d;
 import maspack.matrix.AxisAngle;
 import maspack.matrix.Point3d;
@@ -97,12 +101,21 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
    double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
 
-   double myBoneDensity = 2000.0 * DENSITY_TO_mmKS;
-   double myBoneE = 13.7*1e9 * PRESSURE_TO_mmKS;
+   double CancellousBoneDensity = 100.0 * DENSITY_TO_mmKS;
+   double CancellousBoneE = 1.3*1e9 * PRESSURE_TO_mmKS;
+   double CancellousBoneNu = 0.3;
+
    double myTitaniumDensity = 4420.0 * DENSITY_TO_mmKS;
    double myTitaniumE = 100*1e9 * PRESSURE_TO_mmKS;
    double myTitaniumNu = 0.3;
-   double myBoneNu = 0.3;
+   
+   double corticalBoneYoungModulus =  13.7*1e9 * PRESSURE_TO_mmKS;
+   double corticalBonePoissonRatio = 0.3;
+   double corticalBoneDensity = 2000.0 * DENSITY_TO_mmKS;
+ 
+   double corticalAppositionDensity = 0.002;
+   double cancellousAppositionDensity = 0.0001;
+
    
    double t=0.75; 
 
@@ -124,6 +137,15 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    RigidBody myMandibleRight;
    RigidBody myMandibleLeft;
+   RigidBody myDonor0Mesh;
+
+   
+   PolygonalMesh donorMeshSurface;
+   PolygonalMesh surfaceLeft;
+   PolygonalMesh surfaceRight;
+
+
+   
 
 
    private static Color PALE_BLUE = new Color (0.6f, 0.6f, 1.0f);
@@ -155,6 +177,13 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    HashMap<String,String> hemisymphysisMusclesRight = new HashMap<String,String>();
    
    
+   HashSet<FemNode3d> nodesOnSurfaceLeft =   new HashSet<FemNode3d>();
+   HashSet<FemElement3d> elemsNearSurfaceLeft =  new HashSet<FemElement3d>();
+   
+   HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
+   HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
+   HashSet<FemElement3d> elementsCloseToSurface = new HashSet<FemElement3d>();
+   
    JFrame frame;
    JPanel panel; 
    JSeparator seperator1;
@@ -174,8 +203,6 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    static {
       myProps.addReadOnly ("maxNodalStress", "Max Nodal Stress");
-      myProps.addReadOnly ("maxMechanicalStimRightBuiltin", "Max Mechanical Stimulus");
-      myProps.addReadOnly ("maxMechanicalStimLeftBuiltin", "Max Mechanical Stimulus");
       myProps.addReadOnly ("percMechanicalStimLeftBuiltin", "Max Mechanical Stimulus");
       myProps.addReadOnly ("percMechanicalStimRightBuiltin", "Max Mechanical Stimulus");
 
@@ -188,20 +215,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
      
    }
    
-  public double getMaxMechanicalStimRightBuiltin() {
-      
-      return computeMaxStressStrainDonor0RightBuiltin();
-     
-   }
-   
 
-   
- public double getMaxMechanicalStimLeftBuiltin() {
-      
-      return computeMaxStressStrainDonor0LeftBuiltin();
-     
-   }
- 
  
  public double getPercMechanicalStimLeftBuiltin() {
     
@@ -484,8 +498,112 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
      frame.setVisible(false);
      
      
+     
+     
+     
+     
+     
+     surfaceLeft = myMandibleLeft.getSurfaceMesh();
 
+     //Finding Surface Nodes and elements 
+     
+     for ( FemNode3d node : myDonor0. getNodes ()) {
+      
+        double d = surfaceLeft. distanceToPoint (node. getPosition ());
+
+         if (d < .1) {
+            nodesOnSurfaceLeft.add (node);  
+            RenderProps.setPointColor (node, Color.PINK);
+         }
   
+     }
+     
+     
+     for (FemElement3d element : myDonor0.getElements()) {
+         for (FemNode3d node : element.getNodes()) {
+            if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
+                elemsNearSurfaceLeft.add (element);
+                RenderProps.setLineColor (element, Color.MAGENTA);
+            }
+              
+         }
+     }
+     
+     
+     
+     surfaceRight = myMandibleRight.getSurfaceMesh();
+
+     
+     for ( FemNode3d node : myDonor0. getNodes ()) {
+      
+     double d = surfaceRight. distanceToPoint (node. getPosition ());
+
+         if (d < .1) {
+            nodesOnSurfaceRight.add (node);  
+            RenderProps.setPointColor (node, Color.PINK);
+         }
+  
+     }
+     
+     
+     for (FemElement3d element : myDonor0.getElements()) {
+         for (FemNode3d node : element.getNodes()) {
+            if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
+                elemsNearSurfaceRight.add (element);
+                RenderProps.setLineColor (element, Color.MAGENTA);
+            }
+              
+         }
+     }
+
+     
+     
+     
+    myDonor0Mesh = (RigidBody)myJawModel.findComponent (
+        "rigidBodies/donor_mesh0");
+     // Get the surface mesh from the donor mesh rigid body
+   
+   //Get the vertices from the surface mesh of the donor mesh rigid body
+    donorMeshSurface = myDonor0Mesh.getSurfaceMesh();
+   double distanceThreshold = 2.0;  // Set your distance threshold
+   
+   //Set to store elements close to the surface
+  elementsCloseToSurface = new HashSet<>();
+   
+   //Iterate over all elements in the FEM model
+   for (FemElement3d element : myDonor0.getElements()) {
+     // Compute the centroid of the element
+     Point3d centroid = new Point3d();
+     element.computeCentroid(centroid);
+   
+     // Initialize a variable to track the minimum distance
+     double minDistance = Double.MAX_VALUE;
+   
+     // Iterate over all vertices in the donor mesh surface
+     for (Vertex3d vertex : donorMeshSurface.getVertices()) {
+         Point3d vertexPosition = vertex.getWorldPoint(); // Get the world position of the vertex
+   double distance = vertexPosition.distance(centroid); // Calculate distance to the centroid
+   
+   // Keep track of the minimum distance found
+         if (distance < minDistance) {
+             minDistance = distance;
+         }
+     }
+   
+     // If the closest distance is within the threshold, add the element and color it
+     if (minDistance < distanceThreshold) {
+         elementsCloseToSurface.add(element);
+         RenderProps.setLineColor(element, Color.GREEN);  // Color the element green
+         LinearMaterial corticalBoneMaterial = new LinearMaterial(corticalBoneYoungModulus, corticalBonePoissonRatio);
+         element.setMaterial(corticalBoneMaterial);
+         element.setDensity(corticalBoneDensity);
+     }
+   }
+   
+   //Debug: print the number of close elements found
+   System.out.println("Number of elements close to the surface: " + elementsCloseToSurface.size());
+   
+   
    }
    
    
@@ -545,273 +663,61 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    
    public double computePercStressStrainDonor0LeftBuiltin() {
-      
-      HashSet<FemNode3d> nodesOnSurfaceLeft =   new HashSet<FemNode3d>();
-      HashSet<FemElement3d> elemsNearSurfaceLeft =  new HashSet<FemElement3d>();
-      
-      myDonor0.setComputeNodalStress (true);
-      myDonor0.setComputeNodalStrain (true);
-      myDonor0.setComputeStrainEnergy (true);
-      myDonor0.setComputeNodalEnergyDensity (true);
-     
-      
-      
-      PolygonalMesh surfaceLeft = myMandibleLeft.getSurfaceMesh();
+      // Enable necessary computations
+      myDonor0.setComputeNodalStress(true);
+      myDonor0.setComputeNodalStrain(true);
+      myDonor0.setComputeStrainEnergy(true);
+      myDonor0.setComputeNodalEnergyDensity(true);
 
-      //Finding Surface Nodes and elements 
-      
-      for ( FemNode3d node : myDonor0. getNodes ()) {
-       
-      double d = surfaceLeft. distanceToPoint (node. getPosition ());
-
-          if (d < .1) {
-             nodesOnSurfaceLeft.add (node);  
-             RenderProps.setPointColor (node, Color.PINK);
-          }
-   
-      }
-      
-      
-      for (FemElement3d element : myDonor0.getElements()) {
-          for (FemNode3d node : element.getNodes()) {
-             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
-                 elemsNearSurfaceLeft.add (element);
-                 RenderProps.setLineColor (element, Color.MAGENTA);
-             }
-               
-          }
-      }
-      
       double appCounter = 0;
-      
-      //Strain Energy Density and Mechanical Stimulus Computations
-      
-      for (FemElement3d element : elemsNearSurfaceLeft) {
-        
-         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
-     
-         elementStrainEnergyDensity = element.getStrainEnergy ()/element.getVolume ();
-         
-         
-         if (elementStrainEnergyDensity/(1000 * 0.002) > 0.0396) {
-            appCounter = appCounter + 1;
-         }
 
+      // Define densities for cortical and cancellous bone
+
+
+      // Strain Energy Density and Mechanical Stimulus Computations
+      for (FemElement3d element : elemsNearSurfaceLeft) {
+          double elementStrainEnergyDensity = element.getStrainEnergy() / element.getVolume();
+
+          boolean isNearSurface = elementsCloseToSurface.contains(element);
+          double density = isNearSurface ? corticalAppositionDensity : cancellousAppositionDensity;
+
+          if (elementStrainEnergyDensity / (1000 * density) > 0.0396) {
+              appCounter = appCounter + 1;
+          }
       }
 
-      
-      return  appCounter/(elemsNearSurfaceLeft.size ());
-      
-   }
+      return appCounter / elemsNearSurfaceLeft.size();
+  }
+
    
    
    
    
    public double computePercStressStrainDonor0RightBuiltin() {
-      
-      HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
-      HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
-      
+      // Enable necessary computations
+      myDonor0.setComputeNodalStress(true);
+      myDonor0.setComputeNodalStrain(true);
+      myDonor0.setComputeStrainEnergy(true);
+      myDonor0.setComputeNodalEnergyDensity(true);
 
-      myDonor0.setComputeNodalStress (true);
-      myDonor0.setComputeNodalStrain (true);
-      myDonor0.setComputeStrainEnergy (true);
-      myDonor0.setComputeNodalEnergyDensity (true);
-     
-      
-      
-      PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
-
-      //Finding Surface Nodes and elements 
-      
-      for ( FemNode3d node : myDonor0. getNodes ()) {
-       
-      double d = surfaceRight. distanceToPoint (node. getPosition ());
-
-          if (d < .1) {
-             nodesOnSurfaceRight.add (node);  
-             RenderProps.setPointColor (node, Color.PINK);
-          }
-   
-      }
-      
-      
-      for (FemElement3d element : myDonor0.getElements()) {
-          for (FemNode3d node : element.getNodes()) {
-             if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
-                 elemsNearSurfaceRight.add (element);
-                 RenderProps.setLineColor (element, Color.MAGENTA);
-             }
-               
-          }
-      }
-      
       double appCounter = 0;
-      
-      //Strain Energy Density and Mechanical Stimulus Computations
-      
+
+      // Strain Energy Density and Mechanical Stimulus Computations
       for (FemElement3d element : elemsNearSurfaceRight) {
-        
-         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
-     
-         elementStrainEnergyDensity = element.getStrainEnergy ()/element.getVolume ();
-         
-         
-         if (elementStrainEnergyDensity/(1000 * 0.002) > 0.0396) {
-            appCounter = appCounter + 1;
-         }
+          double elementStrainEnergyDensity = element.getStrainEnergy() / element.getVolume();
 
-      }
+          boolean isNearSurface = elementsCloseToSurface.contains(element);
+          double density = isNearSurface ? corticalAppositionDensity : cancellousAppositionDensity;
 
-      
-      return  appCounter/(elemsNearSurfaceRight.size ());
-      
-   }
-   
-   
-   
-   
-   
-   
-   
-public double computeMaxStressStrainDonor0LeftBuiltin(){
-   
-
-   HashSet<FemNode3d> nodesOnSurfaceLeft =   new HashSet<FemNode3d>();
-   HashSet<FemElement3d> elemsNearSurfaceLeft =  new HashSet<FemElement3d>();
-      
-      myDonor0.setComputeNodalStress (true);
-      myDonor0.setComputeNodalStrain (true);
-      myDonor0.setComputeStrainEnergy (true);
-      myDonor0.setComputeNodalEnergyDensity (true);
-      
-      
-      double totalStrainEnergyDensity = 0; // Initialize total strain energy density
-      double MaxStrainEnergyDensity =0;
-      
-      
-      PolygonalMesh surfaceLeft = myMandibleLeft.getSurfaceMesh();
-
-      //Finding Surface Nodes and elements 
-      
-      for ( FemNode3d node : myDonor0. getNodes ()) {
-       
-      double d = surfaceLeft. distanceToPoint (node. getPosition ());
-
-          if (d < .1) {
-             nodesOnSurfaceLeft.add (node);  
-             RenderProps.setPointColor (node, Color.PINK);
-          }
-   
-      }
-      
-      
-      for (FemElement3d element : myDonor0.getElements()) {
-          for (FemNode3d node : element.getNodes()) {
-             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
-                 elemsNearSurfaceLeft.add (element);
-                 RenderProps.setLineColor (element, Color.MAGENTA);
-             }
-               
+          if (elementStrainEnergyDensity / (1000 * density) > 0.0396) {
+              appCounter = appCounter + 1;
           }
       }
-      
-      
-      //Strain Energy Density and Mechanical Stimulus Computations
-      
-      for (FemElement3d element : elemsNearSurfaceLeft) {
-        
-         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
-     
-         elementStrainEnergyDensity = element.getStrainEnergy ()/element.getVolume ();
-         
-         totalStrainEnergyDensity += elementStrainEnergyDensity;
-         
-         if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
-            MaxStrainEnergyDensity = elementStrainEnergyDensity;
-         }
 
-      }
-
-      
-      return  MaxStrainEnergyDensity/(1000 * 0.002); //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
-
-      //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mj/mm^3): Divided by unit Conversion
-      
-}
-
-
-
-
-
-public double computeMaxStressStrainDonor0RightBuiltin(){
-   
-   HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
-   HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
+      return appCounter / elemsNearSurfaceRight.size();
+  }
 
    
-   myDonor0.setComputeNodalStress (true);
-   myDonor0.setComputeNodalStrain (true);
-   myDonor0.setComputeStrainEnergy (true);
-   myDonor0.setComputeNodalEnergyDensity (true);
-   
-   double totalStrainEnergyDensity = 0; // Initialize total strain energy density
-   double MaxStrainEnergyDensity =0;
-   
-   
-   PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
-
-   //Finding Surface Nodes and elements 
-   
-   for ( FemNode3d node : myDonor0. getNodes ()) {
-    
-   double d = surfaceRight. distanceToPoint (node. getPosition ());
-
-       if (d < .1) {
-          nodesOnSurfaceRight.add (node);  
-          RenderProps.setPointColor (node, Color.PINK);
-       }
-
-   }
-   
-   
-   for (FemElement3d element : myDonor0.getElements()) {
-       for (FemNode3d node : element.getNodes()) {
-          if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
-              elemsNearSurfaceRight.add (element);
-              RenderProps.setLineColor (element, Color.MAGENTA);
-          }
-            
-       }
-   }
-   
-
-   
-   //Strain Energy Density and Mechanical Stimulus Computations
-   
-
-   double elementStrainEnergyDensity = 0; // Element-specific strain energy density
-
-   
-   for (FemElement3d element : elemsNearSurfaceRight) {
-     
-      elementStrainEnergyDensity = element.getStrainEnergy ()/element .getVolume ();
-      
-      totalStrainEnergyDensity += elementStrainEnergyDensity;
-      
-      if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
-         MaxStrainEnergyDensity = elementStrainEnergyDensity;
-      }
-
-   }
-   
-   return  MaxStrainEnergyDensity/(1000 * 0.002) ; //Mechanical Stimulus (mJ/g): divided by unit Conversion Times the Density for 
-
-   //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mJ/mm^3): Divided by unit Conversion
-}
-
-
-
 
    
    /**
@@ -948,7 +854,7 @@ public double computeMaxStressStrainDonor0RightBuiltin(){
      //    myJawModel, "donor0", "case4_donor_inf_remeshed_transformed_boolean.obj", myBoneDensity, myBoneE, myBoneNu);
       
       myDonor0 = createFemModel (
-         myJawModel, "donor0", "donor_opt0_remeshed.obj", myBoneDensity, myBoneE, myBoneNu);
+         myJawModel, "donor0", "donor_opt0_remeshed.obj", CancellousBoneDensity, CancellousBoneE, CancellousBoneNu);
       
       //plate
       

@@ -1,10 +1,10 @@
 clc;
 clear all;
 
-resultsFile = 'Result_B_Defect_Trial_6.mat';
+resultsFile = 'Result_B_Defect_Trial_7_Het.mat';
 
 % Number of total iterations
-totalIterations = 60;
+totalIterations = 50;
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));

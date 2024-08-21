@@ -4,7 +4,7 @@ function results = helperFunction(results, currentIteration)
 clearvars -except results currentIteration;
 
 defectType = "B"; 
-resultsFile = 'Result_B_Defect_Trial_6.mat';
+resultsFile = 'Result_B_Defect_Trial_7_Het.mat';
 
 if defectType == "B"
 

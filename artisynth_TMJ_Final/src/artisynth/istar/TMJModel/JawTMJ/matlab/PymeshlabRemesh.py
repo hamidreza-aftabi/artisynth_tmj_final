@@ -24,10 +24,10 @@ destinationDir = target_path / 'artisynth_tmj_final' / 'artisynth_TMJ_Final' / '
 
 # List of files to be remeshed with specific target lengths
 file_list = {
-    'donor_opt0.obj': 0.35,
-    'resected_mandible_l_opt.obj': 0.35,
-    'resected_mandible_r_opt.obj': 0.35,
-    'screw_opt0.obj': 0.35
+    'donor_opt0.obj': 0.55,
+    'resected_mandible_l_opt.obj': 0.55,
+    'resected_mandible_r_opt.obj': 0.55,
+    'screw_opt0.obj': 0.55
 }
 
 for file_name, target_length in file_list.items():

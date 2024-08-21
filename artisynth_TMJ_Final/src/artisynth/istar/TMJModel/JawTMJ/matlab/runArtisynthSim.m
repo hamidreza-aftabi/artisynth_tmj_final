@@ -2,9 +2,9 @@ function loss = runArtisynthSim(params)
     
    defectType = "B"; 
 
-    resultsFile = 'Result_B_Defect_Trial_6.mat';
-    textFile = 'Percent_B_Defect_Trial_6.txt';
-    logFile = 'Log_B_Defect_Trial_6.txt';
+    resultsFile = 'Result_B_Defect_Trial_7_Het.mat';
+    textFile = 'Percent_B_Defect_Trial_7_Het.txt';
+    logFile = 'Log_B_Defect_Trial_7_Het.txt';
 
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
