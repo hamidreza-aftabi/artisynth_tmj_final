@@ -4,7 +4,7 @@ function results = helperFunction(results, currentIteration)
 clearvars -except results currentIteration;
 
 defectType = "B"; 
-resultsFile = 'Result_B_Defect_Trial_1.mat';
+resultsFile = 'Result_B_Defect_Trial_6.mat';
 
 if defectType == "B"
 
@@ -24,7 +24,6 @@ vars = [zOffsetVar, leftRollVar, leftPitchVar, rightRollVar, rightPitchVar];
 % Debugging output to confirm function execution
 disp('Helper function started.');
 
-rng('shuffle');
 
 % Check if we are resuming from a previous session
 if exist('results', 'var') && ~isempty(results)
@@ -36,6 +35,7 @@ else
     results = bayesopt(@(params) runArtisynthSim(params), vars, ...
         'Verbose', 1, ...
         'AcquisitionFunctionName', 'expected-improvement-plus', ...
+        'NumSeedPoints', 15, ...
         'MaxObjectiveEvaluations', 1, ... % Initial evaluations
         'GPActiveSetSize', 300, ... % Use active set to speed up Gaussian Process calculations
         'IsObjectiveDeterministic', false, ... % Set if the objective function is deterministic

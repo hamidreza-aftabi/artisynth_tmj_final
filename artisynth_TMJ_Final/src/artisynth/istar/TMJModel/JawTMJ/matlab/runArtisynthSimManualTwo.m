@@ -30,11 +30,16 @@
     num_screws = 2;
     num_segment = 2;
 
-    zOffset = double(params.zOffset);
-    leftRoll = double(params.leftRoll);
-    leftPitch = double(params.leftPitch);
-    rightRoll = double(params.rightRoll);
-    rightPitch = double(params.rightPitch);
+    %zOffset = double(params.zOffset);
+    zOffset = 0
+    %leftRoll = double(params.leftRoll);
+    leftRoll= -0.301187399385210
+    %leftPitch = double(params.leftPitch);
+    leftPitch = 10.743228307430662
+    %rightRoll = double(params.rightRoll);
+    rightRoll = 11.793802384125314
+    %rightPitch = double(params.rightPitch);
+    rightPitch = -14.066058915026181 
 
 
     % Debugging information
@@ -190,7 +195,7 @@
     loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
 
     % Close the second Arisynth instance
-    pause(3);
-    ah1.quit();
-    ah1 = [];
-    java.lang.System.gc();
+    %pause(3);
+    %ah1.quit();
+    %ah1 = [];
+    %java.lang.System.gc();

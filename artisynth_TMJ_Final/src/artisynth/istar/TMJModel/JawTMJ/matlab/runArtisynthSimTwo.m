@@ -3,9 +3,9 @@ function loss = runArtisynthSimTwo(params)
     defectType = "RB"; 
 
 
-    resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
-    textFile = 'left_right_percent_25_TMJ_FIXED_Trial7_Costhalf.txt';
-    logFile = 'log_25_TMJ_FIXED_Trial7_Costhalf.txt';
+    resultsFile = 'Result_RB_Trial_1.mat';
+    textFile = 'Percent_RB_Trial_1.txt';
+    logFile = 'Log_Result_RB_Trial_1.txt';
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
@@ -26,7 +26,8 @@ function loss = runArtisynthSimTwo(params)
     num_screws = 2;
     num_segment = 2;
 
-    zOffset = double(params.zOffset);
+    %zOffset = double(params.zOffset);
+    zOffset = 0;
     leftRoll = double(params.leftRoll);
     leftPitch = double(params.leftPitch);
     rightRoll = double(params.rightRoll);
@@ -135,6 +136,7 @@ function loss = runArtisynthSimTwo(params)
         fprintf(fileID, '%.2f,', zOffset);
         fprintf(fileID, '%.2f,', leftRoll);
         fprintf(fileID, '%.2f,', leftPitch);
+        fprintf(fileID, '%.2f,', rightRoll);
         fprintf(fileID, '%.2f,', rightPitch);
         fprintf(fileID, '\n');
         fclose(fileID);
@@ -188,20 +190,21 @@ function loss = runArtisynthSimTwo(params)
 
     end
     
-    for i = 1:1400
+    for i = 1:1200
         ah1.step();
     end
 
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
-    if length(left_percent) == 1 || length(right_percent) == 1
+    if length(left_percent) < 2 || length(right_percent) < 2
         disp('Biomedical Error...');
         fileID = fopen(logFile, 'a');
         fprintf(fileID, 'Biomedical Error:\n');
         fprintf(fileID, '%.2f,', zOffset);
         fprintf(fileID, '%.2f,', leftRoll);
         fprintf(fileID, '%.2f,', leftPitch);
+        fprintf(fileID, '%.2f,', rightRoll);
         fprintf(fileID, '%.2f,', rightPitch);
         fprintf(fileID, '\n');
         fclose(fileID);
@@ -225,7 +228,9 @@ function loss = runArtisynthSimTwo(params)
     %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
     %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
 
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    %loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))));
+
 
     % Close the second Arisynth instance
     pause(3);

@@ -97,7 +97,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
    double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
    double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
 
-   double myBoneDensity = 1900.0 * DENSITY_TO_mmKS;
+   double myBoneDensity = 2000.0 * DENSITY_TO_mmKS;
    double myBoneE = 13.7*1e9 * PRESSURE_TO_mmKS;
    double myTitaniumDensity = 4420.0 * DENSITY_TO_mmKS;
    double myTitaniumE = 100*1e9 * PRESSURE_TO_mmKS;
@@ -189,7 +189,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
    
   public double getMaxMechanicalStimRightBuiltin() {
       
-      return computeStressStrainDonor0RightBuiltin();
+      return computeStressStrainDonor1RightBuiltin();
      
    }
    
@@ -211,7 +211,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
  
  public double getPercMechanicalStimRightBuiltin() {
     
-    return computePercStressStrainDonor0RightBuiltin();
+    return computePercStressStrainDonor1RightBuiltin();
    
  }
  
@@ -338,7 +338,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
       //integField.addRenderMeshComp (cutplane);
       cutplane0. setSurfaceRendering (SurfaceRender.EnergyDensity);
       cutplane0.setStressPlotRanging (Ranging.Fixed);
-      cutplane0.setStressPlotRange (new DoubleInterval(0, .08));
+      cutplane0.setStressPlotRange (new DoubleInterval(0, .0792));
       cutplane0. setAxisLength (25);
       //integField.setRenderRange (new ScalarRange (ScalarRange.Updating.FIXED));
       //RenderProps.setLineWidth (cutplane , 2);
@@ -347,21 +347,13 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
       //field.setColorMap(hueColorMap);
       
       
-      
-      ColorBar cbar = new ColorBar ();
-      cbar. setName("colorBar");
-      cbar. setNumberFormat ("%.3f"); // 2 decimal places
-      cbar. populateLabels (0.0 , .08 , 10); // Start with range [0,1], 10 ticks
-      cbar. setLocation (-100, 0.1, 20, 0.8) ;
-      addRenderable (cbar);
-      cbar. setColorMap (cutplane0. getColorMap ());
      
    
       
       
       
       FemCutPlane cutplane1 = new FemCutPlane (
-      new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
+      new RigidTransform3d (-32.7614, -34.7915, -78.0522, 0, 0 ,Math . toRadians (90) ));
       
       myDonor1. addCutPlane (cutplane1);
           
@@ -369,7 +361,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
       //integField.addRenderMeshComp (cutplane);
       cutplane1. setSurfaceRendering (SurfaceRender.EnergyDensity);
       cutplane1.setStressPlotRanging (Ranging.Fixed);
-      cutplane1.setStressPlotRange (new DoubleInterval(0, .08));
+      cutplane1.setStressPlotRange (new DoubleInterval(0, .0792));
       cutplane1. setAxisLength (25);
       //integField.setRenderRange (new ScalarRange (ScalarRange.Updating.FIXED));
       //RenderProps.setLineWidth (cutplane , 2);
@@ -377,8 +369,25 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
       //RainbowColorMap rainbowMap = new RainbowColorMap();
       //field.setColorMap(hueColorMap);
          
+      
+      
+      ColorBar cbar = new ColorBar ();
+      cbar. setName("colorBar");
+      cbar. setNumberFormat ("%.3f"); // 2 decimal places
+      cbar. populateLabels (0.0 , .0792 , 10); // Start with range [0,1], 10 ticks
+      cbar. setLocation (-100, 0.1, 20, 0.8) ;
+      addRenderable (cbar);
+      cbar. setColorMap (cutplane0. getColorMap ());
          
     
+      ColorBar cbar1 = new ColorBar ();
+      cbar1. setName("colorBar1");
+      cbar1. setNumberFormat ("%.3f"); // 2 decimal places
+      cbar1. populateLabels (0.0 , .0792 , 10); // Start with range [0,1], 10 ticks
+      cbar1. setLocation (-100, 0.1, 20, 0.8) ;
+      addRenderable (cbar1);
+      cbar1. setColorMap (cutplane1. getColorMap ());
+      
       
       /*
       ControlPanel panel = new ControlPanel ();
@@ -637,7 +646,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
          elementStrainEnergyDensity = element.getStrainEnergy ()/element.getVolume ();
          
          
-         if (elementStrainEnergyDensity/(1000 * 0.002) > 0.0396) {
+         if (elementStrainEnergyDensity/(1000 * 0.0001) > 0.0396) {
             appCounter = appCounter + 1;
          }
 
@@ -651,16 +660,16 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
    
    
    
-   public double computePercStressStrainDonor0RightBuiltin() {
+   public double computePercStressStrainDonor1RightBuiltin() {
       
       HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
       HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
       
 
-      myDonor0.setComputeNodalStress (true);
-      myDonor0.setComputeNodalStrain (true);
-      myDonor0.setComputeStrainEnergy (true);
-      myDonor0.setComputeNodalEnergyDensity (true);
+      myDonor1.setComputeNodalStress (true);
+      myDonor1.setComputeNodalStrain (true);
+      myDonor1.setComputeStrainEnergy (true);
+      myDonor1.setComputeNodalEnergyDensity (true);
      
       
       
@@ -668,7 +677,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
 
       //Finding Surface Nodes and elements 
       
-      for ( FemNode3d node : myDonor0. getNodes ()) {
+      for ( FemNode3d node : myDonor1. getNodes ()) {
        
       double d = surfaceRight. distanceToPoint (node. getPosition ());
 
@@ -680,7 +689,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
       }
       
       
-      for (FemElement3d element : myDonor0.getElements()) {
+      for (FemElement3d element : myDonor1.getElements()) {
           for (FemNode3d node : element.getNodes()) {
              if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
                  elemsNearSurfaceRight.add (element);
@@ -701,7 +710,7 @@ public class JawFemDemoOptimizeTwo extends RootModel implements ActionListener {
          elementStrainEnergyDensity = element.getStrainEnergy ()/element.getVolume ();
          
          
-         if (elementStrainEnergyDensity/(1000 * 0.002) > 0.0396) {
+         if (elementStrainEnergyDensity/(1000 * 0.0001) > 0.0396) {
             appCounter = appCounter + 1;
          }
 
@@ -778,92 +787,7 @@ public double computeStressStrainDonor0LeftBuiltin(){
       }
 
       
-      return  MaxStrainEnergyDensity/(1000 * 0.002); //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
-
-      //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mj/mm^3): Divided by unit Conversion
-      
-}
-
-
-
-
-public double computeStressStrainDonor0Left(){
-   
-   
-   HashSet<FemNode3d> nodesOnSurfaceLeft =   new HashSet<FemNode3d>();
-   HashSet<FemElement3d> elemsNearSurfaceLeft =  new HashSet<FemElement3d>();
-      
-      myDonor0.setComputeNodalStress (true);
-      myDonor0.setComputeNodalStrain (true);
-      
-      
-      double totalStrainEnergyDensity = 0; // Initialize total strain energy density
-      double MaxStrainEnergyDensity =0;
-      
-
-      PolygonalMesh surfaceLeft = myMandibleLeft.getSurfaceMesh();
-
-      //Finding Surface Nodes and elements 
-      
-      for ( FemNode3d node : myDonor0. getNodes ()) {
-       
-      double d = surfaceLeft. distanceToPoint (node. getPosition ());
-
-          if (d < .1) {
-             nodesOnSurfaceLeft.add (node);  
-             RenderProps.setPointColor (node, Color.PINK);
-          }
-   
-      }
-      
-      for (FemElement3d element : myDonor0.getElements()) {
-          for (FemNode3d node : element.getNodes()) {
-             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
-                 elemsNearSurfaceLeft.add (element);
-                 RenderProps.setLineColor (element, Color.MAGENTA);
-             }
-               
-          }
-      }
-      
-      
-      //Strain Energy Density and Mechanical Stimulus Computations
-      
-      for (FemElement3d element : elemsNearSurfaceLeft) {
-        
-         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
-         
-
-         for (FemNode3d node :element.getNodes ()) {
-            
-            SymmetricMatrix3d stressTensor = node.getStress();
-            SymmetricMatrix3d strainTensor = node.getStrain();
-
-            double dotProduct = 0;
-
-            
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
-                }
-            } 
-            
-            elementStrainEnergyDensity += dotProduct / 2;
-          
-         }
-         
-         elementStrainEnergyDensity /= 4;
-         
-         totalStrainEnergyDensity += elementStrainEnergyDensity;
-         
-         if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
-            MaxStrainEnergyDensity = elementStrainEnergyDensity;
-         }
-
-      }
-
-      
-      return  MaxStrainEnergyDensity/(1000 * 0.0002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
+      return  MaxStrainEnergyDensity/(1000 * 0.0001); //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
 
       //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mj/mm^3): Divided by unit Conversion
       
@@ -873,16 +797,16 @@ public double computeStressStrainDonor0Left(){
 
 
 
-public double computeStressStrainDonor0RightBuiltin(){
+public double computeStressStrainDonor1RightBuiltin(){
    
    HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
    HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
 
    
-   myDonor0.setComputeNodalStress (true);
-   myDonor0.setComputeNodalStrain (true);
-   myDonor0.setComputeStrainEnergy (true);
-   myDonor0.setComputeNodalEnergyDensity (true);
+   myDonor1.setComputeNodalStress (true);
+   myDonor1.setComputeNodalStrain (true);
+   myDonor1.setComputeStrainEnergy (true);
+   myDonor1.setComputeNodalEnergyDensity (true);
    
    double totalStrainEnergyDensity = 0; // Initialize total strain energy density
    double MaxStrainEnergyDensity =0;
@@ -892,7 +816,7 @@ public double computeStressStrainDonor0RightBuiltin(){
 
    //Finding Surface Nodes and elements 
    
-   for ( FemNode3d node : myDonor0. getNodes ()) {
+   for ( FemNode3d node : myDonor1. getNodes ()) {
     
    double d = surfaceRight. distanceToPoint (node. getPosition ());
 
@@ -904,7 +828,7 @@ public double computeStressStrainDonor0RightBuiltin(){
    }
    
    
-   for (FemElement3d element : myDonor0.getElements()) {
+   for (FemElement3d element : myDonor1.getElements()) {
        for (FemNode3d node : element.getNodes()) {
           if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
               elemsNearSurfaceRight.add (element);
@@ -934,95 +858,12 @@ public double computeStressStrainDonor0RightBuiltin(){
 
    }
    
-   return  MaxStrainEnergyDensity/(1000 * 0.002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
+   return  MaxStrainEnergyDensity/(1000 * 0.0001) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
 
    //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mJ/mm^3): Divided by unit Conversion
 }
 
 
-
-
-
-   
-   public double computeStressStrainDonor0Right(){
-      HashSet<FemNode3d> nodesOnSurfaceRight =   new HashSet<FemNode3d>();
-      HashSet<FemElement3d> elemsNearSurfaceRight =  new HashSet<FemElement3d>();
-      
-
-      
-      myDonor0.setComputeNodalStress (true);
-      myDonor0.setComputeNodalStrain (true);
-           
-      double totalStrainEnergyDensity = 0; // Initialize total strain energy density
-      double MaxStrainEnergyDensity =0;
-      
-      
-      PolygonalMesh surfaceRight = myMandibleRight.getSurfaceMesh();
-
-      //Finding Surface Nodes and elements 
-      
-      for ( FemNode3d node : myDonor0. getNodes ()) {
-       
-      double d = surfaceRight. distanceToPoint (node. getPosition ());
-
-          if (d < .1) {
-             nodesOnSurfaceRight.add (node);  
-             RenderProps.setPointColor (node, Color.PINK);
-          }
-   
-      }
-      
-      
-      for (FemElement3d element : myDonor0.getElements()) {
-          for (FemNode3d node : element.getNodes()) {
-             if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
-                 elemsNearSurfaceRight.add (element);
-                 RenderProps.setLineColor (element, Color.MAGENTA);
-             }
-               
-          }
-      }
-
-      
-      //Strain Energy Density and Mechanical Stimulus Computations
-      
-      for (FemElement3d element : elemsNearSurfaceRight) {
-        
-         double elementStrainEnergyDensity = 0; // Element-specific strain energy density
-
-         for (FemNode3d node :element.getNodes ()) {
-            
-            SymmetricMatrix3d stressTensor = node.getStress();
-            SymmetricMatrix3d strainTensor = node.getStrain();
-
-            double dotProduct = 0;
-
-            
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    dotProduct += stressTensor.get(row, col) * strainTensor.get(row, col);
-                }
-            } 
-            
-            elementStrainEnergyDensity += dotProduct / 2;
-          
-         }
-         
-         elementStrainEnergyDensity /= 4;
-         
-         totalStrainEnergyDensity += elementStrainEnergyDensity;
-         
-         if (elementStrainEnergyDensity > MaxStrainEnergyDensity) {
-            MaxStrainEnergyDensity = elementStrainEnergyDensity;
-         }
-
-      }
-      
-      return  MaxStrainEnergyDensity/(1000 * 0.002) ; //Mechanical Stimulus (mj/g): divided by unit Conversion Times the Density for 
-
-      //return  MaxStrainEnergyDensity/(1000); //Strain Energy Density (mJ/mm^3): Divided by unit Conversion
-   }
-   
  
    
    /**

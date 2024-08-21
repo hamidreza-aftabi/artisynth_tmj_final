@@ -2,9 +2,9 @@ function loss = runArtisynthSim(params)
     
    defectType = "B"; 
 
-    resultsFile = 'Result_B_Defect_Trial_1.mat';
-    textFile = 'Percent_B_Defect_Trial_1.txt';
-    logFile = 'Log_B_Defect_Trial_1.txt';
+    resultsFile = 'Result_B_Defect_Trial_6.mat';
+    textFile = 'Percent_B_Defect_Trial_6.txt';
+    logFile = 'Log_B_Defect_Trial_6.txt';
 
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
@@ -131,6 +131,7 @@ function loss = runArtisynthSim(params)
         fprintf(fileID, '%.2f,', zOffset);
         fprintf(fileID, '%.2f,', leftRoll);
         fprintf(fileID, '%.2f,', leftPitch);
+        fprintf(fileID, '%.2f,', rightRoll);
         fprintf(fileID, '%.2f,', rightPitch);
         fprintf(fileID, '\n');
         fclose(fileID);
@@ -180,13 +181,14 @@ function loss = runArtisynthSim(params)
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
-    if length(left_percent) == 1 || length(right_percent) == 1
+    if length(left_percent) < 2 || length(right_percent) < 2
         disp('Biomedical Error...');
         fileID = fopen(logFile, 'a');
         fprintf(fileID, 'Biomedical Error:\n');
         fprintf(fileID, '%.2f,', zOffset);
         fprintf(fileID, '%.2f,', leftRoll);
         fprintf(fileID, '%.2f,', leftPitch);
+        fprintf(fileID, '%.2f,', rightRoll);
         fprintf(fileID, '%.2f,', rightPitch);
         fprintf(fileID, '\n');
         fclose(fileID);

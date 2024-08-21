@@ -1,7 +1,7 @@
 clc;
 clear all;
 
-resultsFile = 'bayesoptResults_25_TMJ_FIXED_Trial7_Costhalf.mat';
+resultsFile = 'Result_RB_Trial_1.mat';
 
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
@@ -10,7 +10,7 @@ addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core'
 setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
 
 % Number of total iterations
-totalIterations = 50;
+totalIterations = 70;
 
 % Load previous results if they exist
 if isfile(resultsFile)
@@ -18,6 +18,7 @@ if isfile(resultsFile)
 else
     results = [];
     currentIteration = 1;
+    rng('shuffle');
 end
 
 % Perform optimization in iterations

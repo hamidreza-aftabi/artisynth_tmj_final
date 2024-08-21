@@ -1,10 +1,10 @@
 clc;
 clear all;
 
-resultsFile = 'Result_B_Defect_Trial_1.mat';
+resultsFile = 'Result_B_Defect_Trial_6.mat';
 
 % Number of total iterations
-totalIterations = 50;
+totalIterations = 60;
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -17,6 +17,7 @@ if isfile(resultsFile)
 else
     results = [];
     currentIteration = 1;
+    rng('shuffle');
 end
 
 % Perform optimization in iterations
