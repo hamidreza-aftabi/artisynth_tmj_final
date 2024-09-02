@@ -1,10 +1,17 @@
 function loss = runArtisynthSim(params)
     
-   defectType = "B"; 
+    defectType = 'S'; 
+    trial = 2;
+    Safety_On = false;
 
-    resultsFile = 'Result_B_Defect_Trial_7_Het.mat';
-    textFile = 'Percent_B_Defect_Trial_7_Het.txt';
-    logFile = 'Log_B_Defect_Trial_7_Het.txt';
+    resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+    PercentFile = ['Percent_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    logFile = ['Log_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+
+
+    if   Safety_On == true
+        safetyFile = ['Safety' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    end
 
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
@@ -26,7 +33,11 @@ function loss = runArtisynthSim(params)
 
         removeBMuscles();
 
+    elseif defectType == "S"
+
+        removeSMuscles();
     end
+  
 
     num_screws = 1;
     num_segment = 1;
@@ -47,17 +58,29 @@ function loss = runArtisynthSim(params)
 
      if defectType == "B"
             % Left Plane
-            %init_axis_l = [-0.37445 -0.82382 -0.42556];
-            %init_angle_l = 100.22;
+        
             init_axis_l = [-0.35978 -0.83742 -0.41145];
             init_angle_l = 99.373;
         
         
             % Right Plane
-            %init_axis_r = [0.67407 -0.37913 0.63395];
-            %init_angle_r = 144.41;
+       
             init_axis_r = [0.67407 -0.37913 0.63395];
             init_angle_r = 144.41;
+
+     elseif defectType == "S"
+            %init_axis_l =[ 0.30742 -0.93415 0.18128];
+            %init_angle_l = 105.46;
+            init_axis_l = [0.30742 -0.93415 0.18128];
+            init_angle_l =  105.46;
+        
+            % Right Plane
+            %init_axis_r = [0.73745 -0.29537 0.60739];
+            %init_angle_r =  157.51;
+            init_axis_r = [0.72239 -0.29051 0.6275]; 
+            init_angle_r = 156.63;
+
+   
      end
 
     % Set up Artisynth environment and run simulation
@@ -77,7 +100,21 @@ function loss = runArtisynthSim(params)
     root.getPlateBuilder().setNumScrews (num_screws);
     root.getSegmentGenerator.setMaxSegments(num_segment);
     root.getSegmentGenerator.setNumSegments (num_segment);
-    root.importFibulaOptimization();
+
+
+
+     if defectType == "B"
+
+        root.importFibulaOptimization();
+
+    elseif defectType == "S"
+
+        root.importFibulaOptimizationS();
+        Screw_lenght = 35;
+        root.getPlateBuilder().setScrewLength (Screw_lenght) 
+
+     end
+
     
     import maspack.matrix.AxisAngle ;
 
@@ -107,7 +144,7 @@ function loss = runArtisynthSim(params)
     root.createFibulaOptimization(zOffset);
 
     % Perform simulation steps
-    for i = 1:100
+    for i = 1:90
         ah.step();
     end
 
@@ -174,12 +211,16 @@ function loss = runArtisynthSim(params)
         rethrow(ME);
     end
     
-    for i = 1:1400
+    for i = 1:1200
         ah1.step();
     end
 
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
+    
+    left_safety = ah1.getOprobeData('7');
+    right_safety = ah1.getOprobeData('8');
+
 
     if length(left_percent) < 2 || length(right_percent) < 2
         disp('Biomedical Error...');
@@ -199,8 +240,39 @@ function loss = runArtisynthSim(params)
         exit; % Close the current MATLAB session
     end
 
+
+    loss1 = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+   
+    if loss1 == 0.00
+        disp('Zeros loss...');
+        fileID = fopen(logFile, 'a');
+        fprintf(fileID, 'Zero Loss Error:\n');
+        fprintf(fileID, '%.4f,', zOffset);
+        fprintf(fileID, '%.4f,', leftRoll);
+        fprintf(fileID, '%.4f,', leftPitch);
+        fprintf(fileID, '%.4f,', rightRoll);
+        fprintf(fileID, '%.4f,', rightPitch);
+        fprintf(fileID, '\n');
+        fclose(fileID);
+        % Use system command to restart MATLAB
+        matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModified');
+        system(matlabCommand);
+        exit; % Close the current MATLAB session
+    end
+
+
+    if Safety_On == true
+        loss2 =  calculateSafetyFactorsCost(left_safety, right_safety);
+    else
+        loss2 = 0 ;
+    end
+    
+    loss = loss1 + loss2;
+
+
     % Append left and right percent to a text file
-    fileID = fopen(textFile, 'a');
+    fileID = fopen(PercentFile, 'a');
     fprintf(fileID, 'Left Percent:\n');
     fprintf(fileID, '%.2f,', left_percent(:,2));
     fprintf(fileID, '\nRight Percent:\n');
@@ -208,11 +280,15 @@ function loss = runArtisynthSim(params)
     fprintf(fileID, '\n');
     fclose(fileID);
 
-    % Calculate the loss
-    %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
-    %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
-
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    if Safety_On == true
+        fileID = fopen(safetyFile, 'a');
+        fprintf(fileID, 'Left Percent:\n');
+        fprintf(fileID, '%.2f,', left_safety(:,2));
+        fprintf(fileID, '\nRight Percent:\n');
+        fprintf(fileID, '%.2f,', right_safety(:,2));
+        fprintf(fileID, '\n');
+        fclose(fileID);
+    end
 
     % Close the second Arisynth instance
     pause(3);

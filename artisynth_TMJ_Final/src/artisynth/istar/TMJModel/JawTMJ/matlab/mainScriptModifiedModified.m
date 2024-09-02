@@ -1,10 +1,13 @@
 clc;
 clear all;
 
-resultsFile = 'Result_B_Defect_Trial_7_Het.mat';
+defectType = 'S';
+trial = 2 ;
+
+resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
 % Number of total iterations
-totalIterations = 50;
+totalIterations = 60;
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -47,9 +50,20 @@ while currentIteration <= totalIterations
         % Handle specific Java exception
         if strcmp(ME.identifier, 'MATLAB:Java:GenericException')
             javaEx = ME.ExceptionObject;
-            if isa(javaEx, 'maspack.matrix.NumericalException') && contains(javaEx.message, 'Inverted elements')
-                disp('NumericalException: Inverted elements error occurred:');
-                disp(getReport(javaEx));
+            if isa(javaEx, 'maspack.matrix.NumericalException') 
+                 disp('*************NumericalException: either Inverted elements error or find next donor occurred:************');
+                 pause(1)
+                 matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+                 matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, mfilename('fullpath'));
+                 system(matlabCommand);
+                 exit; % Close the current MATLAB session
+            elseif  isa(javaEx, 'maspack.util.InternalErrorException')
+                 disp('**************Cut Error**************');
+                 pause(1)
+                 matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+                 matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, mfilename('fullpath'));
+                 system(matlabCommand);
+                 exit; % Close the current MATLAB session
             else
                 disp(['Java exception occurred: ' ME.message]);
             end

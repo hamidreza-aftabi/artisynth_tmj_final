@@ -28,11 +28,17 @@
     num_screws = 1;
     num_segment = 1;
 
-    zOffset = double(params.zOffset);
-    leftRoll = double(params.leftRoll);
-    leftPitch = double(params.leftPitch);
-    rightRoll = double(params.rightRoll);
-    rightPitch = double(params.rightPitch);
+    %zOffset = double(params.zOffset);
+    %leftRoll = double(params.leftRoll);
+    %leftPitch = double(params.leftPitch);
+    %rightRoll = double(params.rightRoll);
+    %rightPitch = double(params.rightPitch);
+
+    zOffset = -1.77188271915112;
+    leftRoll = 14.3652145702422;
+    leftPitch = 23.4879099952171;
+    rightRoll = 19.5307028123276;
+    rightPitch = 14.8577255083523;
 
     % Debugging information
     fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
@@ -42,25 +48,13 @@
     % Calculate the new resection plane
 
     % Left Plane
-    %init_axis_l = [-0.37445 -0.82382 -0.42556];
-    %init_angle_l = 100.22;
     init_axis_l = [-0.35978 -0.83742 -0.41145];
     init_angle_l = 99.373;
 
 
-    %plane_normal_l = find_plane_normal_from_axis_angle(newer_axis_l, newer_angle_l);
-
     % Right Plane
     init_axis_r = [0.67407 -0.37913 0.63395];
     init_angle_r = 144.41;
-
-    %plane_normal_r = find_plane_normal_from_axis_angle(newer_axis_r, newer_angle_r);
-
-    % Change resection file
-    %input_filename = 'resection_plane_initial.txt';
-    %output_filename = 'resection_plane_optimize.txt';
-
-    %modify_normals_in_file(input_filename, output_filename, plane_normal_l, plane_normal_r);
    
 
     % Set up Artisynth environment and run simulation
@@ -110,7 +104,7 @@
     root.createFibulaOptimization(zOffset);
 
     % Perform simulation steps
-    for i = 1:100
+    for i = 1:90
         ah.step();
     end
 
@@ -160,15 +154,12 @@
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
-    % Calculate the loss
-    %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
-    %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
 
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+   loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
 
-    % Close the second Arisynth instance
-    pause(3);
-    ah1.quit();
-    ah1 = [];
-    java.lang.System.gc();
+  % Close the second Arisynth instance
+  %  pause(3);
+  %  ah1.quit();
+  %  ah1 = [];
+  %  java.lang.System.gc();
     

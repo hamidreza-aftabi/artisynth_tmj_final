@@ -3,8 +3,11 @@ function results = helperFunction(results, currentIteration)
 % Clear unnecessary variables to manage memory
 clearvars -except results currentIteration;
 
-defectType = "B"; 
-resultsFile = 'Result_B_Defect_Trial_7_Het.mat';
+defectType = 'S';
+trial = 2;
+
+
+resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
 if defectType == "B"
 
@@ -14,6 +17,17 @@ if defectType == "B"
     leftPitchVar = optimizableVariable('leftPitch', [-25, 25]);
     rightRollVar = optimizableVariable('rightRoll', [-20, 20]);
     rightPitchVar = optimizableVariable('rightPitch', [-20, 20]);
+
+
+elseif  defectType == "S"
+    
+     % Define the optimizable variables
+    zOffsetVar = optimizableVariable('zOffset', [-6, 3]);
+    leftRollVar = optimizableVariable('leftRoll', [-15, 15]);
+    leftPitchVar = optimizableVariable('leftPitch', [-15, 15]);
+    rightRollVar = optimizableVariable('rightRoll', [-15, 15]);
+    rightPitchVar = optimizableVariable('rightPitch', [-15, 15]);
+
 
 end
 

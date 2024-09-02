@@ -49,6 +49,9 @@ for file_name, target_length in file_list.items():
         ms.meshing_isotropic_explicit_remeshing(adaptive = True, iterations=20, targetlen=target_length)
         ms.meshing_merge_close_vertices()
         ms.meshing_snap_mismatched_borders()
+        ms.meshing_remove_duplicate_faces()
+        ms.meshing_repair_non_manifold_edges()
+        ms.meshing_repair_non_manifold_vertices()
         
         # Save the remeshed mesh
         ms.save_current_mesh(output_mesh_path)

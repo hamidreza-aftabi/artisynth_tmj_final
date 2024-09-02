@@ -6,7 +6,7 @@ objectiveValues = results.ObjectiveMinimumTrace;
 estimatedObjectiveValues = results.EstimatedObjectiveMinimumTrace;
 
 % Limit to the first 50 iterations
-maxIterations = 60;
+maxIterations = 70;
 if length(objectiveValues) > maxIterations
     objectiveValues = objectiveValues(1:maxIterations);
     estimatedObjectiveValues = estimatedObjectiveValues(1:maxIterations);

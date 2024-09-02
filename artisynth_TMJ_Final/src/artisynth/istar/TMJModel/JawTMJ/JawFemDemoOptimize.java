@@ -33,6 +33,7 @@ import artisynth.core.femmodels.FemModel;
 import artisynth.core.femmodels.FemModel3d;
 import artisynth.core.femmodels.FemNode3d;
 import artisynth.core.femmodels.HexElement;
+import artisynth.core.femmodels.IntegrationPoint3d;
 import artisynth.core.fields.ScalarNodalField;
 import artisynth.core.femmodels.FemModel.Ranging;
 import artisynth.core.femmodels.FemModel.SurfaceRender;
@@ -68,6 +69,7 @@ import maspack.geometry.PolygonalMesh;
 import maspack.geometry.Vertex3d;
 import maspack.matrix.AffineTransform3d;
 import maspack.matrix.AxisAngle;
+import maspack.matrix.Matrix3d;
 import maspack.matrix.Point3d;
 import maspack.matrix.RigidTransform3d;
 import maspack.matrix.SymmetricMatrix3d;
@@ -91,7 +93,10 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    TrackingController myTrackingController;
    ScalarNodalField integField;
    
+   boolean Element_Visibility = false;
+   
    boolean myShowDonorStress = false;
+   
 
   
    
@@ -114,7 +119,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    double corticalBoneDensity = 2000.0 * DENSITY_TO_mmKS;
  
    double corticalAppositionDensity = 0.002;
-   double cancellousAppositionDensity = 0.0001;
+   double cancellousAppositionDensity = 0.00015;
 
    
    double t=0.75; 
@@ -156,8 +161,6 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    
    ArrayList<String> MuscleAbbreviation = new ArrayList<String>();
-   ArrayList<Integer> RightSurfaceElemnets = new ArrayList<Integer>();
-   ArrayList<Integer> LeftSurfaceElemnets = new ArrayList<Integer>();
 
  
 
@@ -203,6 +206,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    static {
       myProps.addReadOnly ("maxNodalStress", "Max Nodal Stress");
+      myProps.addReadOnly ("safetyLeft", "Safety Factor Left");
+      myProps.addReadOnly ("safetyRight", "Safety Factor Right");
       myProps.addReadOnly ("percMechanicalStimLeftBuiltin", "Max Mechanical Stimulus");
       myProps.addReadOnly ("percMechanicalStimRightBuiltin", "Max Mechanical Stimulus");
 
@@ -228,6 +233,17 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
     
     return computePercStressStrainDonor0RightBuiltin();
    
+ }
+ 
+ public double getSafetyLeft() {
+    
+    return computeSafetyLeft ();
+ }
+ 
+ 
+ public double getSafetyRight() {
+    
+    return computeSafetyRight ();
  }
  
 /*
@@ -318,7 +334,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
          */
       
 
-      
+     /* 
       FemCutPlane cutplane = new FemCutPlane (
       new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
       
@@ -348,7 +364,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       addRenderable (cbar);
       cbar. setColorMap (cutplane. getColorMap ());
      
-   
+       */
        
       
       /*
@@ -524,6 +540,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
                 elemsNearSurfaceLeft.add (element);
                 RenderProps.setLineColor (element, Color.MAGENTA);
+                RenderProps.setVisible (element, Element_Visibility);
+                
             }
               
          }
@@ -551,6 +569,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
             if (nodesOnSurfaceRight.contains ((FemNode3d)node)) {
                 elemsNearSurfaceRight.add (element);
                 RenderProps.setLineColor (element, Color.MAGENTA);
+                RenderProps.setVisible (element, Element_Visibility);
+
             }
               
          }
@@ -561,11 +581,13 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
      
     myDonor0Mesh = (RigidBody)myJawModel.findComponent (
         "rigidBodies/donor_mesh0");
+    RenderProps.setVisible (myDonor0Mesh, false);
+
      // Get the surface mesh from the donor mesh rigid body
    
    //Get the vertices from the surface mesh of the donor mesh rigid body
     donorMeshSurface = myDonor0Mesh.getSurfaceMesh();
-   double distanceThreshold = 2.0;  // Set your distance threshold
+   double distanceThreshold = 2.5;  // Set your distance threshold
    
    //Set to store elements close to the surface
   elementsCloseToSurface = new HashSet<>();
@@ -594,9 +616,16 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
      if (minDistance < distanceThreshold) {
          elementsCloseToSurface.add(element);
          RenderProps.setLineColor(element, Color.GREEN);  // Color the element green
+         RenderProps.setVisible (element, Element_Visibility);
+
          LinearMaterial corticalBoneMaterial = new LinearMaterial(corticalBoneYoungModulus, corticalBonePoissonRatio);
          element.setMaterial(corticalBoneMaterial);
          element.setDensity(corticalBoneDensity);
+     }
+     else {
+        LinearMaterial corticalBoneMaterial = new LinearMaterial(CancellousBoneE, CancellousBoneNu);
+        element.setMaterial(corticalBoneMaterial);
+        element.setDensity(CancellousBoneDensity);
      }
    }
    
@@ -604,7 +633,102 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    System.out.println("Number of elements close to the surface: " + elementsCloseToSurface.size());
    
    
+
+   
    }
+   
+   
+   
+   public double computeSafetyLeft() {
+
+      // Define yield strengths for cortical and cancellous bone
+      double corticalYieldStrength = 100.0; // Lower bound for cortical bone yield strength in MPa
+      double cancellousYieldStrength = 5.0;  // Lower bound for cancellous bone yield strength in MPa
+
+      // Variables to track the maximum MAP stress for cortical and cancellous regions
+      double maxCorticalStress = -Double.MAX_VALUE;
+      double maxCancellousStress = -Double.MAX_VALUE;
+
+      // Iterate through the elements near the surface on the left
+      for (FemElement3d elem : elemsNearSurfaceLeft) {
+          for (FemNode3d node : elem.getNodes()) {
+              double nodeStress = Math.abs(node.getMAPStress()) / 1000; // Convert to MPa if necessary
+
+              // Check if the element is part of elementsCloseToSurface (cortical)
+              if (elementsCloseToSurface.contains(elem)) {
+                  // Update maximum cortical stress if this is higher
+                  if (nodeStress > maxCorticalStress) {
+                      maxCorticalStress = nodeStress;
+                  }
+              } else {
+                  // Update maximum cancellous stress if this is higher
+                  if (nodeStress > maxCancellousStress) {
+                      maxCancellousStress = nodeStress;
+                  }
+              }
+          }
+      }
+
+      // Calculate the safety factors
+      double safetyFactorCortical = corticalYieldStrength / maxCorticalStress;
+      double safetyFactorCancellous = cancellousYieldStrength / maxCancellousStress;
+
+      // Return the minimum safety factor
+      double minSafetyFactor = Math.min(safetyFactorCortical, safetyFactorCancellous);
+
+      System.out.println("Left Max Cortical Stress = " + maxCorticalStress + " MPa, Left Safety Factor = " + safetyFactorCortical);
+      System.out.println("Left Max Cancellous Stress = " + maxCancellousStress + " MPa, Left Safety Factor = " + safetyFactorCancellous);
+      System.out.println("Left Minimum Safety Factor = " + minSafetyFactor);
+
+      return minSafetyFactor;
+  }
+
+   
+   
+   public double computeSafetyRight() {
+
+      // Define yield strengths for cortical and cancellous bone
+      double corticalYieldStrength = 100.0; // Lower bound for cortical bone yield strength in MPa
+      double cancellousYieldStrength = 5.0;  // Lower bound for cancellous bone yield strength in MPa
+
+      // Variables to track the maximum MAP stress for cortical and cancellous regions
+      double maxCorticalStress = -Double.MAX_VALUE;
+      double maxCancellousStress = -Double.MAX_VALUE;
+
+      // Iterate through the elements near the surface on the right
+      for (FemElement3d elem : elemsNearSurfaceRight) {
+          for (FemNode3d node : elem.getNodes()) {
+              double nodeStress = Math.abs(node.getMAPStress()) / 1000; // Convert to MPa if necessary
+
+              // Check if the element is part of elementsCloseToSurface (cortical)
+              if (elementsCloseToSurface.contains(elem)) {
+                  // Update maximum cortical stress if this is higher
+                  if (nodeStress > maxCorticalStress) {
+                      maxCorticalStress = nodeStress;
+                  }
+              } else {
+                  // Update maximum cancellous stress if this is higher
+                  if (nodeStress > maxCancellousStress) {
+                      maxCancellousStress = nodeStress;
+                  }
+              }
+          }
+      }
+
+      // Calculate the safety factors
+      double safetyFactorCortical = corticalYieldStrength / maxCorticalStress;
+      double safetyFactorCancellous = cancellousYieldStrength / maxCancellousStress;
+
+      // Return the minimum safety factor
+      double minSafetyFactor = Math.min(safetyFactorCortical, safetyFactorCancellous);
+
+      System.out.println("Right Max Cortical Stress = " + maxCorticalStress + " MPa, Right Safety Factor = " + safetyFactorCortical);
+      System.out.println("Right Max Cancellous Stress = " + maxCancellousStress + " MPa, Right Safety Factor = " + safetyFactorCancellous);
+      System.out.println("Right Minimum Safety Factor = " + minSafetyFactor);
+
+      return minSafetyFactor;
+  }
+
    
    
    public double computeMaxNodalStress() {
@@ -612,6 +736,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    // Assuming 'femModel' is your FEM model
       FemModel3d femModel = myDonor0 ; // Initialize your FEM model here
 
+      
    // Get the list of all nodes in the model
       PointList<FemNode3d> nodePointList = femModel.getNodes();
 
@@ -653,6 +778,10 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       double averageStress = sumStress / count;
       
       return averageStress;
+      
+      
+      
+      
 
    }
 
@@ -731,13 +860,12 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
     * @param nu Possion's ratio for the FEM material
     */
    public FemModel3d createFemModel (
-      MechModel mech, String name, String meshName,
-      double density, double E, double nu) {
+      MechModel mech, String name, String meshName) {
 
       // create the fem and set its material properties
       FemModel3d fem = new FemModel3d (name);
-      fem.setDensity (density);
-      fem.setMaterial (new LinearMaterial (E, nu));
+      //fem.setDensity (density);
+      //fem.setMaterial (new LinearMaterial (E, nu));
       
 
       // load the triangular surface mesh and then call createFromMesh,
@@ -854,7 +982,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
      //    myJawModel, "donor0", "case4_donor_inf_remeshed_transformed_boolean.obj", myBoneDensity, myBoneE, myBoneNu);
       
       myDonor0 = createFemModel (
-         myJawModel, "donor0", "donor_opt0_remeshed.obj", CancellousBoneDensity, CancellousBoneE, CancellousBoneNu);
+         myJawModel, "donor0", "donor_opt0_remeshed.obj");
       
       //plate
       
