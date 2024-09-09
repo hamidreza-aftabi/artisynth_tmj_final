@@ -5,7 +5,7 @@ muscleInfo = fullfile('..', 'geometry', 'muscleInfo.txt');
 closerMuscleList = fullfile('..', 'geometry', 'closerMuscleList.txt');
 
 muscleNames = {
-    'rad', 'lad', 'rgh' ,'lgh', 'lam', 'ram'
+    'rad', 'lad', 'rgh' ,'lgh'
 };
 
 

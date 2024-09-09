@@ -1,8 +1,8 @@
 function loss = runArtisynthSim(params)
     
-    defectType = 'S'; 
-    trial = 2;
-    Safety_On = false;
+    defectType = 'B'; 
+    trial = 25;
+    Safety_On = true;
 
     resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
     PercentFile = ['Percent_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
@@ -58,13 +58,11 @@ function loss = runArtisynthSim(params)
 
      if defectType == "B"
             % Left Plane
-        
             init_axis_l = [-0.35978 -0.83742 -0.41145];
             init_angle_l = 99.373;
         
         
             % Right Plane
-       
             init_axis_r = [0.67407 -0.37913 0.63395];
             init_angle_r = 144.41;
 
@@ -211,7 +209,7 @@ function loss = runArtisynthSim(params)
         rethrow(ME);
     end
     
-    for i = 1:1200
+    for i = 1:1240
         ah1.step();
     end
 
@@ -241,12 +239,12 @@ function loss = runArtisynthSim(params)
     end
 
 
-    loss1 = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    loss1 = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) + .0001;
    
-    if loss1 == 0.00
-        disp('Zeros loss...');
+    if loss1 == 0.00 || isnan (loss1)
+        disp('Zeros/Nan loss...');
         fileID = fopen(logFile, 'a');
-        fprintf(fileID, 'Zero Loss Error:\n');
+        fprintf(fileID, 'Zero/nan Loss Error:\n');
         fprintf(fileID, '%.4f,', zOffset);
         fprintf(fileID, '%.4f,', leftRoll);
         fprintf(fileID, '%.4f,', leftPitch);
@@ -268,7 +266,7 @@ function loss = runArtisynthSim(params)
         loss2 = 0 ;
     end
     
-    loss = loss1 + loss2;
+    loss = loss1; 
 
 
     % Append left and right percent to a text file

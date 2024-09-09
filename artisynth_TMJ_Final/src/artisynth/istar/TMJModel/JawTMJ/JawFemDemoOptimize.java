@@ -646,8 +646,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       double cancellousYieldStrength = 5.0;  // Lower bound for cancellous bone yield strength in MPa
 
       // Variables to track the maximum MAP stress for cortical and cancellous regions
-      double maxCorticalStress = -Double.MAX_VALUE;
-      double maxCancellousStress = -Double.MAX_VALUE;
+      double maxCorticalStress = 0.0001;
+      double maxCancellousStress = 0.0001;
 
       // Iterate through the elements near the surface on the left
       for (FemElement3d elem : elemsNearSurfaceLeft) {
@@ -692,8 +692,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       double cancellousYieldStrength = 5.0;  // Lower bound for cancellous bone yield strength in MPa
 
       // Variables to track the maximum MAP stress for cortical and cancellous regions
-      double maxCorticalStress = -Double.MAX_VALUE;
-      double maxCancellousStress = -Double.MAX_VALUE;
+      double maxCorticalStress = 0.0001;
+      double maxCancellousStress = 0.0001;
 
       // Iterate through the elements near the surface on the right
       for (FemElement3d elem : elemsNearSurfaceRight) {
@@ -1213,7 +1213,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
    protected double bolusDiameter = 8; // mm
 
-   protected double bolusMaxResistance = 130; // N
+   protected double bolusMaxResistance = 110; // N
 
    protected double bolusStiffness = bolusMaxResistance / (bolusDiameter);
 

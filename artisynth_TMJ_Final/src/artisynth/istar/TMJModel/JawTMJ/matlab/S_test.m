@@ -30,6 +30,7 @@
 
     end
 
+
     num_screws = 1;
     num_segment = 1;
     Screw_lenght = 35;
@@ -40,12 +41,11 @@
     %rightRoll = double(params.rightRoll);
     %rightPitch = double(params.rightPitch);
 
-
-    zOffset =   -6;
-    leftRoll =  15;
-    leftPitch =  15;
-    rightRoll =  15;
-    rightPitch =  -15;
+    zOffset = -1.71944787296037;
+    leftRoll =  14.9575795695718;
+    leftPitch = 24.5696081183386;
+    rightRoll =  19.6326549559554;
+    rightPitch = 14.5368591142578;
   
     % Debugging information
     fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
@@ -161,7 +161,7 @@
         rethrow(ME);
     end
     
-    for i = 1:1200
+    for i = 1:1240
         ah1.step();
     end
 
@@ -169,7 +169,7 @@
     right_percent = ah1.getOprobeData('6');
 
 
-   loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+   loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) + .0001 ;
 
   % Close the second Arisynth instance
   %  pause(3);
