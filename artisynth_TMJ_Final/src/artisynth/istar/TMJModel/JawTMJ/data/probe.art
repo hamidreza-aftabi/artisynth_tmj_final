@@ -58,7 +58,7 @@
     inputs=[
       V0 1
     ]
-    data=[
+	data=[
       0.05580032 0.07922218052227255
       1.722289414934026 0.0923799723470492
       4.039034799966497 0.19286362416224423
@@ -148,6 +148,77 @@
     ]
   ]
   NumericInputProbe [ 
+    startTime=0.002
+    stopTime=1.2049999999999998
+    updateInterval=-1.0
+    name="Right Anterior Digastric "
+    scale=0.11285764049999997
+    attachedFile="lad.txt"
+    interpolationOrder=Cubic
+    displayRange=[ 0.0 1.0 ]
+    track=4
+    model=models/jawmodel
+    vsize=1
+    props=[
+      "models/jawmodel/axialSprings/rad:excitation"
+    ]
+    drivers=[
+      "V0"
+    ]
+    inputs=[
+      V0 1
+    ]
+    data=[
+      0.011560666666666665 0.026049361325966677
+      1.6069517590135869 0.10246618799999985
+      2.9694171 0.2299968000000002
+      4.221140814 0.07187399999999974
+      4.84243404 0.014374799999999695
+      5.238356648334958 0.0
+      5.926652254 0.0
+      8.36005122 0.0
+      9.828009673 0.2156219999999999
+    ]
+    plotTraceInfo=[
+      [ order=0 label="axialSprings/rad:excitation" visible=true color=Red ]
+    ]
+  ]
+  NumericInputProbe [ 
+    startTime=0.0
+    stopTime=1.2049999999999998
+    updateInterval=-1.0
+    name="Left Anterior Digastric "
+    scale=0.11316728594603616
+    attachedFile="rad.txt"
+    interpolationOrder=Cubic
+    displayRange=[ 0.0 1.0 ]
+    track=5
+    model=models/jawmodel
+    vsize=1
+    props=[
+      "models/jawmodel/axialSprings/lad:excitation"
+    ]
+    drivers=[
+      "V0"
+    ]
+    inputs=[
+      V0 1
+    ]
+    data=[
+      0.017341028571428576 0.02610233572205444
+      1.7036725621566704 0.09307024740958227
+      3.011849676 0.24486855797793294
+      4.4207072 0.0
+      5.825951646 0.0
+      8.6713872 0.0
+      9.8615776 0.14404032822231314
+      10.4991796 0.36010082055578396
+    ]
+    plotTraceInfo=[
+      [ order=0 label="axialSprings/lad:excitation" visible=true color=Red ]
+    ]
+  ]
+  NumericInputProbe [ 
     startTime=0.095
     stopTime=1.2049999999999998
     updateInterval=-1.0
@@ -156,7 +227,7 @@
     attachedFile="lam.txt"
     interpolationOrder=Cubic
     displayRange=[ 0.0 1.0 ]
-    track=4
+    track=6
     model=models/jawmodel
     vsize=1
     props=[
@@ -192,7 +263,7 @@
     attachedFile="ram.txt"
     interpolationOrder=Cubic
     displayRange=[ 0.0 1.0 ]
-    track=5
+    track=7
     model=models/jawmodel
     vsize=1
     props=[
@@ -220,6 +291,78 @@
     ]
   ]
   NumericInputProbe [ 
+    startTime=0.002
+    stopTime=1.2049999999999998
+    updateInterval=-1.0
+    name="Right Geniohyoid "
+    scale=0.11297945642579381
+    attachedFile="lgh.txt"
+    interpolationOrder=Cubic
+    displayRange=[ 0.0 1.0 ]
+    track=8
+    model=models/jawmodel
+    vsize=1
+    props=[
+      "models/jawmodel/axialSprings/rgh:excitation"
+    ]
+    drivers=[
+      "V0"
+    ]
+    inputs=[
+      V0 1
+    ]
+    data=[
+      0.017341028571428576 0.017043670853303747
+      0.9517723810931117 0.04352101902720029
+      1.718883906 0.28215589247999984
+      2.601142902 0.3291818745600001
+      4.380872256 0.018810392832000016
+      5.93243118 0.0
+      8.6713872 0.0
+      9.6915504 0.18810392831999975
+      10.307899 0.23512991039999995
+    ]
+    plotTraceInfo=[
+      [ order=0 label="axialSprings/rgh:excitation" visible=true color=Red ]
+    ]
+  ]
+  NumericInputProbe [ 
+    startTime=0.002
+    stopTime=1.21
+    updateInterval=-1.0
+    name="Left Geniohyoid "
+    scale=0.11344903022639974
+    attachedFile="rgh.txt"
+    interpolationOrder=Cubic
+    displayRange=[ 0.0 1.0 ]
+    track=9
+    model=models/jawmodel
+    vsize=1
+    props=[
+      "models/jawmodel/axialSprings/lgh:excitation"
+    ]
+    drivers=[
+      "V0"
+    ]
+    inputs=[
+      V0 1
+    ]
+    data=[
+      0.017341028571428576 0.013413866068616604
+      0.9005731827320708 0.017467373363815316
+      1.67324982 0.2146627530310032
+      2.555508816 0.2516735725191071
+      4.350449532 0.014804327795241613
+      5.93243118 0.0
+      8.6713872 0.0
+      9.6277902 0.18505409744051995
+      10.3716592 0.25907573641672765
+    ]
+    plotTraceInfo=[
+      [ order=0 label="axialSprings/lgh:excitation" visible=true color=Red ]
+    ]
+  ]
+  NumericInputProbe [ 
     startTime=0.47
     stopTime=1.309
     updateInterval=-1.0
@@ -228,7 +371,7 @@
     attachedFile="lat.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=6
+    track=10
     model=models/jawmodel
     vsize=1
     props=[
@@ -263,7 +406,7 @@
     attachedFile="rat.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=7
+    track=11
     model=models/jawmodel
     vsize=1
     props=[
@@ -298,7 +441,7 @@
     attachedFile="lmt.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=8
+    track=12
     model=models/jawmodel
     vsize=1
     props=[
@@ -333,7 +476,7 @@
     attachedFile="rmt.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=9
+    track=13
     model=models/jawmodel
     vsize=1
     props=[
@@ -368,7 +511,7 @@
     attachedFile="lpt.txt"
     interpolationOrder=Cubic
     displayRange=[ 0.0 1.0 ]
-    track=10
+    track=14
     model=models/jawmodel
     vsize=1
     props=[
@@ -403,7 +546,7 @@
     attachedFile="rpt.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=11
+    track=15
     model=models/jawmodel
     vsize=1
     props=[
@@ -438,7 +581,7 @@
     attachedFile="lsm.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=12
+    track=16
     model=models/jawmodel
     vsize=1
     props=[
@@ -473,7 +616,7 @@
     attachedFile="rsm.txt"
     interpolationOrder=Cubic
     displayRange=[ 0.0 1.0 ]
-    track=13
+    track=17
     model=models/jawmodel
     vsize=1
     props=[
@@ -509,7 +652,7 @@
     attachedFile="ldm.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=14
+    track=18
     model=models/jawmodel
     vsize=1
     props=[
@@ -544,7 +687,7 @@
     attachedFile="rdm.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=15
+    track=19
     model=models/jawmodel
     vsize=1
     props=[
@@ -579,7 +722,7 @@
     attachedFile="lmp.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=16
+    track=20
     model=models/jawmodel
     vsize=1
     props=[
@@ -614,7 +757,7 @@
     attachedFile="rmp.txt"
     interpolationOrder=Cubic
     displayRange=[ -0.020000000000000004 1.0 ]
-    track=17
+    track=21
     model=models/jawmodel
     vsize=1
     props=[

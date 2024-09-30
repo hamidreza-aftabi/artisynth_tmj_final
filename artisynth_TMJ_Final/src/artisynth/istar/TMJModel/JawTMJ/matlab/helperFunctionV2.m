@@ -4,9 +4,9 @@ function results = helperFunctionV2(results, currentIteration)
 clearvars -except results currentIteration;
 
 defectType = 'B';
-trial = 25;
+trial = 31;
 
-resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+resultsFile = ['Result_Safety_1' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
 % Define the range of variables based on defectType
 if defectType == "B"
@@ -35,9 +35,11 @@ signCombinations(signCombinations == 0) = -1;  % Convert 0 to -1 for negative si
 % Apply the sign combinations to the midpoints
 initialPoints = midpoints + signCombinations .* ranges;
 
+
 % Convert initial points to a table for Bayesian optimization
 varsNames = {'zOffset', 'leftRoll', 'leftPitch', 'rightRoll', 'rightPitch'};
 initialTable = array2table(initialPoints, 'VariableNames', varsNames);
+
 
 % Debugging output to confirm function execution
 disp('Helper function started with all sign combinations.');
@@ -63,6 +65,7 @@ else
         'Verbose', 1, ...
         'AcquisitionFunctionName', 'expected-improvement', ...
         'InitialX', initialTable, ...  % Provide the generated initial points
+        'NumSeedPoints', 15, ...
         'MaxObjectiveEvaluations', 1, ... % Initial evaluations
         'GPActiveSetSize', 300, ... % Use active set to speed up Gaussian Process calculations
         'IsObjectiveDeterministic', false, ... % Set if the objective function is deterministic

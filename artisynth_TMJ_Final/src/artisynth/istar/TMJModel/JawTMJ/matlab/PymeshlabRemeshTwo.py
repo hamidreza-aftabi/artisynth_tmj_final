@@ -51,7 +51,7 @@ for file_name, target_length in file_list.items():
         target_length = pymeshlab.PureValue(target_length)
 
         # Remesh the current mesh
-        ms.meshing_isotropic_explicit_remeshing(adaptive = True, iterations=20, targetlen=target_length)
+        ms.meshing_isotropic_explicit_remeshing(iterations = 60, targetlen = target_length, featuredeg = 20.000000, checksurfdist = True, maxsurfdist = target_length, splitflag = True, collapseflag = True, swapflag = True, smoothflag = True, reprojectflag = True)       
         ms.meshing_merge_close_vertices()
         ms.meshing_snap_mismatched_borders()
         ms.meshing_remove_duplicate_faces()

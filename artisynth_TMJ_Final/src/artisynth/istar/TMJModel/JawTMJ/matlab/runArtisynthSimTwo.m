@@ -16,6 +16,8 @@ function loss = runArtisynthSimTwo(params)
     %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
 
     toggleComment(bodyList, 'screw1', 'remove');
+    toggleComment(bodyList, 'donor_mesh1', 'remove');
+
 
     if defectType == "RB"
         
@@ -225,10 +227,7 @@ function loss = runArtisynthSimTwo(params)
     fclose(fileID);
 
     % Calculate the loss
-    %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
-    %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
 
-    %loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
     loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))));
 
 

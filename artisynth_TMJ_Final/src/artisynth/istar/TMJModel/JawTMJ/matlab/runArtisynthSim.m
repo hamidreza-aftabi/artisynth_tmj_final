@@ -1,12 +1,12 @@
 function loss = runArtisynthSim(params)
     
-    defectType = 'B'; 
-    trial = 25;
+    defectType = 'S'; 
+    trial = 1;
     Safety_On = true;
 
-    resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
-    PercentFile = ['Percent_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
-    logFile = ['Log_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    resultsFile = ['Finl_Result_Safety1_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+    PercentFile = ['Final_Percent_Safety1_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    logFile = ['Final_Log_Safety1_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
 
 
     if   Safety_On == true
@@ -26,6 +26,8 @@ function loss = runArtisynthSim(params)
     %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
     
     toggleComment(bodyList, 'screw1', 'add');
+    toggleComment(bodyList, 'donor_mesh1', 'add');
+
 
     resetMuscles();
 
@@ -108,7 +110,7 @@ function loss = runArtisynthSim(params)
     elseif defectType == "S"
 
         root.importFibulaOptimizationS();
-        Screw_lenght = 35;
+        Screw_lenght = 20;
         root.getPlateBuilder().setScrewLength (Screw_lenght) 
 
      end
@@ -266,7 +268,7 @@ function loss = runArtisynthSim(params)
         loss2 = 0 ;
     end
     
-    loss = loss1; 
+    loss = loss1 + loss2 ; 
 
 
     % Append left and right percent to a text file

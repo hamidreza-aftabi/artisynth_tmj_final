@@ -2,7 +2,6 @@
     
     defectType = "RB"; 
     
-
     %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
     %setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -19,6 +18,8 @@
     resetMuscles();
     
     toggleComment(bodyList, 'screw1', 'remove');
+    toggleComment(bodyList, 'donor_mesh1', 'remove');
+
 
     if defectType == "RB"
         
@@ -26,20 +27,22 @@
 
     end
 
-
     num_screws = 2;
     num_segment = 2;
 
     %zOffset = double(params.zOffset);
-    zOffset = 0
+    zOffset = 0; % -6 --> +6
+
+    RDPoffset = 10 ;  % -20 --> 15mm lenght   -15 --> 20mm lenght -10 --> 25mm 
+    
     %leftRoll = double(params.leftRoll);
-    leftRoll= -0.301187399385210
+    leftRoll= 25;
     %leftPitch = double(params.leftPitch);
-    leftPitch = 10.743228307430662
+    leftPitch = 25;
     %rightRoll = double(params.rightRoll);
-    rightRoll = 11.793802384125314
+    rightRoll = 15;
     %rightPitch = double(params.rightPitch);
-    rightPitch = -14.066058915026181 
+    rightPitch = 15;
 
 
     % Debugging information
@@ -50,10 +53,7 @@
     % Calculate the new resection plane
 
     % Left Plane
-    %init_axis_l = [-0.37445 -0.82382 -0.42556];
     init_axis_l = [-0.35978 -0.83742 -0.41145];
-
-    %init_angle_l = 100.22;
     init_angle_l = 99.373;
 
 
@@ -120,10 +120,10 @@
 
     pause(1);
 
-    root.createFibulaOptimizationTwo(zOffset);
+    root.createFibulaOptimizationTwo(zOffset,RDPoffset);
 
     % Perform simulation steps
-    for i = 1:100
+    for i = 1:90
         ah.step();
     end
 
@@ -156,7 +156,7 @@
 
     % Run the second Artisynth model
     try
-        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwo');
+        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwoWithSafety');
         if isempty(ah1)
             error('Failed to initialize the second Artisynth instance.');
         end
@@ -180,7 +180,7 @@
     end
 
 
-    for i = 1:1400
+    for i = 1:1240
         ah1.step();
     end
 
@@ -188,11 +188,8 @@
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
-    % Calculate the loss
-    %loss = - (mean(left_percent(:,2)) + mean(right_percent(:,2))) / ...
-    %        abs(mean(left_percent(:,2)) - mean(right_percent(:,2)) + 1e-7);
 
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.5 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
 
     % Close the second Arisynth instance
     %pause(3);

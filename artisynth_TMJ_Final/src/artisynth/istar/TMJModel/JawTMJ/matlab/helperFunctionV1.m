@@ -4,10 +4,10 @@ function results = helperFunctionV1(results, currentIteration)
 clearvars -except results currentIteration;
 
 defectType = 'B';
-trial = 25;
+trial = 30;
 
 
-resultsFile = ['Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+resultsFile = ['Result_Safety_1' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
 if defectType == "B"
 
@@ -48,8 +48,7 @@ else
     % Run Bayesian optimization from scratch
     results = bayesopt(@(params) runArtisynthSim(params), vars, ...
         'Verbose', 1, ...
-        'AcquisitionFunctionName', 'expected-improvement-plus', ...
-        'ExplorationRatio', 0.6, ...
+        'AcquisitionFunctionName', 'expected-improvement', ...
         'NumSeedPoints', 15, ...
         'MaxObjectiveEvaluations', 1, ... % Initial evaluations
         'GPActiveSetSize', 300, ... % Use active set to speed up Gaussian Process calculations

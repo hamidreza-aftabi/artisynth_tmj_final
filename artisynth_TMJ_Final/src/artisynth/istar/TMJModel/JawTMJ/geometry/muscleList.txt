@@ -15,10 +15,10 @@ lsp
 rip
 lip
 #rad
-lad
-#ram
+#lad
+ram
 lam
 rpm
 lpm
-rgh
-lgh
+#rgh
+#lgh
