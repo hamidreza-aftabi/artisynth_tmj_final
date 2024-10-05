@@ -31,23 +31,23 @@
     num_segment = 2;
 
     %zOffset = double(params.zOffset);
-    zOffset = 0; % -6 --> +6
+    zOffset =-5; % -6 --> +6
 
-    RDPoffset = 10 ;  % -20 --> 15mm lenght   -15 --> 20mm lenght -10 --> 25mm 
-    
+    rdpOffset = -10 ;  % -20 --> 15mm lenght   -15 --> 20mm lenght -10 --> 25mm 
+
     %leftRoll = double(params.leftRoll);
     leftRoll= 25;
     %leftPitch = double(params.leftPitch);
     leftPitch = 25;
     %rightRoll = double(params.rightRoll);
-    rightRoll = 15;
+    rightRoll = -15;
     %rightPitch = double(params.rightPitch);
-    rightPitch = 15;
+    rightPitch = -15;
 
 
     % Debugging information
-    fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
-        zOffset, leftRoll, leftPitch, rightRoll, rightPitch);
+  fprintf('Running simulation with zOffset = %.2f, rdpOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
+        zOffset, rdpOffset, leftRoll, leftPitch, rightRoll, rightPitch);
     fprintf('ARTISYNTH_HOME = %s\n', getenv('ARTISYNTH_HOME'));
 
     % Calculate the new resection plane
@@ -78,8 +78,11 @@
     root = ah.root();
     
     root.getPlateBuilder().setNumScrews (num_screws);
+    root.getPlateBuilder().setScrewLength (10);
+
     root.getSegmentGenerator.setMaxSegments(num_segment);
     root.getSegmentGenerator.setNumSegments (num_segment);
+
 
     root.importFibulaOptimizationTwo();
     
@@ -120,7 +123,7 @@
 
     pause(1);
 
-    root.createFibulaOptimizationTwo(zOffset,RDPoffset);
+    root.createFibulaOptimizationTwo(zOffset,rdpOffset);
 
     % Perform simulation steps
     for i = 1:90
@@ -188,8 +191,13 @@
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
+    left_safety = ah1.getOprobeData('7');
+    right_safety = ah1.getOprobeData('8');
 
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))) - 0.499 *abs(mean(left_percent(:,2)) - mean(right_percent(:,2)))) ;
+    mid0_percent = ah1.getOprobeData('9');
+    mid1_percent = ah1.getOprobeData('10');
+
+    loss = - (0.5*(mean(left_percent(:,2)) + mean(min(mid0_percent(:,2),mid1_percent(:,2)))) - 0.499 *abs(mean(left_percent(:,2)) - mean(min(mid0_percent(:,2),mid1_percent(:,2)))));
 
     % Close the second Arisynth instance
     %pause(3);

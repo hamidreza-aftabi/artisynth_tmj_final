@@ -1,16 +1,19 @@
 clc;
 clear all;
 
-resultsFile = 'Result_RB_Trial_1.mat';
+defectType = 'RB';
+trial = 1;
 
+resultsFile = ['Final_Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+
+
+% Number of total iterations
+totalIterations = 100;
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
-
 setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
 
-% Number of total iterations
-totalIterations = 70;
 
 % Load previous results if they exist
 if isfile(resultsFile)
@@ -48,15 +51,36 @@ while currentIteration <= totalIterations
         % Handle specific Java exception
         if strcmp(ME.identifier, 'MATLAB:Java:GenericException')
             javaEx = ME.ExceptionObject;
-            if isa(javaEx, 'maspack.matrix.NumericalException') && contains(javaEx.message, 'Inverted elements')
-                disp('NumericalException: Inverted elements error occurred:');
-                disp(getReport(javaEx));
+            if isa(javaEx, 'maspack.matrix.NumericalException') 
+                 disp('*************NumericalException:  Inverted elements************');
+                 pause(1)
+                 matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+                 matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, mfilename('fullpath'));
+                 system(matlabCommand);
+                 exit; % Close the current MATLAB session
+                
+            elseif  isa(javaEx, 'maspack.util.InternalErrorException')
+                 disp('**************Cut Error**************');
+                 pause(1)
+                 matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+                 matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, mfilename('fullpath'));
+                 system(matlabCommand);
+                 exit; % Close the current MATLAB session
+            elseif isa(javaEx, 'maspack.matrix.NumericalException: findNextDonorPoint') 
+                 disp('**************Next Point Error**************');
+                 pause(1)
+                 matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+                 matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, mfilename('fullpath'));
+                 system(matlabCommand);
+                 exit; % Close the current MATLAB session
             else
                 disp(['Java exception occurred: ' ME.message]);
             end
+
         else
             disp(['Error occurred: ' ME.message]);
             disp('MATLAB Error...');
+            pause(1)
             % Save workspace and restart MATLAB
             save(resultsFile, 'results', 'currentIteration', 'totalIterations');
             % Use system command to restart MATLAB
@@ -68,3 +92,4 @@ while currentIteration <= totalIterations
         
     end
 end
+

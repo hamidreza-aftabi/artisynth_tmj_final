@@ -1,11 +1,18 @@
 function loss = runArtisynthSimTwo(params)
     
-    defectType = "RB"; 
+    defectType = 'RB'; 
+    trial = 1;
+    Safety_On = false;
 
+    resultsFile = ['Finl_Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+    PercentFile = ['Final_Percent_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    logFile = ['Final_Log_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    
 
-    resultsFile = 'Result_RB_Trial_1.mat';
-    textFile = 'Percent_RB_Trial_1.txt';
-    logFile = 'Log_Result_RB_Trial_1.txt';
+    if   Safety_On == true
+        safetyFile = ['Safety' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    end
+
 
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
@@ -28,16 +35,16 @@ function loss = runArtisynthSimTwo(params)
     num_screws = 2;
     num_segment = 2;
 
-    %zOffset = double(params.zOffset);
-    zOffset = 0;
+    zOffset = double(params.zOffset);
+    rdpOffset = double(params.rdpOffset);
     leftRoll = double(params.leftRoll);
     leftPitch = double(params.leftPitch);
     rightRoll = double(params.rightRoll);
     rightPitch = double(params.rightPitch);
 
     % Debugging information
-    fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
-        zOffset, leftRoll, leftPitch, rightRoll, rightPitch);
+    fprintf('Running simulation with zOffset = %.2f, rdpOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
+        zOffset, rdpOffset, leftRoll, leftPitch, rightRoll, rightPitch);
     fprintf('ARTISYNTH_HOME = %s\n', getenv('ARTISYNTH_HOME'));
 
 
@@ -108,10 +115,10 @@ function loss = runArtisynthSimTwo(params)
 
     pause(1);
 
-    root.createFibulaOptimizationTwo(zOffset);
+    root.createFibulaOptimizationTwo(zOffset,rdpOffset);
 
     % Perform simulation steps
-    for i = 1:100
+    for i = 1:90
         ah.step();
     end
 
@@ -136,6 +143,7 @@ function loss = runArtisynthSimTwo(params)
         fileID = fopen(logFile, 'a');
         fprintf(fileID, 'Graphic Error:\n');
         fprintf(fileID, '%.2f,', zOffset);
+        fprintf(fileID, '%.2f,', rdpOffset);
         fprintf(fileID, '%.2f,', leftRoll);
         fprintf(fileID, '%.2f,', leftPitch);
         fprintf(fileID, '%.2f,', rightRoll);
@@ -170,7 +178,7 @@ function loss = runArtisynthSimTwo(params)
 
     % Run the second Artisynth model
     try
-        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwo');
+        ah1 = artisynth('-model', 'artisynth.istar.TMJModel.JawTMJ.JawFemDemoOptimizeTwoWithSafety');
         if isempty(ah1)
             error('Failed to initialize the second Artisynth instance.');
         end
@@ -192,18 +200,25 @@ function loss = runArtisynthSimTwo(params)
 
     end
     
-    for i = 1:1200
+    for i = 1:1240
         ah1.step();
     end
 
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
+    left_safety = ah1.getOprobeData('7');
+    right_safety = ah1.getOprobeData('8');
+
+    mid0_percent = ah1.getOprobeData('9');
+    mid1_percent = ah1.getOprobeData('10');
+
     if length(left_percent) < 2 || length(right_percent) < 2
         disp('Biomedical Error...');
         fileID = fopen(logFile, 'a');
         fprintf(fileID, 'Biomedical Error:\n');
         fprintf(fileID, '%.2f,', zOffset);
+        fprintf(fileID, '%.2f,', rdpOffset);
         fprintf(fileID, '%.2f,', leftRoll);
         fprintf(fileID, '%.2f,', leftPitch);
         fprintf(fileID, '%.2f,', rightRoll);
@@ -217,18 +232,61 @@ function loss = runArtisynthSimTwo(params)
         exit; % Close the current MATLAB session
     end
 
+    % Calculate the loss
+
+    loss1 = - (0.5*(mean(left_percent(:,2)) + mean(min(mid0_percent(:,2),mid1_percent(:,2)))) - 0.499 *abs(mean(left_percent(:,2)) - mean(min(mid0_percent(:,2),mid1_percent(:,2)))));
+
+
+     if loss1 == 0.00 || isnan (loss1)
+        disp('Zeros/Nan loss...');
+        fileID = fopen(logFile, 'a');
+        fprintf(fileID, 'Zero/nan Loss Error:\n');
+        fprintf(fileID, '%.4f,', zOffset);
+        fprintf(fileID, '%.2f,', rdpOffset);
+        fprintf(fileID, '%.4f,', leftRoll);
+        fprintf(fileID, '%.4f,', leftPitch);
+        fprintf(fileID, '%.4f,', rightRoll);
+        fprintf(fileID, '%.4f,', rightPitch);
+        fprintf(fileID, '\n');
+        fclose(fileID);
+        % Use system command to restart MATLAB
+        matlabExecutable = fullfile(matlabroot, 'bin', 'matlab');
+        matlabCommand = sprintf('"%s" -r "load(''%s''); run(''%s''); exit"', matlabExecutable, resultsFile, 'mainScriptModifiedModified');
+        system(matlabCommand);
+        exit; % Close the current MATLAB session
+    end
+
+
+     if Safety_On == true
+        loss2 =  calculateSafetyFactorsCost(left_safety, right_safety);
+    else
+        loss2 = 0 ;
+    end
+    
+    loss = loss1 + loss2 ; 
+
     % Append left and right percent to a text file
-    fileID = fopen(textFile, 'a');
+    fileID = fopen(PercentFile, 'a');
     fprintf(fileID, 'Left Percent:\n');
     fprintf(fileID, '%.2f,', left_percent(:,2));
     fprintf(fileID, '\nRight Percent:\n');
     fprintf(fileID, '%.2f,', right_percent(:,2));
+    fprintf(fileID, '\nMid0 percent:\n');
+    fprintf(fileID, '%.2f,', mid0_percent(:,2));
+     fprintf(fileID, '\nMid1 percent:\n');
+    fprintf(fileID, '%.2f,', mid1_percent(:,2));
     fprintf(fileID, '\n');
     fclose(fileID);
 
-    % Calculate the loss
-
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(right_percent(:,2))));
+    if Safety_On == true
+        fileID = fopen(safetyFile, 'a');
+        fprintf(fileID, 'Left Safety:\n');
+        fprintf(fileID, '%.2f,', left_safety(:,2));
+        fprintf(fileID, '\nRight Safety:\n');
+        fprintf(fileID, '%.2f,', right_safety(:,2));
+        fprintf(fileID, '\n');
+        fclose(fileID);
+    end
 
 
     % Close the second Arisynth instance

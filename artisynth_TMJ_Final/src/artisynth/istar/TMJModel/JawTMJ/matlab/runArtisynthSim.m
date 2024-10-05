@@ -270,7 +270,6 @@ function loss = runArtisynthSim(params)
     
     loss = loss1 + loss2 ; 
 
-
     % Append left and right percent to a text file
     fileID = fopen(PercentFile, 'a');
     fprintf(fileID, 'Left Percent:\n');
