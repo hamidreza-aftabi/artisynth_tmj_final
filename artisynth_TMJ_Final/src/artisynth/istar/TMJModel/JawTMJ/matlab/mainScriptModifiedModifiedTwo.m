@@ -2,7 +2,7 @@ clc;
 clear all;
 
 defectType = 'RB';
-trial = 1;
+trial = 4;
 
 resultsFile = ['Final_Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 

@@ -1,6 +1,17 @@
     
-    
+    clc
+    clear all
+
     defectType = "RB"; 
+
+
+    zOffset = -5.94406221641167;
+    rdpOffset = 8.82685370794607;
+    leftRoll = 21.4008197501238;
+    leftPitch = 6.29391553799110;
+    rightRoll = -8.94866427785834;
+    rightPitch = 0.136970103301765;
+
     
     %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
     %setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
@@ -12,11 +23,10 @@
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
 
-    %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
+   
     bodyList = fullfile('..', 'geometry', 'bodyList.txt');
+    %bodyList ="C:\Users\Hamidreza\git\artisynth_tmj_final\artisynth_TMJ_Final\src\artisynth\istar\TMJModel\JawTMJ\geometry\bodyList.txt";
 
-    resetMuscles();
-    
     toggleComment(bodyList, 'screw1', 'remove');
     toggleComment(bodyList, 'donor_mesh1', 'remove');
 
@@ -30,38 +40,30 @@
     num_screws = 2;
     num_segment = 2;
 
-    %zOffset = double(params.zOffset);
-    zOffset =-5; % -6 --> +6
-
-    rdpOffset = -10 ;  % -20 --> 15mm lenght   -15 --> 20mm lenght -10 --> 25mm 
-
-    %leftRoll = double(params.leftRoll);
-    leftRoll= 25;
-    %leftPitch = double(params.leftPitch);
-    leftPitch = 25;
-    %rightRoll = double(params.rightRoll);
-    rightRoll = -15;
-    %rightPitch = double(params.rightPitch);
-    rightPitch = -15;
 
 
     % Debugging information
-  fprintf('Running simulation with zOffset = %.2f, rdpOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
+    fprintf('Running simulation with zOffset = %.2f, rdpOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
         zOffset, rdpOffset, leftRoll, leftPitch, rightRoll, rightPitch);
     fprintf('ARTISYNTH_HOME = %s\n', getenv('ARTISYNTH_HOME'));
 
-    % Calculate the new resection plane
 
-    % Left Plane
-    init_axis_l = [-0.35978 -0.83742 -0.41145];
-    init_angle_l = 99.373;
+    if defectType == "RB"
 
-
-    % Right Plane
-    init_axis_r = [0.74092 -0.52003 0.42498];
-    init_angle_r = 149.41;
-
+        % Calculate the new resection plane
     
+        % Left Plane
+        init_axis_l = [-0.35978 -0.83742 -0.41145];
+        init_angle_l = 99.373;
+       
+    
+        % Right Plane
+        init_axis_r = [0.74092 -0.52003 0.42498];
+        init_angle_r = 149.41;
+    
+
+    end
+   
 
     % Set up Artisynth environment and run simulation
     try
@@ -76,17 +78,14 @@
     end
     
     root = ah.root();
-    
-    root.getPlateBuilder().setNumScrews (num_screws);
-    root.getPlateBuilder().setScrewLength (10);
 
+    root.getPlateBuilder().setNumScrews (num_screws);
     root.getSegmentGenerator.setMaxSegments(num_segment);
     root.getSegmentGenerator.setNumSegments (num_segment);
 
-
     root.importFibulaOptimizationTwo();
     
-    import maspack.matrix.AxisAngle ;
+    import maspack.matrix.AxisAngle;
 
     planeL = ah.find('models/Reconstruction/resectionPlanes/planeL');
     planeL.setOrientation(AxisAngle ([init_axis_l, deg2rad(init_angle_l)]));
@@ -110,23 +109,10 @@
 
     pause(1);
 
-
-    [new_axis_l, new_angle_l] = rotate_axis_angle_around_local_x(init_axis_l, init_angle_l, leftRoll);
-    [newer_axis_l, newer_angle_l] = rotate_axis_angle_around_local_y(new_axis_l, new_angle_l, leftPitch);
-    planeL.setOrientation(AxisAngle ([newer_axis_l, deg2rad(newer_angle_l)]));
-
-    [new_axis_r, new_angle_r] = rotate_axis_angle_around_local_x(init_axis_r, init_angle_r, rightRoll);
-    [newer_axis_r, newer_angle_r] = rotate_axis_angle_around_local_y(new_axis_r, new_angle_r, rightPitch);
-    planeR.setOrientation(AxisAngle ([newer_axis_r, deg2rad(newer_angle_r)]));
-
-    ah.step();
-
-    pause(1);
-
     root.createFibulaOptimizationTwo(zOffset,rdpOffset);
 
     % Perform simulation steps
-    for i = 1:90
+    for i = 1:50
         ah.step();
     end
 
@@ -136,11 +122,17 @@
     % Create screws and export files
     root.getPlatePanel.createScrews();
     
+    ah.step();  
+
     root.exportFilesTwo();
     root.exportFemPlateTwo();
 
+    left_mandible = ah.find('models/Reconstruction/rigidBodies/mandibleL');
+    right_mandible = ah.find('models/Reconstruction/rigidBodies/mandibleR');
+
     
-    fileList = {'donor_opt0.obj', 'donor_opt1.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj', 'screw_opt1.obj'};
+    
+    fileList = {'donor_opt0.obj', 'donor_opt1.obj', 'plate_opt.art', 'resected_mandible_l_opt.obj', 'resected_mandible_r_opt.obj', 'screw_opt0.obj','screw_opt1.obj'};
 
     for i = 1:length(fileList)
         sourceFile = fullfile(sourceDir, fileList{i});
@@ -168,10 +160,9 @@
         disp(ME.message);
         rethrow(ME);
     end
-    
-     root = ah1.root();
 
-    if defectType == "RB"
+
+     if defectType == "RB"
         sphm_R = ah1.find ('models/jawmodel/axialSprings/sphm_R');
         sphm_R_parent = sphm_R.getParent();
         sphm_R_parent.remove (sphm_R);
@@ -181,13 +172,11 @@
         stm_R_parent.remove (stm_R);
 
     end
-
-
+    
     for i = 1:1240
         ah1.step();
     end
 
-    
     left_percent = ah1.getOprobeData('5');
     right_percent = ah1.getOprobeData('6');
 
@@ -197,10 +186,26 @@
     mid0_percent = ah1.getOprobeData('9');
     mid1_percent = ah1.getOprobeData('10');
 
-    loss = - (0.5*(mean(left_percent(:,2)) + mean(min(mid0_percent(:,2),mid1_percent(:,2)))) - 0.499 *abs(mean(left_percent(:,2)) - mean(min(mid0_percent(:,2),mid1_percent(:,2)))));
+
+    % Calculate the loss
+
+    loss1 = - (0.5*(mean(left_percent(:,2)) + min(mean(mid0_percent(:,2)),mean(mid1_percent(:,2)))) - 0.499 *abs(mean(left_percent(:,2)) - min(mean(mid0_percent(:,2)),mean(mid1_percent(:,2)))));
+
+
+
+
+     if Safety_On == true
+        loss2 =  calculateSafetyFactorsCost(left_safety, right_safety);
+    else
+        loss2 = 0 ;
+    end
+    
+    loss = loss1 + loss2 ; 
+
+
 
     % Close the second Arisynth instance
-    %pause(3);
-    %ah1.quit();
-    %ah1 = [];
-    %java.lang.System.gc();
+    pause(3);
+    ah1.quit();
+    ah1 = [];
+    java.lang.System.gc();

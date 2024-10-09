@@ -1,7 +1,7 @@
 function loss = runArtisynthSimTwo(params)
     
     defectType = 'RB'; 
-    trial = 1;
+    trial = 4;
     Safety_On = false;
 
     resultsFile = ['Finl_Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
@@ -118,7 +118,7 @@ function loss = runArtisynthSimTwo(params)
     root.createFibulaOptimizationTwo(zOffset,rdpOffset);
 
     % Perform simulation steps
-    for i = 1:90
+    for i = 1:50
         ah.step();
     end
 
@@ -234,7 +234,7 @@ function loss = runArtisynthSimTwo(params)
 
     % Calculate the loss
 
-    loss1 = - (0.5*(mean(left_percent(:,2)) + mean(min(mid0_percent(:,2),mid1_percent(:,2)))) - 0.499 *abs(mean(left_percent(:,2)) - mean(min(mid0_percent(:,2),mid1_percent(:,2)))));
+    loss1 = - (0.5*(mean(left_percent(:,2)) + min(mean(mid0_percent(:,2)),mean(mid1_percent(:,2)))) - 0.499 *abs(mean(left_percent(:,2)) - min(mean(mid0_percent(:,2)),mean(mid1_percent(:,2)))));
 
 
      if loss1 == 0.00 || isnan (loss1)

@@ -5,19 +5,19 @@ function results = helperFunctionTwo(results, currentIteration)
     clearvars -except results currentIteration;
 
     defectType = 'RB'; 
-    trial = 1;
+    trial = 4;
 
     resultsFile = ['Final_Result_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
     % Define the range of variables and initial points based on defectType
     
-    zOffsetRange = [-6, 6];
-    rdpOffsetRange = [-10, 10];
+    zOffsetRange = [-5, 5];
+    rdpOffsetRange = [-7, 7]; 
     leftRollRange = [-25, 25];
     leftPitchRange = [-25, 25];
     rightRollRange = [-15, 15];
     rightPitchRange = [-15, 15];
-    initialPoints = [-5, 0, 20, 20, 0, 0];  % Initial point for defect 'B'
+    initialPoints = [-5, 0, 20, 20, 0, 0];  % Initial point 
 
     % Use Latin Hypercube Sampling to generate 19 new sample points (20 total with initial point)
     numSamples = 20;  % Number of additional samples to generate (19 + 1 initial point = 20)

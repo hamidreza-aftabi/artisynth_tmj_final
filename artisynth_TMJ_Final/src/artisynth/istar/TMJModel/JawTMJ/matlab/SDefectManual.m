@@ -45,11 +45,12 @@
     %rightRoll = double(params.rightRoll);
     %rightPitch = double(params.rightPitch);
    
-    zOffset = -4.65883516618166;
-    leftRoll =  -8.15;
-    leftPitch = -9.03;
-    rightRoll =  -9.41;
-    rightPitch =  9.60;
+
+    zOffset = -6.87507521406159;
+    leftRoll =  -14.5515610958586;
+    leftPitch = -14.6155834463781;
+    rightRoll =  -7.87420773760786;
+    rightPitch = -6.89851329542230;
   
     % Debugging information
     fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
