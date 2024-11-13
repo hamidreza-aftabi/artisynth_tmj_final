@@ -38,12 +38,18 @@
   
 
 
-    zOffset = -1.70717994160864;
-    leftRoll =  -25;
-    leftPitch = -25;
-    rightRoll =  19.0933647143706;
-    rightPitch = 7.01348752778682;
+    zOffset = -1.82;
+    leftRoll =  24.2;
+    leftPitch = 20.4;
+    rightRoll = 19.98;
+    rightPitch = 18.7;
 
+    
+    %zOffset = -1.77;
+    %leftRoll =  18.44;
+    %leftPitch = 15.43;
+    %rightRoll =  16.57;
+    %rightPitch = 16.1;
 
     % Debugging information
     fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...

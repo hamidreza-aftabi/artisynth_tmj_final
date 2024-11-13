@@ -13,13 +13,13 @@ function costFunction = calculateSafetyFactorsCost(leftMatrix, rightMatrix)
 
     % Calculate the cost function based on the safety factors
     if minLeft < safetyFactorThreshold
-        leftCost = leftWeight * abs((safetyFactorThreshold - minLeft));
+        leftCost = leftWeight * abs((safetyFactorThreshold - minLeft))^2;
     else
         leftCost = 0;
     end
 
     if minRight < safetyFactorThreshold
-        rightCost = rightWeight * abs((safetyFactorThreshold - minRight));
+        rightCost = rightWeight * abs((safetyFactorThreshold - minRight))^2;
     else
         rightCost = 0;
     end

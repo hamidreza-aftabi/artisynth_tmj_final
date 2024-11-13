@@ -14,6 +14,11 @@ function loss = runArtisynthSimTwo(params)
     end
 
 
+    addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
+    setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
+ 
+
+
     sourceDir = fullfile('..','..','..', '..', '..', '..', '..', '..', 'artisynth_istar', 'src', 'artisynth', 'istar', 'reconstruction', 'optimizationResultTwo');
     destinationDir = fullfile('..', 'geometry');
     %sourceDir = 'C:\Users\Hamidreza\git\artisynth_istar\src\artisynth\istar\reconstruction\optimizationResult';

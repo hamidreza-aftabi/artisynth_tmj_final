@@ -1,12 +1,12 @@
-function results = helperFunctionV3(results, currentIteration)
+function results = helperFunctionSens(results, currentIteration)
 
     % Clear unnecessary variables to manage memory
     clearvars -except results currentIteration;
 
-    defectType = 'S';  % Set defect type ('B' or 'S')
+    defectType = 'B';  % Set defect type ('B' or 'S')
     trial = 1;
 
-    resultsFile = ['Final_Result_Safety1_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+    resultsFile = ['Sens_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
     % Define the range of variables and initial points based on defectType
     if defectType == "B"
@@ -15,7 +15,8 @@ function results = helperFunctionV3(results, currentIteration)
         leftPitchRange = [-25, 25];
         rightRollRange = [-20, 20];
         rightPitchRange = [-20, 20];
-        initialPoints = [-2, 25, 25, 20, 20];  % Initial point for defect 'B'
+        initialPoints = [-1.82, 24.2, 20.4, 19.98, 18.7];  % Initial point for defect 'B'
+
 
     elseif defectType == "S"
         zOffsetRange = [-7, 3];
@@ -23,12 +24,11 @@ function results = helperFunctionV3(results, currentIteration)
         leftPitchRange = [-15, 15];
         rightRollRange = [-10, 10];
         rightPitchRange = [-15, 15];
-        initialPoints = [3, 10, -15, -10, -15;
-                        0.2739, -9.8, 2.43, 9.76, 12.90];  % Initial point for defect 'S'
+        initialPoints = [-7 0 0 0 0];  % Initial point for defect 'S'
     end
 
     % Use Latin Hypercube Sampling to generate 19 new sample points (20 total with initial point)
-    numSamples = 20;  % Number of additional samples to generate (19 + 1 initial point = 20)
+    numSamples = 3;  % Number of additional samples to generate (19 + 1 initial point = 20)
     numVariables = 5; % Number of variables to sample
 
     % Define the variable ranges
@@ -63,8 +63,10 @@ function results = helperFunctionV3(results, currentIteration)
     rightRollVar = optimizableVariable('rightRoll', rightRollRange);
     rightPitchVar = optimizableVariable('rightPitch', rightPitchRange);
 
+
     % Combine all optimizable variables into an array
     vars = [zOffsetVar, leftRollVar, leftPitchVar, rightRollVar, rightPitchVar];
+
 
     % Check if we are resuming from a previous session
     if exist('results', 'var') && ~isempty(results)
@@ -75,8 +77,7 @@ function results = helperFunctionV3(results, currentIteration)
         % Run Bayesian optimization with the combined initial points
         results = bayesopt(@(params) runArtisynthSim(params), vars, ...
             'Verbose', 1, ...
-            'AcquisitionFunctionName', 'expected-improvement-plus', ...
-            'ExplorationRatio', 0.6, ...
+            'AcquisitionFunctionName', 'expected-improvement', ...
             'InitialX', initialTable, ...  % Provide the combined initial points
             'MaxObjectiveEvaluations', 1, ... % Initial evaluations
             'IsObjectiveDeterministic', false, ...

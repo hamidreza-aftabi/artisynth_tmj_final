@@ -103,23 +103,23 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    boolean myUseScrews = true;
   
    
-   double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
-   double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
+   public static double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
+   public static double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
 
-   double CancellousBoneDensity = 100.0 * DENSITY_TO_mmKS;
-   double CancellousBoneE = 1.3*1e9 * PRESSURE_TO_mmKS;
-   double CancellousBoneNu = 0.3;
+   public static double CancellousBoneDensity = 100.0 * DENSITY_TO_mmKS;
+   public static double CancellousBoneE = 1.3*1e9 * PRESSURE_TO_mmKS;
+   public static double CancellousBoneNu = 0.3;
 
-   double myTitaniumDensity = 4420.0 * DENSITY_TO_mmKS;
-   double myTitaniumE = 100*1e9 * PRESSURE_TO_mmKS;
-   double myTitaniumNu = 0.3;
+   public static double myTitaniumDensity = 4420.0 * DENSITY_TO_mmKS;
+   public static double myTitaniumE = 100*1e9 * PRESSURE_TO_mmKS;
+   public static double myTitaniumNu = 0.3;
    
-   double corticalBoneYoungModulus =  13.7*1e9 * PRESSURE_TO_mmKS;
-   double corticalBonePoissonRatio = 0.3;
-   double corticalBoneDensity = 2000.0 * DENSITY_TO_mmKS;
+   public static double corticalBoneYoungModulus =  13.7*1e9 * PRESSURE_TO_mmKS;
+   public static double corticalBonePoissonRatio = 0.3;
+   public static double corticalBoneDensity = 2000.0 * DENSITY_TO_mmKS;
  
-   double corticalAppositionDensity = 0.002;
-   double cancellousAppositionDensity = 0.00015;
+   public static double corticalAppositionDensity = 0.002;
+   public static double cancellousAppositionDensity = 0.00015;
 
    
    double t=0.75; 
@@ -149,9 +149,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    PolygonalMesh surfaceLeft;
    PolygonalMesh surfaceRight;
 
-
    
-
+  
 
    private static Color PALE_BLUE = new Color (0.6f, 0.6f, 1.0f);
    private static Color GOLD = new Color (1f, 0.8f, 0.1f);
@@ -196,7 +195,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    JButton button;
    
    
-   protected static PropertyList myProps = new PropertyList (JawFemDemoOptimize.class, RootModel.class);
+   public static PropertyList myProps = new PropertyList (JawFemDemoOptimize.class, RootModel.class);
   
    
    public PropertyList getAllPropertyInfo() {
@@ -246,6 +245,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
     return computeSafetyRight ();
  }
  
+ 
+
 /*
    @Override
    public void prerender ( RenderList list ) {
@@ -270,6 +271,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    @Override
    public void build (String[] args) throws IOException {
       super.build (args);
+      
+ 
      
       setWorkingDir();
       myJawModel = new JawModelFEM("jawmodel");
@@ -296,9 +299,9 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
       if (myShowDonorStress) {
          // set donor FEM models to display stress on their surfaces
-         myDonor0.setSurfaceRendering (SurfaceRender.Stress);
+         myDonor0.setSurfaceRendering (SurfaceRender.EnergyDensity);
          myDonor0.setStressPlotRanging (Ranging.Fixed);
-         myDonor0.setStressPlotRange (new DoubleInterval(0, 200000));
+         myDonor0.setStressPlotRange (new DoubleInterval(0, 0.08));
         
          // allow stress ranges to be controlled in the control panel
          ControlPanel panel1 = new ControlPanel("options");
@@ -334,7 +337,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
          */
       
 
-     /* 
+     
       FemCutPlane cutplane = new FemCutPlane (
       new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
       
@@ -364,7 +367,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       addRenderable (cbar);
       cbar. setColorMap (cutplane. getColorMap ());
      
-       */
+       
        
       
       /*
@@ -539,8 +542,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
          for (FemNode3d node : element.getNodes()) {
             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
                 elemsNearSurfaceLeft.add (element);
-                RenderProps.setLineColor (element, Color.MAGENTA);
-                RenderProps.setVisible (element, Element_Visibility);
+                RenderProps.setLineColor (element, Color.green);
+                RenderProps.setVisible (element, true);
                 
             }
               
@@ -676,9 +679,9 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       // Return the minimum safety factor
       double minSafetyFactor = Math.min(safetyFactorCortical, safetyFactorCancellous);
 
-      System.out.println("Left Max Cortical Stress = " + maxCorticalStress + " MPa, Left Safety Factor = " + safetyFactorCortical);
-      System.out.println("Left Max Cancellous Stress = " + maxCancellousStress + " MPa, Left Safety Factor = " + safetyFactorCancellous);
-      System.out.println("Left Minimum Safety Factor = " + minSafetyFactor);
+      //System.out.println("Left Max Cortical Stress = " + maxCorticalStress + " MPa, Left Safety Factor = " + safetyFactorCortical);
+      //System.out.println("Left Max Cancellous Stress = " + maxCancellousStress + " MPa, Left Safety Factor = " + safetyFactorCancellous);
+      //System.out.println("Left Minimum Safety Factor = " + minSafetyFactor);
 
       return minSafetyFactor;
   }
@@ -722,9 +725,9 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       // Return the minimum safety factor
       double minSafetyFactor = Math.min(safetyFactorCortical, safetyFactorCancellous);
 
-      System.out.println("Right Max Cortical Stress = " + maxCorticalStress + " MPa, Right Safety Factor = " + safetyFactorCortical);
-      System.out.println("Right Max Cancellous Stress = " + maxCancellousStress + " MPa, Right Safety Factor = " + safetyFactorCancellous);
-      System.out.println("Right Minimum Safety Factor = " + minSafetyFactor);
+      //System.out.println("Right Max Cortical Stress = " + maxCorticalStress + " MPa, Right Safety Factor = " + safetyFactorCortical);
+      //System.out.println("Right Max Cancellous Stress = " + maxCancellousStress + " MPa, Right Safety Factor = " + safetyFactorCancellous);
+      //System.out.println("Right Minimum Safety Factor = " + minSafetyFactor);
 
       return minSafetyFactor;
   }
@@ -812,8 +815,25 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
           if (elementStrainEnergyDensity / (1000 * density) > 0.0396) {
               appCounter = appCounter + 1;
+            //  RenderProps.setLineColor (element, Color.red);
+            //  RenderProps.setVisible (element, true);
+              
           }
+          
+          else {
+             
+            if (isNearSurface) {
+            // RenderProps.setLineColor (element, Color.blue);
+            }
+            else {
+             //  RenderProps.setLineColor (element, Color.green);
+            }
+            }
+          
       }
+
+      System.out.println("left elemnt number in appose = " + appCounter );
+      System.out.println("left elemnt number total suface = " + elemsNearSurfaceLeft.size() );
 
       return appCounter / elemsNearSurfaceLeft.size();
   }

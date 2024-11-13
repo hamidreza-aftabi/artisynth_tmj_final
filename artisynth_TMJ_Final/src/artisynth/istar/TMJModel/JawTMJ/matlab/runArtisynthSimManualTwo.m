@@ -4,13 +4,12 @@
 
     defectType = "RB"; 
 
-
-    zOffset = -5.94406221641167;
-    rdpOffset = 8.82685370794607;
-    leftRoll = 21.4008197501238;
-    leftPitch = 6.29391553799110;
-    rightRoll = -8.94866427785834;
-    rightPitch = 0.136970103301765;
+    zOffset = -4.91;
+    rdpOffset = 6.69 ;
+    leftRoll = 18.35 ;
+    leftPitch = 23.99;
+    rightRoll = -3.57;
+    rightPitch = 8.07;
 
     
     %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
@@ -30,6 +29,8 @@
     toggleComment(bodyList, 'screw1', 'remove');
     toggleComment(bodyList, 'donor_mesh1', 'remove');
 
+
+    resetMuscles();
 
     if defectType == "RB"
         

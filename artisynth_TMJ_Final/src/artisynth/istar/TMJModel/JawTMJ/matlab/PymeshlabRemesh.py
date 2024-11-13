@@ -52,7 +52,8 @@ for file_name, target_length in file_list.items():
         ms.meshing_remove_duplicate_faces()
         ms.meshing_repair_non_manifold_edges()
         ms.meshing_repair_non_manifold_vertices()
-        
+        ms.meshing_close_holes(maxholesize = 30, newfaceselected = True, selfintersection = True, refinehole = True, refineholeedgelen = pymeshlab.PercentageValue(2.906027))
+
         # Save the remeshed mesh
         ms.save_current_mesh(output_mesh_path)
         print(f"Remeshed file has been saved to {output_mesh_path}")

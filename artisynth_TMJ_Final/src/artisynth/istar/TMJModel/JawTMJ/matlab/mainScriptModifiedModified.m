@@ -1,13 +1,13 @@
 clc;
 clear all;
 
-defectType = 'S';
+defectType = 'B';
 trial = 1;
 
-resultsFile = ['Final_Result_Safety1_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+resultsFile = ['Sens_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
 % Number of total iterations
-totalIterations = 100;
+totalIterations = 88;
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -29,7 +29,7 @@ while currentIteration <= totalIterations
   
     try
         % Run the helper function
-        results = helperFunctionV3(results, currentIteration);
+        results = helperFunctionWithSens(results, currentIteration);
         
         % Save results and current iteration
         currentIteration = currentIteration + 1;
