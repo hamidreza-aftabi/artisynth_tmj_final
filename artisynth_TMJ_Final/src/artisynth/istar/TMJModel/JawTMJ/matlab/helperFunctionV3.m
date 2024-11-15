@@ -1,4 +1,4 @@
-function results = helperFunctionSens(results, currentIteration)
+function results = helperFunctionV3(results, currentIteration)
 
     % Clear unnecessary variables to manage memory
     clearvars -except results currentIteration;
