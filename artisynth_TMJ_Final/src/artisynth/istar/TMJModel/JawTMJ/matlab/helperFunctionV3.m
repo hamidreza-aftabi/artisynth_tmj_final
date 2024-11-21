@@ -6,7 +6,7 @@ function results = helperFunctionV3(results, currentIteration)
     defectType = 'B';  % Set defect type ('B' or 'S')
     trial = 1;
 
-    resultsFile = ['Sens_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+    resultsFile = ['Traj_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
     % Define the range of variables and initial points based on defectType
     if defectType == "B"
@@ -15,7 +15,18 @@ function results = helperFunctionV3(results, currentIteration)
         leftPitchRange = [-25, 25];
         rightRollRange = [-20, 20];
         rightPitchRange = [-20, 20];
-        initialPoints = [-1.82, 24.2, 20.4, 19.98, 18.7];  % Initial point for defect 'B'
+        initialPoints = [1.5, 0, 0, 0, 0;
+                         1.5, 0, 0, 0, 0;
+                         1.5, 0, 0, 0, 0;
+                         1.5, 0, 0, 0, 0;
+                         -1.82, 24.2, 20.4, 19.98, 18.7;
+                         -1.82, 24.2, 20.4, 19.98, 18.7;
+                         -1.82, 24.2, 20.4, 19.98, 18.7;
+                         -1.82, 24.2, 20.4, 19.98, 18.7;
+                         -1.77, 18.44, 15.43, 16.57, 16.1;
+                         -1.77, 18.44, 15.43, 16.57, 16.1;
+                         -1.77, 18.44, 15.43, 16.57, 16.1;
+                         -1.77, 18.44, 15.43, 16.57, 16.1];  % Initial point for defect 'B'
 
 
     elseif defectType == "S"

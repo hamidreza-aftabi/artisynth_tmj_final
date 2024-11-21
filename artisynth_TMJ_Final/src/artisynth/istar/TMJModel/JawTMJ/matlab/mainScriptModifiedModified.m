@@ -3,11 +3,10 @@ clear all;
 
 defectType = 'B';
 trial = 1;
-
-resultsFile = ['Sens_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+resultsFile = ['Sobol_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
 
 % Number of total iterations
-totalIterations = 88;
+totalIterations = 100;
 
 %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
 addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
@@ -29,7 +28,7 @@ while currentIteration <= totalIterations
   
     try
         % Run the helper function
-        results = helperFunctionWithSens(results, currentIteration);
+        results = helperFunctionV4WithSobolSeq(results, currentIteration);
         
         % Save results and current iteration
         currentIteration = currentIteration + 1;

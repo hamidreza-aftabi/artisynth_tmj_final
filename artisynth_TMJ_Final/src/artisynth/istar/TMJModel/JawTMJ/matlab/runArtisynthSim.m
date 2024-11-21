@@ -2,16 +2,14 @@ function loss = runArtisynthSim(params)
     
     defectType = 'B'; 
     trial = 1;
-
     Safety_On = false;
-
-    resultsFile = ['Sens_Finl_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
-    PercentFile = ['Sens_Final_Percent_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
-    logFile = ['Sens_Final_Log_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    resultsFile = ['Sobol_Final_Result_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.mat'];
+    PercentFile = ['Sobol_Final_Percent_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+    logFile = ['Sobol_Final_Log_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
 
 
     if   Safety_On == true
-        safetyFile = ['Safety_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
+        safetyFile = ['Traj_Safety_Sensitivity_' defectType '_Defect_Trial_' num2str(trial) '.txt'];
     end
 
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));

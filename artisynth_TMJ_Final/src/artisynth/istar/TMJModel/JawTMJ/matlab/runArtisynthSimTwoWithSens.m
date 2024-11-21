@@ -13,6 +13,14 @@ function loss = runArtisynthSimTwoWithSens(params)
         safetyFile = ['Safety' defectType '_Defect_Trial_' num2str(trial) '.txt'];
     end
 
+   iterationFile = 'currentIteration.mat';
+
+    % Load or initialize current iteration from file
+    if isfile(iterationFile)
+        load(iterationFile, 'currentIteration');  % Load iteration if the file exists
+    else
+        currentIteration = 1;  % Initialize if the file does not exist
+    end
 
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  
@@ -77,7 +85,7 @@ function loss = runArtisynthSimTwoWithSens(params)
     if paramIdx == 10
        
          % List of muscles (using 'r' as the base, will replace with 'l' for left side)
-        muscles = {'rip', 'lip'};
+        muscles = {'lat', 'lmt', 'lpt', 'lip', 'ldm', 'lsm', 'lmp', 'rip'};
         
         % Loop through each muscle, adjusting both right and left sides
         for i = 1:length(muscles)
@@ -93,7 +101,7 @@ function loss = runArtisynthSimTwoWithSens(params)
 
     if paramIdx == 11
          % List of muscles (using 'r' as the base, will replace with 'l' for left side)
-        muscles = {'rip', 'lip'};
+        muscles = {'lat', 'lmt', 'lpt', 'lip', 'ldm', 'lsm', 'lmp', 'rip'};
         
         % Loop through each muscle, adjusting both right and left sides
         for i = 1:length(muscles)
@@ -102,12 +110,7 @@ function loss = runArtisynthSimTwoWithSens(params)
             muscle_right = ah1.find(muscle_name_right);
             material_right = muscle_right.getMaterial();
             material_right.setMaxForce(material_right.getMaxForce() * adjustment);
-        
-            % Left-side muscle (replace 'r' with 'l')
-            muscle_name_left = strrep(muscle_name_right, '/r', '/l');
-            muscle_left = ah1.find(muscle_name_left);
-            material_left = muscle_left.getMaterial();
-            material_left.setMaxForce(material_left.getMaxForce() * adjustment);
+
         end 
 
     end
@@ -200,7 +203,12 @@ function loss = runArtisynthSimTwoWithSens(params)
         fprintf(fileID, '\n');
         fclose(fileID);
     end
-
+  
+    % Increment current iteration
+    currentIteration = currentIteration + 1;
+    
+    % Save the updated iteration count back to the file
+    save(iterationFile, 'currentIteration');
 
     % Close the second Arisynth instance
     pause(3);

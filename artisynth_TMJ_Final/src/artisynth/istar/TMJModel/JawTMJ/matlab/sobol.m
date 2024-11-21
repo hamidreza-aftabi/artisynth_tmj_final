@@ -2,8 +2,8 @@
 
 % Clear workspace and load Bayesian optimization results
 clear;
-load('Final_Result_B_Defect_Trial_5.mat');  % Replace with the correct file name
-
+load('Sobol_Final_Result_Sensitivity_S_Defect_Trial_2.mat');  % Replace with the correct file name
+%load('Final_Result_S_Defect_Trial_1.mat');
 % Extract parameter values and output from results
 paramValues = results.XTrace;          % Extract parameter values
 outputValues = results.ObjectiveTrace;  % Extract objective (output) values

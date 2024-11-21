@@ -24,7 +24,7 @@ function loss = runArtisynthSimWithSens(params)
         currentIteration = 1;  % Initialize if the file does not exist
     end
 
-% Increment current itera
+    % Increment current itera
 
     addpath(fullfile('..','..', '..', '..', '..', '..', '..', '..', 'artisynth_core', 'matlab'));
     setArtisynthClasspath(getenv('ARTISYNTH_HOME'));  

@@ -2,7 +2,7 @@
 
 % Clear workspace and load Bayesian optimization results
 clear;
-load('Final_Result_RB_Defect_Trial_Final.mat');  % Load your actual results file
+load('Final_Result_RB_Defect_Trial_2.mat');  % Load your actual results file
 
 % Extract parameter values and output from results
 paramValues = results.XTrace;          % Extract parameter values
@@ -51,7 +51,7 @@ meanOutput = mean(predictedOutputs);
 varOutput = var(predictedOutputs);
 
 % Binning parameters for Sobol' approximation
-numBins = 10;  % Number of bins for each parameter
+numBins = 20;  % Number of bins for each parameter
 
 % Loop through each parameter to calculate Sobol' indices
 for i = 1:numVariables
