@@ -38,7 +38,7 @@
   
 
 
-    zOffset = -1.82;
+    zOffset = -3;
     leftRoll =  24.2;
     leftPitch = 20.4;
     rightRoll = 19.98;
