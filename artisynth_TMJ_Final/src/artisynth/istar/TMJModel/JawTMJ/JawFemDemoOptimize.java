@@ -107,7 +107,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    public static double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
    public static double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
 
-   public static double CancellousBoneDensity = 100.0 * DENSITY_TO_mmKS;
+   public static double CancellousBoneDensity = 1000.0 * DENSITY_TO_mmKS;
    public static double CancellousBoneE = 1.3*1e9 * PRESSURE_TO_mmKS;
    public static double CancellousBoneNu = 0.3;
 
