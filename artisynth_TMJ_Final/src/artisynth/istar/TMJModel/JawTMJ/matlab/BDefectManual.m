@@ -1,6 +1,6 @@
     
     defectType = "B"; 
-    Safety_On = true;
+    Safety_On = false;
 
     %addpath('C:\Users\Hamidreza\git\artisynth_core\matlab');
     %setArtisynthClasspath(getenv('ARTISYNTH_HOME'));
@@ -36,20 +36,19 @@
     %rightRoll = double(params.rightRoll);
     %rightPitch = double(params.rightPitch);
   
-
-
-    zOffset = -3;
-    leftRoll =  24.2;
-    leftPitch = 20.4;
-    rightRoll = 19.98;
-    rightPitch = 18.7;
-
     
     %zOffset = -1.77;
-    %leftRoll =  18.44;
-    %leftPitch = 15.43;
-    %rightRoll =  16.57;
-    %rightPitch = 16.1;
+    %leftRoll =  23;
+    %leftPitch = 20;
+    %rightRoll =  20;
+    %rightPitch = 20;
+
+
+    zOffset = -1.7;
+    leftRoll = 0;
+    leftPitch = 0;
+    rightRoll =  0;
+    rightPitch = 0;
 
     % Debugging information
     fprintf('Running simulation with zOffset = %.2f, leftRoll = %.2f, leftPitch = %.2f, rightRoll = %.2f, rightPitch = %.2f\n', ...
@@ -115,7 +114,7 @@
     root.createFibulaOptimization(zOffset);
 
     % Perform simulation steps
-    for i = 1:90
+    for i = 1:130
         ah.step();
     end
 

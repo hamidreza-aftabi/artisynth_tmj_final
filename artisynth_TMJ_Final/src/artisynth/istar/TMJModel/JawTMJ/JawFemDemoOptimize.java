@@ -65,6 +65,7 @@ import artisynth.core.util.ScalarRange;
 import artisynth.core.workspace.RootModel;
 import maspack.geometry.BVFeatureQuery;
 import maspack.geometry.Face;
+import maspack.geometry.MeshBase;
 import maspack.geometry.PolygonalMesh;
 import maspack.geometry.Vertex3d;
 import maspack.matrix.AffineTransform3d;
@@ -97,11 +98,11 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    boolean myShowDonorStress = false;
    
-
-  
+   boolean cutPlane = false;
    
-   boolean myUseScrews = true;
-  
+   String donorMesh = "donor_opt0_remeshed.obj";
+   String plateFile = "plate_opt.art";
+     
    
    public static double DENSITY_TO_mmKS = 1e-9; // convert density from MKS tp mmKS
    public static double PRESSURE_TO_mmKS = 1e-3; // convert pressure from MKS tp mmKS
@@ -114,17 +115,12 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    public static double myTitaniumE = 100*1e9 * PRESSURE_TO_mmKS;
    public static double myTitaniumNu = 0.3;
    
+   public static double corticalBoneDensity = 2000.0 * DENSITY_TO_mmKS;
    public static double corticalBoneYoungModulus =  13.7*1e9 * PRESSURE_TO_mmKS;
    public static double corticalBonePoissonRatio = 0.3;
-   public static double corticalBoneDensity = 2000.0 * DENSITY_TO_mmKS;
  
    public static double corticalAppositionDensity = 0.002;
-   public static double cancellousAppositionDensity = 0.00015;
-
-   
-   double t=0.75; 
-
-   protected static double unitConversion = 1000;
+   public static double cancellousAppositionDensity = 0.0015;
 
    
    // for interaction between the donor check Optimization paper for prosthesis
@@ -133,6 +129,14 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    double  DEFAULT_Damping = 10; 
    double  DEFAULT_Nu = 0.3;
    
+   
+   double corticalThickness = 2.5;
+   
+   double t=0.75; 
+
+   protected static double unitConversion = 1000;
+
+ 
    
    
    FemModel3d myDonor0;
@@ -150,11 +154,11 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    PolygonalMesh surfaceRight;
 
    
-  
-
+ 
    private static Color PALE_BLUE = new Color (0.6f, 0.6f, 1.0f);
    private static Color GOLD = new Color (1f, 0.8f, 0.1f);
 
+   
    String myGeoDir = PathFinder.getSourceRelativePath (
       JawFemDemoOptimize.class, "geometry/");
    
@@ -247,7 +251,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
  
  
 
-/*
+    /*
    @Override
    public void prerender ( RenderList list ) {
      super.prerender (list );
@@ -337,50 +341,53 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
          */
       
 
+     if (cutPlane == true) {
+        
      
-      FemCutPlane cutplane = new FemCutPlane (
-      new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
-      
-      myDonor0. addCutPlane (cutplane);
-          
-      //integField.setVisualization (ScalarNodalField.Visualization.SURFACE);
-      //integField.addRenderMeshComp (cutplane);
-      
-      cutplane. setSurfaceRendering (SurfaceRender.EnergyDensity);
-      cutplane.setStressPlotRanging (Ranging.Fixed);
-      cutplane.setStressPlotRange (new DoubleInterval(0, .0792));
-      cutplane. setAxisLength (25);
-      
-      //integField.setRenderRange (new ScalarRange (ScalarRange.Updating.FIXED));
-      //RenderProps.setLineWidth (cutplane , 2);
-      //integField.setRenderRange (new ScalarRange (0, .04));    
-      //RainbowColorMap rainbowMap = new RainbowColorMap();
-      //field.setColorMap(hueColorMap);
-      
-      
-      
-      ColorBar cbar = new ColorBar ();
-      cbar. setName("colorBar");
-      cbar. setNumberFormat ("%.3f"); // 2 decimal places
-      cbar. populateLabels (0.0 , .0792 , 10); // Start with range [0,1], 10 ticks
-      cbar. setLocation (-100, 0.1, 20, 0.8) ;
-      addRenderable (cbar);
-      cbar. setColorMap (cutplane. getColorMap ());
-     
-       
-       
-      
-      /*
-      ControlPanel panel = new ControlPanel ();
-      panel.addWidget (integField , " visualization ");
-      panel.addWidget (integField , " renderRange ");
-      panel.addWidget (integField , " colorMap ");
-      addControlPanel ( panel);
-      */
-     
-      /*
-      addMonitor(new StressUpdateMonitor(myDonor0, integField));
-       */
+         FemCutPlane cutplane = new FemCutPlane (
+         new RigidTransform3d (-32.7614, -69.3082, -98.8487, 0, 0 ,Math . toRadians (90) ));
+         
+         myDonor0. addCutPlane (cutplane);
+             
+         //integField.setVisualization (ScalarNodalField.Visualization.SURFACE);
+         //integField.addRenderMeshComp (cutplane);
+         
+         cutplane. setSurfaceRendering (SurfaceRender.EnergyDensity);
+         cutplane.setStressPlotRanging (Ranging.Fixed);
+         cutplane.setStressPlotRange (new DoubleInterval(0, .0792));
+         cutplane. setAxisLength (25);
+         
+         //integField.setRenderRange (new ScalarRange (ScalarRange.Updating.FIXED));
+         //RenderProps.setLineWidth (cutplane , 2);
+         //integField.setRenderRange (new ScalarRange (0, .04));    
+         //RainbowColorMap rainbowMap = new RainbowColorMap();
+         //field.setColorMap(hueColorMap);
+         
+         
+         
+         ColorBar cbar = new ColorBar ();
+         cbar. setName("colorBar");
+         cbar. setNumberFormat ("%.3f"); // 2 decimal places
+         cbar. populateLabels (0.0 , .0792 , 10); // Start with range [0,1], 10 ticks
+         cbar. setLocation (-100, 0.1, 20, 0.8) ;
+         addRenderable (cbar);
+         cbar. setColorMap (cutplane. getColorMap ());
+        
+             
+         
+         /*
+         ControlPanel panel = new ControlPanel ();
+         panel.addWidget (integField , " visualization ");
+         panel.addWidget (integField , " renderRange ");
+         panel.addWidget (integField , " colorMap ");
+         addControlPanel ( panel);
+         */
+        
+         /*
+         addMonitor(new StressUpdateMonitor(myDonor0, integField));
+         */
+         
+     }
       
       for (double i=0.01; i<=2*t; i=i+0.01 ){
          addWayPoint (i);
@@ -389,7 +396,6 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       
       loadProbes("probe.art");
      
-      //addControlPanel();
       
       loadBoluses();
             
@@ -512,11 +518,9 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
      frame.setTitle("Urken's Defect Classification (Forward)");
      frame.setSize(330, 500);
-     //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
      frame.add(panel);
      frame.setVisible(false);
-     
-     
      
      
      
@@ -543,7 +547,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
             if (nodesOnSurfaceLeft.contains ((FemNode3d)node)) {
                 elemsNearSurfaceLeft.add (element);
                 RenderProps.setLineColor (element, Color.green);
-                RenderProps.setVisible (element, true);
+                RenderProps.setVisible (element, Element_Visibility);
                 
             }
               
@@ -586,14 +590,13 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
         "rigidBodies/donor_mesh0");
     RenderProps.setVisible (myDonor0Mesh, false);
 
-     // Get the surface mesh from the donor mesh rigid body
    
-   //Get the vertices from the surface mesh of the donor mesh rigid body
+    //Get the vertices from the surface mesh of the donor mesh rigid body
     donorMeshSurface = myDonor0Mesh.getSurfaceMesh();
-   double distanceThreshold = 2.5;  // Set your distance threshold
+    double distanceThreshold = corticalThickness;  // Set your distance threshold
    
    //Set to store elements close to the surface
-  elementsCloseToSurface = new HashSet<>();
+   elementsCloseToSurface = new HashSet<>();
    
    //Iterate over all elements in the FEM model
    for (FemElement3d element : myDonor0.getElements()) {
@@ -618,7 +621,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
      // If the closest distance is within the threshold, add the element and color it
      if (minDistance < distanceThreshold) {
          elementsCloseToSurface.add(element);
-         RenderProps.setLineColor(element, Color.GREEN);  // Color the element green
+         RenderProps.setLineColor(element, Color.YELLOW);  // Color the element green
          RenderProps.setVisible (element, Element_Visibility);
 
          LinearMaterial corticalBoneMaterial = new LinearMaterial(corticalBoneYoungModulus, corticalBonePoissonRatio);
@@ -635,10 +638,12 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    //Debug: print the number of close elements found
    System.out.println("Number of elements close to the surface: " + elementsCloseToSurface.size());
    
+ 
+  }
    
-
    
-   }
+   
+   
    
    
    
@@ -686,6 +691,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       return minSafetyFactor;
   }
 
+   
+   
    
    
    public double computeSafetyRight() {
@@ -792,8 +799,6 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    
    
-   
-   
    public double computePercStressStrainDonor0LeftBuiltin() {
       // Enable necessary computations
       myDonor0.setComputeNodalStress(true);
@@ -863,48 +868,30 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
           }
       }
 
+
+      System.out.println("right elemnt number in appose = " + appCounter );
+      System.out.println("right elemnt number total suface = " + elemsNearSurfaceRight.size() );
+      
       return appCounter / elemsNearSurfaceRight.size();
   }
 
    
 
    
-   /**
-    * Create a FEM model from a triangular surface mesh using Tetgen.
-    *
-    * @param mech MechModel to add the FEM model to
-    * @param name name of the FEM model
-    * @param meshName name of the mesh file in the geometry folder
-    * @param density of the FEM
-    * @param E Young's modulus for the FEM material
-    * @param nu Possion's ratio for the FEM material
-    */
+
    public FemModel3d createFemModel (
       MechModel mech, String name, String meshName) {
 
-      // create the fem and set its material properties
       FemModel3d fem = new FemModel3d (name);
-      //fem.setDensity (density);
-      //fem.setMaterial (new LinearMaterial (E, nu));
-      
 
-      // load the triangular surface mesh and then call createFromMesh,
-      // which uses tetgen to create a tetrahedral volumetric mesh:
+      
       PolygonalMesh surface = loadMesh (meshName);
       FemFactory.createFromMesh (fem, surface, /*tetgen quality=*/1.5);
 
-      // damping parameters are important for stabilty
       fem.setMassDamping (1.0);
       fem.setStiffnessDamping (0);
 
-      // enable computation of nodal stresses. Do this so that stresses will be
-      // computed even if they are not being rendered.
-      //fem.setComputeNodalStress (true);
-
-      // turn on surface rendering and set surface color to light blue
       
-      //RenderProps.setFaceColor (fem, PALE_BLUE);
-      //fem.setSurfaceRendering (FemModel.SurfaceRender.Shaded);
       RenderProps.setSphericalPoints (fem, 0.2, Color.BLUE);
 
       mech.addModel (fem);
@@ -912,11 +899,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    }
 
    
-
    
-   /**
-    * Load a polygonal mesh with the given name from the geometry folder.
-    */
+
    private PolygonalMesh loadMesh (String meshName) {
       PolygonalMesh mesh = null;
       String meshPath = myGeoDir + meshName;
@@ -930,18 +914,8 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       return mesh;
    }
 
+
    
-   /**
-    * Attach an FEM model to another body (either an FEM or a rigid body)
-    * by attaching a subset of its nodes to that body.
-    *
-    * @param mech MechModel containing all the components
-    * @param fem FEM model to be connected
-    * @param body body to attach the FEM to. Can be a rigid body
-    * or another FEM.
-    * @param nodeNums numbers of the FEM nodes which should be attached
-    * to the body
-    */
    public void attachFemToBody (
       MechModel mech, FemModel3d fem, PointAttachable body, int[] nodeNums) {
 
@@ -952,17 +926,6 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
   
    
-   /**
-    * Attach an FEM model to another body (either an FEM or a rigid body) by
-    * attaching all surface nodes that are within a certain distance of the
-    * body's surface mesh.
-    *
-    * @param mech MechModel containing all the components
-    * @param fem FEM model to be connected
-    * @param body body to attach the FEM to. Can be a rigid body
-    * or another FEM.
-    * @param dist distance to the body surface for attaching nodes
-    */
    public void attachFemToBody (
       MechModel mech, FemModel3d fem, PointAttachable body, double dist) {
       
@@ -994,20 +957,11 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
    
    public void addFemDonorPlate() {
      
-     //donor
-     //  myDonor0 = createFemModel (
-     //     myJawModel, "donor0", "resected_donor_transformed_remeshed3.obj", myBoneDensity, myBoneE, myBoneNu);
-      
-     //myDonor0 = createFemModel (
-     //    myJawModel, "donor0", "case4_donor_inf_remeshed_transformed_boolean.obj", myBoneDensity, myBoneE, myBoneNu);
       
       myDonor0 = createFemModel (
-         myJawModel, "donor0", "donor_opt0_remeshed.obj");
-      
-      //plate
-      
-      //String platePath = myGeoDir + "plate_final_case4_inf.art";
-      String platePath = myGeoDir + "plate_opt.art";
+         myJawModel, "donor0", donorMesh);
+            
+      String platePath = myGeoDir + plateFile;
    
       try {
          // read the FEM using the loadComponent utility
@@ -1034,9 +988,6 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
       }
       myJawModel.addModel (myPlate);
       
-      //attach the plate to the left and right mandible segments. We use
-      // explicitly defined nodes to do this, since the plate may be some
-      // distance from the segments.
            
       myMandibleRight = (RigidBody)myJawModel.findComponent (
       "rigidBodies/jaw_resected");
@@ -1067,12 +1018,7 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
  
    }
    
-   
-   
-   
-   /**
-    * Helper method to attach the plate to the donor segments.
-    */
+
    private void attachPlateToDonorSegments (MechModel mech) {
          // attach plate to donor segments using rigid bodies representing screws
 
@@ -1081,19 +1027,18 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
         
         
         RigidBody screw0 = (RigidBody)myJawModel.findComponent ("rigidBodies/screw0");
+
         
         int  hexElem0  = findClosestHexElementNumber(myPlate,screw0);
-      
-        //System.out.println (hexElem);
 
        
          attachElemToSegmentforRigid (
              mech, screw0,  (HexElement)myPlate.getElementByNumber(hexElem0),
              myDonor0, attachTol);
          
-         screw0.setDensity (myTitaniumDensity);
-
-      
+         
+         screw0.setDensity (myTitaniumDensity);      
+        
    }
    
    
@@ -1132,85 +1077,43 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
 
 
    
-   /**
-    * Helper method to set the interactions between donor segments and the
-    * mandible segments.
-    */
+
    private void setDonorSegmentInteractions (MechModel mech) {
       
-      
-      LinearElasticContact EFContact = new LinearElasticContact (DEFAULT_E, DEFAULT_Nu, DEFAULT_Damping, DEFAULT_Thickness);
-
+     
       CollisionBehavior behav7 = new CollisionBehavior (true, 0);
       CollisionBehavior behav8 = new CollisionBehavior (true, 0);
+
       
       behav7.setMethod(Method.VERTEX_PENETRATION);
       behav8.setMethod(Method.VERTEX_PENETRATION);
+
      
+      LinearElasticContact EFContact = new LinearElasticContact (DEFAULT_E, DEFAULT_Nu, DEFAULT_Damping, DEFAULT_Thickness);
       behav7.setForceBehavior (EFContact);
       behav8.setForceBehavior (EFContact);
 
+
       CollisionManager cm = myJawModel.getCollisionManager();
-      
-      // use AJL collisions so we can render pressure maps:
       cm.setColliderType (ColliderType.AJL_CONTOUR);
 
+      
+      
       myJawModel.setCollisionBehavior (myJawModel.rigidBodies().get ("jaw_resected"), (FemModel3d) myJawModel.models().get ("donor0"), behav7);
       myJawModel.setCollisionBehavior (myJawModel.rigidBodies().get ("jaw"), (FemModel3d) myJawModel.models().get ("donor0"), behav8);
 
-   
+;
       behav7.setName ("donor_mandible1");
       behav8.setName ("donor_mandible2");
+
      
    }
 
-   /**
-    * Attach a hex element of plate FEM to one of the donor segment FEMs using
-    * a rigid body representation of a screw. The hex element and nearby nodes
-    * of the donor FEM at then all connected to the screw.
-    *
-    * @param mech MechModel containing all the components
-    * @param hex hex element of the plate FEM
-    * @param donorFem FEM model of the donor segment
-    * @param screwLen length of the cylinder representing the screw
-    * @param attachTol distance tolerance for attaching donor FEM
-    * nodes to the screw
-    */
    
  
    private void attachElemToSegmentforRigid (
       MechModel mech, RigidBody screw, HexElement hex, FemModel3d donorFem, double attachTol) {
 
-      /*
-      // compute centroid of the hex element
-      Point3d cent = new Point3d();
-      hex.computeCentroid (cent);
-
-      // compute normal pointing toward the donor FEM. From the construction of
-      // plate FEM, we know that this is given by the outward facing normal of
-      // the quad face given by the first four hex nodes.
-      Vector3d nrm = new Vector3d();
-      FemNode3d[] nodes = hex.getNodes();
-      Face.computeNormal (
-         nrm, nodes[0].getPosition(), nodes[1].getPosition(),
-         nodes[2].getPosition(), nodes[3].getPosition());
-
-      // represent the screw as a cylinder with radius 1/10 of it length.
-      RigidBody screw = RigidBody.createCylinder (
-         null, screwLen/10, screwLen, myTitaniumDensity, 10);
-      // Set the pose of the screw so that it lies along the normal starting at
-      // the hex centroid.
-      RigidTransform3d TSW = new RigidTransform3d ();
-      TSW.p.set (cent);
-      TSW.R.setZDirection (nrm);
-      TSW.mulXyz (0, 0, screwLen/2);
-      screw.setPose (TSW);
-       */
-
-      //mech.addRigidBody (screw); // add to the MechModel
-
-      // attach to the screw all donor FEM nodes that are within attachTol of
-      // its surface
       PolygonalMesh smesh = screw.getSurfaceMesh();
       int nattach = 0;
       for (FemNode3d n : donorFem.getNodes()) {
@@ -1463,29 +1366,5 @@ public class JawFemDemoOptimize extends RootModel implements ActionListener {
     }
    
    
-  public void addControlPanel(){
-  
-     ControlPanel panel;
-     panel = new ControlPanel("Parameter Tuning","LiveUpdate");
-     panel.addLabel ("Ligaments");
-     panel.addWidget (myJawModel, "StmSlack");
-     panel.addWidget (myJawModel, "SphmSlack");
-     panel.addWidget ("tm_R", this, "models/jawmodel/multiPointSprings/tm_R:restLength");
-     panel.addWidget ("tm_L", this, "models/jawmodel/multiPointSprings/tm_L:restLength");
-     panel.addWidget (new JSeparator());
-     panel.addLabel ("Elastic Foundation Contact");
-     panel.addWidget (myJawModel, "EFYoung");
-     panel.addWidget (myJawModel, "EFThickness");
-     panel.addWidget (myJawModel, "EFDamping");
-     panel.addWidget (myJawModel, "EFNu");
-     panel.addWidget (new JSeparator());
-     panel.addLabel ("Capsule Render Properties");
-     panel.addWidget ("sapsule_r", this, "models/jawmodel/models/capsule_r:renderProps.visible");
-     panel.addWidget ("sapsule_l", this, "models/jawmodel/models/capsule_l:renderProps.visible");
-     addControlPanel (panel);
-     panel.pack ();
-     
-    
-  }
  
 }

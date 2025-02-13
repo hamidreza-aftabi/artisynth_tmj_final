@@ -182,11 +182,11 @@ public class JawModel extends MechModel implements ScalableUnits,
    double tmjForceNorm = 0.0;
 
    double[] curvParams = new double[] { 0.0, // x0
-	 0.0, // y0
-	 12.0, // xf
-	 -5.0, // yf
-	 -40.0, // initial slope
-	 -10.0 }; // final slope
+         0.0, // y0
+         12.0, // xf
+         -5.0, // yf
+         -40.0, // initial slope
+         -10.0 }; // final slope
 
    int numSegments = 20;
 
@@ -197,9 +197,9 @@ public class JawModel extends MechModel implements ScalableUnits,
       public String meshName;
 
       public void scan(ReaderTokenizer rtok) throws IOException {
-	 name = rtok.sval;
-	 rtok.nextToken();
-	 meshName = rtok.sval;
+         name = rtok.sval;
+         rtok.nextToken();
+         meshName = rtok.sval;
       }
    }
 
@@ -215,19 +215,19 @@ public class JawModel extends MechModel implements ScalableUnits,
       boolean pairedFlag; // true == left-right paired muscle
 
       public boolean isPaired() {
-	 return pairedFlag;
+         return pairedFlag;
       }
 
       public void scan(ReaderTokenizer rtok) throws IOException {
-	 name = rtok.sval;
-	 rtok.nextToken();
-	 origin = rtok.sval;
-	 rtok.nextToken();
-	 insertion = rtok.sval;
-	 rtok.nextToken();
-	 pairedFlag = (rtok.sval.compareTo("paired") == 0.0);
-	 rtok.nextToken();
-	 fullName = rtok.sval;
+         name = rtok.sval;
+         rtok.nextToken();
+         origin = rtok.sval;
+         rtok.nextToken();
+         insertion = rtok.sval;
+         rtok.nextToken();
+         pairedFlag = (rtok.sval.compareTo("paired") == 0.0);
+         rtok.nextToken();
+         fullName = rtok.sval;
       }
 
    }
@@ -240,42 +240,42 @@ public class JawModel extends MechModel implements ScalableUnits,
       public ArrayList<String> coactivators = new ArrayList<String>();
 
       public void scan(ReaderTokenizer rtok) throws IOException {
-	 rtok.eolIsSignificant(true);
-	 name = rtok.sval;
-	 rtok.nextToken();
-	 fullName = rtok.sval;
-	 rtok.nextToken();
-	 while (rtok.ttype != ReaderTokenizer.TT_EOL
-	       && rtok.ttype != ReaderTokenizer.TT_EOF) {
-	    coactivators.add(rtok.sval);
-	    rtok.nextToken();
-	 }
+         rtok.eolIsSignificant(true);
+         name = rtok.sval;
+         rtok.nextToken();
+         fullName = rtok.sval;
+         rtok.nextToken();
+         while (rtok.ttype != ReaderTokenizer.TT_EOL
+               && rtok.ttype != ReaderTokenizer.TT_EOF) {
+            coactivators.add(rtok.sval);
+            rtok.nextToken();
+         }
       }
    }
 
    public static PropertyList myProps = new PropertyList(JawModel.class,
-	 MechModel.class);
+         MechModel.class);
 
    static {
       myProps.add("renderFaces * showMeshFaces",
-	    "flag for redering mesh faces", false);
+            "flag for redering mesh faces", false);
       myProps.add("renderEdges * showMeshEdges",
-	    "flag for redering mesh faces", false);
+            "flag for redering mesh faces", false);
       myProps
-	    .add("transparency * *", "transparency of rigid body meshes", true);
+            .add("transparency * *", "transparency of rigid body meshes", true);
       myProps.add("enableMuscles * *", "enables all muscles", true);
       myProps.add("muscleColor * *", "color of closer muscles", Color.CYAN);
       myProps.add("rigidBodyColor * *", "color of jaw and skull", Color.WHITE);
       myProps.addReadOnly("jawMuscleWrench",
-	    "total wrench applied to jaw by muscles");
+            "total wrench applied to jaw by muscles");
       myProps
-	    .addReadOnly("jawMuscleForce",
-		  "translational force component of total wrench applied to jaw by muscles");
+            .addReadOnly("jawMuscleForce",
+                  "translational force component of total wrench applied to jaw by muscles");
       myProps.addReadOnly("jawMuscleMoment",
-	    "moment component of total wrench applied to jaw by muscles");
+            "moment component of total wrench applied to jaw by muscles");
 
       myProps.addReadOnly("jawComPosition",
-	    "jaw centre-of-mass in world-coordinates");
+            "jaw centre-of-mass in world-coordinates");
    }
 
    public PropertyList getAllPropertyInfo() {
@@ -291,28 +291,28 @@ public class JawModel extends MechModel implements ScalableUnits,
    }
 
    public JawModel(String name, boolean fixedLaryngeal,
-	 boolean useComplexJoint, boolean useCurvJoint) throws IOException {
+         boolean useComplexJoint, boolean useCurvJoint) throws IOException {
       super(name);
 
       setGravity(0, 0, -gravityVal * unitConversion);
       setupRenderProps();
 
       if (!fixedLaryngeal) {
-	 muscleList = readStringList(ArtisynthPath
+         muscleList = readStringList(ArtisynthPath
             .getSrcRelativePath(JawModel.class, "geometry/" + muscleListAllFilename));
-	 bodyInfoList = readBodyInfoList(ArtisynthPath
+         bodyInfoList = readBodyInfoList(ArtisynthPath
             .getSrcRelativePath(JawModel.class, "geometry/" + bodyListAllFilename));
       } else {
-	 muscleList = readStringList(ArtisynthPath
+         muscleList = readStringList(ArtisynthPath
             .getSrcRelativePath(JawModel.class, "geometry/" + muscleListFilename));
-	 bodyInfoList = readBodyInfoList(ArtisynthPath
+         bodyInfoList = readBodyInfoList(ArtisynthPath
             .getSrcRelativePath(JawModel.class, "geometry/" +bodyListFilename));
       }
 
       muscleInfo = readMuscleInfo(ArtisynthPath
          .getSrcRelativePath(JawModel.class, "geometry/" +muscleInfoFilename));
       muscleGroupInfo = readMuscleGroupsInfo(ArtisynthPath.getSrcRelativePath(
-	    JawModel.class, "geometry/" + muscleGroupInfoFilename));
+            JawModel.class, "geometry/" + muscleGroupInfoFilename));
       // setMuscleAbbreviations();
 
       assembleRigidBodies();
@@ -347,8 +347,8 @@ public class JawModel extends MechModel implements ScalableUnits,
       constrainedBody = myRigidBodies.get("jaw");
       if (constrainedBody == null) // no jaw body - error
       {
-	 System.err.println("JawModel: unable to get jaw rigidbody");
-	 return;
+         System.err.println("JawModel: unable to get jaw rigidbody");
+         return;
       }
 
 
@@ -386,7 +386,7 @@ public class JawModel extends MechModel implements ScalableUnits,
 
       ColorMapProps tp = new ColorMapProps();
       tp.setFileName(ArtisynthPath.getSrcRelativePath(JawModel.class,
-	    "skull.jpg"));
+            "skull.jpg"));
       tp.setColorMixing(Renderer.ColorMixing.MODULATE);
       tp.setEnabled(true);
 
@@ -402,40 +402,40 @@ public class JawModel extends MechModel implements ScalableUnits,
 
 
    public HashMap<String, MuscleInfo> readMuscleInfo(String filename)
-	 throws IOException {
+         throws IOException {
       HashMap<String, MuscleInfo> infoList = new LinkedHashMap<String, MuscleInfo>();
       ReaderTokenizer rtok = new ReaderTokenizer(new FileReader( filename));
 
       while (rtok.nextToken() != ReaderTokenizer.TT_EOF) {
-	 MuscleInfo mi = new MuscleInfo();
-	 mi.scan(rtok);
-	 infoList.put(mi.name, mi);
+         MuscleInfo mi = new MuscleInfo();
+         mi.scan(rtok);
+         infoList.put(mi.name, mi);
       }
       return infoList;
    }
 
    protected ArrayList<MuscleGroupInfo> readMuscleGroupsInfo(String filename)
-	 throws IOException {
+         throws IOException {
       ArrayList<MuscleGroupInfo> infoList = new ArrayList<MuscleGroupInfo>();
       ReaderTokenizer rtok = new ReaderTokenizer(new FileReader(filename));
       rtok.eolIsSignificant(true); // read end of lines
       while (rtok.nextToken() != ReaderTokenizer.TT_EOF) {
-	 MuscleGroupInfo mgi = new MuscleGroupInfo();
-	 mgi.scan(rtok);
-	 infoList.add(mgi);
+         MuscleGroupInfo mgi = new MuscleGroupInfo();
+         mgi.scan(rtok);
+         infoList.add(mgi);
       }
       return infoList;
    }
 
    public  ArrayList<BodyInfo> readBodyInfoList(String filename)
-	 throws IOException {
+         throws IOException {
       ReaderTokenizer rtok = new ReaderTokenizer(new FileReader(filename));
       rtok.wordChars(".");
       ArrayList<BodyInfo> bodyInfoList = new ArrayList<BodyInfo>();
       while (rtok.nextToken() != ReaderTokenizer.TT_EOF) {
-	 BodyInfo bi = new BodyInfo();
-	 bi.scan(rtok);
-	 bodyInfoList.add(bi);
+         BodyInfo bi = new BodyInfo();
+         bi.scan(rtok);
+         bodyInfoList.add(bi);
       }
       return bodyInfoList;
    }
@@ -445,23 +445,23 @@ public class JawModel extends MechModel implements ScalableUnits,
       ReaderTokenizer rtok = new ReaderTokenizer(new FileReader(filename));
 
       while (rtok.nextToken() != ReaderTokenizer.TT_EOF) {
-	 if (rtok.ttype != ReaderTokenizer.TT_WORD) { throw new IOException(
-	       "readMarkerList Expecting word, got " + rtok.tokenName()); }
-	 stringList.add(rtok.sval);
+         if (rtok.ttype != ReaderTokenizer.TT_WORD) { throw new IOException(
+               "readMarkerList Expecting word, got " + rtok.tokenName()); }
+         stringList.add(rtok.sval);
       }
       return stringList;
    }
 
    public ArrayList<Muscle> createMuscleList(
-	 ArrayList<String> muscleAbbreviations) {
+         ArrayList<String> muscleAbbreviations) {
       ArrayList<Muscle> list = new ArrayList<Muscle>();
       for (String name : muscleAbbreviations) {
-	 if (muscleInfo.get(name).isPaired()) {
-	    list.add(findMuscle("l" + name));
-	    list.add(findMuscle("r" + name));
-	 } else {
-	    list.add(findMuscle(name));
-	 }
+         if (muscleInfo.get(name).isPaired()) {
+            list.add(findMuscle("l" + name));
+            list.add(findMuscle("r" + name));
+         } else {
+            list.add(findMuscle(name));
+         }
       }
       return list;
    }
@@ -472,9 +472,9 @@ public class JawModel extends MechModel implements ScalableUnits,
       String[] larNames = new String[] { "hyoid", "thyroid", "cricoid" };
       RigidBody body;
       for (int i = 0; i < larNames.length; i++) {
-	 if ((body = rigidBodies().get(larNames[i])) != null) {
-	    body.setDynamic(false);
-	 }
+         if ((body = rigidBodies().get(larNames[i])) != null) {
+            body.setDynamic(false);
+         }
       }
    }
 
@@ -499,13 +499,13 @@ public class JawModel extends MechModel implements ScalableUnits,
 
    public void setBodyMesh(RigidBody body, String meshName, double scale) {
       String meshFilename = ArtisynthPath.getSrcRelativePath(JawModel.class,
-	    "geometry/" + meshName);
+            "geometry/" + meshName);
       PolygonalMesh mesh = new PolygonalMesh();
       try {
-	 mesh.read(new BufferedReader(new FileReader(meshFilename)));
+         mesh.read(new BufferedReader(new FileReader(meshFilename)));
       } catch (IOException e) {
-	 e.printStackTrace();
-	 return;
+         e.printStackTrace();
+         return;
       }
       mesh.scale(scale);
       mesh.setFixed(true);
@@ -521,7 +521,7 @@ public class JawModel extends MechModel implements ScalableUnits,
       else if (name.compareTo("hyoid") == 0.0) setHyoidDynamicProps(body);
       else if (name.compareTo("thyroid") == 0.0) setThyroidDynamicProps(body);
       else
-	 setBodyFixed(body);
+         setBodyFixed(body);
 
    }
 
@@ -534,11 +534,11 @@ public class JawModel extends MechModel implements ScalableUnits,
       // Ineria Properties from ADAMS model - kg*mm*mm
      
       jaw.setRotationalInertia(new SymmetricMatrix3d(92.19, // (0,0)
-	    182.2, // (1,1)
-	    125.2, // (2,2)
-	    -1.122, // (0,1)
-	    -10.7, // (0,2)
-	    1.345)); // (1,2)
+            182.2, // (1,1)
+            125.2, // (2,2)
+            -1.122, // (0,1)
+            -10.7, // (0,2)
+            1.345)); // (1,2)
       jaw.setCenterOfMass(new Point3d(9.53, 0.0, 36.08)); // mm (uncapped obj)
       // jaw.setCenterOfMass(new Point3d(0.0, -13.73, 31.97)); //mm (capped obj)
       
@@ -557,11 +557,11 @@ public class JawModel extends MechModel implements ScalableUnits,
       // Inertia Properties from ADAMS model - kg*mm*mm
       thyroid.setDynamic(true);
       thyroid.setRotationalInertia(new SymmetricMatrix3d(2.1537, // (0,0)
-	    1.6109, // (1,1)
-	    7.4320, // (2,2)
-	    0.0, // (0,1)
-	    0.0, // (0,2)
-	    1.9663)); // (1,2)
+            1.6109, // (1,1)
+            7.4320, // (2,2)
+            0.0, // (0,1)
+            0.0, // (0,2)
+            1.9663)); // (1,2)
       thyroid.setCenterOfMass(new Point3d(0.0, 14.92, -14.24)); // mm (from obj)
       thyroid.setMass(thyroCricoidMass); // kg
    }
@@ -573,11 +573,11 @@ public class JawModel extends MechModel implements ScalableUnits,
       // Inertia Properties from ADAMS model - kg*mm*mm
       hyoid.setDynamic(true);
       hyoid.setRotationalInertia(new SymmetricMatrix3d(2.1537, // (0,0)
-	    1.6109, // (1,1)
-	    7.4320, // (2,2)
-	    0.0, // (0,1)
-	    0.0, // (0,2)
-	    1.9663)); // (1,2)
+            1.6109, // (1,1)
+            7.4320, // (2,2)
+            0.0, // (0,1)
+            0.0, // (0,2)
+            1.9663)); // (1,2)
       hyoid.setCenterOfMass(new Point3d(0.0, 6.03, 4.48)); // mm (from obj)
       // hyoid.setMass(0.2); //kg
       hyoid.setMass(hyoidMass); // kg
@@ -585,62 +585,62 @@ public class JawModel extends MechModel implements ScalableUnits,
 
  
    private RigidTransform3d readAnatomyTransformInfo(String name)
-	 throws IOException {
+         throws IOException {
       // apply tranformations to rigid bodies that require it
       // if "name.transform" exists, read file and apply transform
       Matrix4d M = null;
       RigidTransform3d X;
       ReaderTokenizer rtok;
       try {
-	 rtok = new ReaderTokenizer(new FileReader(ArtisynthPath
-	       .getSrcRelativePath(JawModel.class, "geometry/" + name
-		     + ".transform")));
+         rtok = new ReaderTokenizer(new FileReader(ArtisynthPath
+               .getSrcRelativePath(JawModel.class, "geometry/" + name
+                     + ".transform")));
       } catch (Exception e) {
-	 if (debug) {
-	    System.out.println("Can't find transform file for " + name);
-	    System.out.println("assuming no transform required");
-	 }
-	 return null;
+         if (debug) {
+            System.out.println("Can't find transform file for " + name);
+            System.out.println("assuming no transform required");
+         }
+         return null;
       }
 
       while (rtok.nextToken() != ReaderTokenizer.TT_EOF) {
-	 if (rtok.ttype == ReaderTokenizer.TT_WORD) {
-	    if (rtok.sval.compareTo("setTransform") == 0) {
-	       if (debug) {
-		  System.out.println(name + " parser found: " + rtok.sval);
-	       }
-	       while (rtok.nextToken() != ReaderTokenizer.TT_NUMBER)
-		  if (debug) {
-		     System.out.println("reading " + rtok.sval);
-		  }
-	       // flush the "setTransform" flag in Amira landmark file
-	       if (rtok.ttype == ReaderTokenizer.TT_NUMBER) {
-		  rtok.pushBack();
-		  M = new Matrix4d();
-		  M.scan(rtok);
-		  M.transpose(); // amira uses opposite row/col convention for
-		  // matrices
-		  if (true) {
-		     System.out.println(name + " pose = " + M.toString());
-		  }
-	       }
-	       break;
-	    }
-	 }
+         if (rtok.ttype == ReaderTokenizer.TT_WORD) {
+            if (rtok.sval.compareTo("setTransform") == 0) {
+               if (debug) {
+                  System.out.println(name + " parser found: " + rtok.sval);
+               }
+               while (rtok.nextToken() != ReaderTokenizer.TT_NUMBER)
+                  if (debug) {
+                     System.out.println("reading " + rtok.sval);
+                  }
+               // flush the "setTransform" flag in Amira landmark file
+               if (rtok.ttype == ReaderTokenizer.TT_NUMBER) {
+                  rtok.pushBack();
+                  M = new Matrix4d();
+                  M.scan(rtok);
+                  M.transpose(); // amira uses opposite row/col convention for
+                  // matrices
+                  if (true) {
+                     System.out.println(name + " pose = " + M.toString());
+                  }
+               }
+               break;
+            }
+         }
       }
       if (M == null) throw new IOException("Error reading transform info from "
-	    + name + " file");
+            + name + " file");
       else {
-	 X = new RigidTransform3d();
-	 X.set((Matrix) M);
-	 return X;
+         X = new RigidTransform3d();
+         X.set((Matrix) M);
+         return X;
       }
 
    }
 
    public void assembleRigidBodies() throws IOException {
       for (BodyInfo bodyInfo : bodyInfoList) {
-	 createAndAddBody(bodyInfo.name, bodyInfo.meshName);
+         createAndAddBody(bodyInfo.name, bodyInfo.meshName);
       }
 
       // transformed vertebrae mesh has been saved to vertebrae_t.obj
@@ -649,11 +649,11 @@ public class JawModel extends MechModel implements ScalableUnits,
 
       // Rigidbody dampers for dynamic components
       setBodyDamping("jaw", myJawDampingT * unitConversion, myJawDampingR
-	    * unitConversion);
+            * unitConversion);
       setBodyDamping("hyoid", myHyoidDampingT * unitConversion, myHyoidDampingR
-	    * unitConversion);
+            * unitConversion);
       setBodyDamping("thyroid", myHyoidDampingT * unitConversion,
-	    myHyoidDampingR * unitConversion);
+            myHyoidDampingR * unitConversion);
       setBodyDamping("cricoid", 0.1, 10);
    }
 
@@ -667,64 +667,64 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void attachMarkers() {
       Point3d[] pts;
       for (int k = 0; k < muscleList.size(); k++) {
-	 String name = muscleList.get(k);
-	 MuscleInfo info = muscleInfo.get(name);
-	 RigidBody origin = myRigidBodies.get(info.origin);
-	 RigidBody insertion = myRigidBodies.get(info.insertion);
+         String name = muscleList.get(k);
+         MuscleInfo info = muscleInfo.get(name);
+         RigidBody origin = myRigidBodies.get(info.origin);
+         RigidBody insertion = myRigidBodies.get(info.insertion);
 
-	 try {
-	    if (origin == null || insertion == null) { throw new Exception(
-		  "muscle attached to non-existent body"); }
-	    if (info.isPaired()) {
-	       pts = AmiraLandmarkReader.read(ArtisynthPath.getSrcRelativePath(
-		     JawModel.class, "geometry/l" + name + ".landmarkAscii"),
-		     CM_TO_MM);
-	       checkOriginInsertion(pts);
+         try {
+            if (origin == null || insertion == null) { throw new Exception(
+                  "muscle attached to non-existent body"); }
+            if (info.isPaired()) {
+               pts = AmiraLandmarkReader.read(ArtisynthPath.getSrcRelativePath(
+                     JawModel.class, "geometry/l" + name + ".landmarkAscii"),
+                     CM_TO_MM);
+               checkOriginInsertion(pts);
 
-	       addFrameMarker(new FrameMarker("l" + name + "_origin"), origin,
-		     pts[0]);
-	       addFrameMarker(new FrameMarker("l" + name + "_insertion"),
-		     insertion, pts[1]);
-	       // right side muscle is mirrored in x direction
-	       addFrameMarker(new FrameMarker("r" + name + "_origin"),
-		     myRigidBodies.get(info.origin),
-		     createRightSidePoint(pts[0]));
-	       addFrameMarker(new FrameMarker("r" + name + "_insertion"),
-		     myRigidBodies.get(info.insertion),
-		     createRightSidePoint(pts[1]));
-	    } else {
-	       pts = AmiraLandmarkReader.read(ArtisynthPath.getSrcRelativePath(
-		     JawModel.class, "geometry/" + name + ".landmarkAscii"),
-		     CM_TO_MM);
-	       addFrameMarker(new FrameMarker(name + "_origin"), origin, pts[0]);
-	       // right side attachment is mirrored in x direction
-	       //why is this mirrored if the muscle is not on both sides? Shouldn't this be pts[1] 
-	       addFrameMarker(new FrameMarker(name + "_insertion"), insertion,
-		     createRightSidePoint(pts[0]));
+               addFrameMarker(new FrameMarker("l" + name + "_origin"), origin,
+                     pts[0]);
+               addFrameMarker(new FrameMarker("l" + name + "_insertion"),
+                     insertion, pts[1]);
+               // right side muscle is mirrored in x direction
+               addFrameMarker(new FrameMarker("r" + name + "_origin"),
+                     myRigidBodies.get(info.origin),
+                     createRightSidePoint(pts[0]));
+               addFrameMarker(new FrameMarker("r" + name + "_insertion"),
+                     myRigidBodies.get(info.insertion),
+                     createRightSidePoint(pts[1]));
+            } else {
+               pts = AmiraLandmarkReader.read(ArtisynthPath.getSrcRelativePath(
+                     JawModel.class, "geometry/" + name + ".landmarkAscii"),
+                     CM_TO_MM);
+               addFrameMarker(new FrameMarker(name + "_origin"), origin, pts[0]);
+               // right side attachment is mirrored in x direction
+               //why is this mirrored if the muscle is not on both sides? Shouldn't this be pts[1] 
+               addFrameMarker(new FrameMarker(name + "_insertion"), insertion,
+                     createRightSidePoint(pts[0]));
 
-	    }
-	 } catch (Exception e) {
-	    System.out.println(e.getMessage());
-	    System.out.println("unable to add markers for muscle, removing: "
-		  + info.fullName);
-	    muscleList.remove(k);
-	    k--; // update index to reflect purged kth muscle
-	    continue;
-	 }
+            }
+         } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("unable to add markers for muscle, removing: "
+                  + info.fullName);
+            muscleList.remove(k);
+            k--; // update index to reflect purged kth muscle
+            continue;
+         }
       }
    }
 
    private static void checkOriginInsertion(Point3d[] markerPts) {
       if (markerPts[0].z < markerPts[1].z) { // origin and insertion point are
-	 // mixed up, do swap
-	 Point3d tmp = markerPts[0];
-	 markerPts[0] = markerPts[1];
-	 markerPts[1] = tmp;
+         // mixed up, do swap
+         Point3d tmp = markerPts[0];
+         markerPts[0] = markerPts[1];
+         markerPts[1] = tmp;
       }
    }
 
    private static Muscle createPeckMuscle (
-	 String name, double maxForce, double optLen, double maxLen, double ratio) {
+         String name, double maxForce, double optLen, double maxLen, double ratio) {
       Muscle m = new Muscle(name);
       m.setPeckMuscleMaterial(maxForce, optLen, maxLen, ratio);
       return m;
@@ -779,27 +779,27 @@ public class JawModel extends MechModel implements ScalableUnits,
       myMuscles.add(createPeckMuscle("lad", 40.0, 35.1, 45.1, 0.0)); // lad
       // (opener)
       myMuscles.add(createPeckMuscle("lpd", postdigMaxForce, 35.1, 45.1,
-	    0.0)); // lpd
+            0.0)); // lpd
       myMuscles.add(createPeckMuscle("lam", mylohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Left Anterior Mylohyoid
+            0.0));// Left Anterior Mylohyoid
       myMuscles.add(createPeckMuscle("lpm", mylohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Left Posterior Mylohyoid
+            0.0));// Left Posterior Mylohyoid
       myMuscles.add(createPeckMuscle("lgh", geniohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Left Geniohyoid
+            0.0));// Left Geniohyoid
       myMuscles.add(createPeckMuscle("lsh", stylohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Left Stylohyoid
+            0.0));// Left Stylohyoid
       myMuscles.add(createPeckMuscle("rad", 40.0, 35.1, 45.1, 0.0)); // rad
       // (opener)
       myMuscles.add(createPeckMuscle("rpd", postdigMaxForce, 35.1, 45.1,
-	    0.0)); // rpd
+            0.0)); // rpd
       myMuscles.add(createPeckMuscle("ram", mylohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Right Anterior Mylohyoid
+            0.0));// Right Anterior Mylohyoid
       myMuscles.add(createPeckMuscle("rpm", mylohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Right Posterior Mylohyoid
+            0.0));// Right Posterior Mylohyoid
       myMuscles.add(createPeckMuscle("rgh", geniohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Right Geniohyoid
+            0.0));// Right Geniohyoid
       myMuscles.add(createPeckMuscle("rsh", stylohyoidMaxForce, 35.1, 45.1,
-	    0.0));// Right Stylohyoid
+            0.0));// Right Stylohyoid
 
       // hyoid depressors
       myMuscles.add(createPeckMuscle("lth", 20.0, 35.1, 45.1, 0.5));// Left
@@ -857,7 +857,7 @@ public class JawModel extends MechModel implements ScalableUnits,
       // get length ratios to update muscle lengths for new Amira geometry
       Muscle m;
       for (int k = 0; k < myMuscles.size(); k++) {
-	 m = myMuscles.get(k);
+         m = myMuscles.get(k);
       }
 
    }
@@ -865,17 +865,17 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void printMuscleMaxForces() {
 
       for (AxialSpring s : myAxialSprings) {
-	 if (s instanceof Muscle) {
-	    Muscle m = (Muscle) s;
-	    String fullname = "";
-	    if (muscleInfo.containsKey(m.getName().substring(1))) {
-	       fullname = (m.getName().startsWith("l") ? "Left " : "Right ")
-		     + muscleInfo.get(m.getName().substring(1)).fullName;
-	    }
-	    System.out.printf("%s %g -- %s\n", m.getName().toUpperCase(), 
-	       Muscle.getMaxForce (m), fullname);
+         if (s instanceof Muscle) {
+            Muscle m = (Muscle) s;
+            String fullname = "";
+            if (muscleInfo.containsKey(m.getName().substring(1))) {
+               fullname = (m.getName().startsWith("l") ? "Left " : "Right ")
+                     + muscleInfo.get(m.getName().substring(1)).fullName;
+            }
+            System.out.printf("%s %g -- %s\n", m.getName().toUpperCase(), 
+               Muscle.getMaxForce (m), fullname);
 
-	 }
+         }
       }
 
    }
@@ -883,34 +883,34 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void assembleMuscleGroups() {
 
       for (MuscleGroupInfo info : muscleGroupInfo) {
-	 // bilateral excitor
-	 MuscleExciter bilateral = new MuscleExciter("bi_" + info.name);
+         // bilateral excitor
+         MuscleExciter bilateral = new MuscleExciter("bi_" + info.name);
 
-	 // add groups for left and right sides
-	 for (int i = 0; i < 2; i++) // add groups for left and right sides
-	 {
-	    String prefix = (i == 0 ? "l" : "r");
-	    String fullPrefix = (i == 0 ? "Left " : "Right ");
-	    MuscleExciter exciter = new MuscleExciter(prefix + info.name);
-	    for (String target : info.coactivators) {
-	       ExcitationComponent c = (Muscle) myAxialSprings.get(prefix
-		     + target);
-	       if (c == null) { // look for target in excitors list
-		  c = myExciterList.get(prefix + target);
-	       }
-	       if (c == null) continue;
+         // add groups for left and right sides
+         for (int i = 0; i < 2; i++) // add groups for left and right sides
+         {
+            String prefix = (i == 0 ? "l" : "r");
+            String fullPrefix = (i == 0 ? "Left " : "Right ");
+            MuscleExciter exciter = new MuscleExciter(prefix + info.name);
+            for (String target : info.coactivators) {
+               ExcitationComponent c = (Muscle) myAxialSprings.get(prefix
+                     + target);
+               if (c == null) { // look for target in excitors list
+                  c = myExciterList.get(prefix + target);
+               }
+               if (c == null) continue;
 
-	       exciter.addTarget(c, 1.0);
-	    }
-	    addMuscleExciter(exciter);
-	    bilateral.addTarget(exciter, 1.0);
-	    muscleAbbreviations.put(prefix + info.name, fullPrefix
-		  + info.fullName);
-	 }
+               exciter.addTarget(c, 1.0);
+            }
+            addMuscleExciter(exciter);
+            bilateral.addTarget(exciter, 1.0);
+            muscleAbbreviations.put(prefix + info.name, fullPrefix
+                  + info.fullName);
+         }
 
-	 addMuscleExciter(bilateral);
-	 muscleAbbreviations.put("bi_" + info.name, "Bilateral "
-	       + info.fullName);
+         addMuscleExciter(bilateral);
+         muscleAbbreviations.put("bi_" + info.name, "Bilateral "
+               + info.fullName);
 
       }
 
@@ -918,24 +918,24 @@ public class JawModel extends MechModel implements ScalableUnits,
 
    public void updateMuscleLengthProps() {
       for (Muscle m : myMuscles)
-	 m.resetLengthProps();
+         m.resetLengthProps();
    }
 
    public void pruneMuscleList() {
       for (int k = 0; k < myMuscles.size(); k++) {
-	 Muscle m = myMuscles.get(k);
-	 String name = m.getName();
-	 boolean inMuscleList = false;
-	 for (int i = 0; i < muscleList.size(); i++) {
-	    if (name.endsWith(muscleList.get(i))) {
-	       inMuscleList = true;
-	       break;
-	    }
-	 }
-	 if (!inMuscleList) {
-	    myMuscles.remove(k);
-	    k--; // update index to reflect purged kth muscle
-	 }
+         Muscle m = myMuscles.get(k);
+         String name = m.getName();
+         boolean inMuscleList = false;
+         for (int i = 0; i < muscleList.size(); i++) {
+            if (name.endsWith(muscleList.get(i))) {
+               inMuscleList = true;
+               break;
+            }
+         }
+         if (!inMuscleList) {
+            myMuscles.remove(k);
+            k--; // update index to reflect purged kth muscle
+         }
       }
    }
 
@@ -944,43 +944,43 @@ public class JawModel extends MechModel implements ScalableUnits,
     */
    public void attachMuscles() {
       for (int k = 0; k < muscleList.size(); k++) {
-	 String name = muscleList.get(k);
-	 if (muscleInfo.get(muscleList.get(k)).isPaired()) {
-	    addMuscle("l" + name);
-	    muscleAbbreviations.put("l" + name, "Left "
-		  + muscleInfo.get(name).fullName);
-	    addMuscle("r" + name);
-	    muscleAbbreviations.put("r" + name, "Right "
-		  + muscleInfo.get(name).fullName);
-	 } else {
-	    addMuscle(name);
-	 }
+         String name = muscleList.get(k);
+         if (muscleInfo.get(muscleList.get(k)).isPaired()) {
+            addMuscle("l" + name);
+            muscleAbbreviations.put("l" + name, "Left "
+                  + muscleInfo.get(name).fullName);
+            addMuscle("r" + name);
+            muscleAbbreviations.put("r" + name, "Right "
+                  + muscleInfo.get(name).fullName);
+         } else {
+            addMuscle(name);
+         }
       }
    }
 
    public void assembleBilateralExcitors() {
       for (int k = 0; k < muscleList.size(); k++) {
-	 String name = muscleList.get(k);
-	 if (muscleInfo.get(muscleList.get(k)).isPaired()) {
-	    Muscle left = (Muscle) myAxialSprings.get("l" + name);
-	    Muscle right = (Muscle) myAxialSprings.get("r" + name);
-	    if (left != null && right != null) {
-	       String excitorName = "bi_" + name;
-	       MuscleExciter bilateral = new MuscleExciter(excitorName);
-	       bilateral.addTarget(left, 1.0);
-	       bilateral.addTarget(right, 1.0);
-	       addMuscleExciter(bilateral);
-	       String fullName = muscleInfo.get(name).fullName;
-	       muscleAbbreviations.put(excitorName, "Bilateral " + fullName);
-	    }
-	 }
+         String name = muscleList.get(k);
+         if (muscleInfo.get(muscleList.get(k)).isPaired()) {
+            Muscle left = (Muscle) myAxialSprings.get("l" + name);
+            Muscle right = (Muscle) myAxialSprings.get("r" + name);
+            if (left != null && right != null) {
+               String excitorName = "bi_" + name;
+               MuscleExciter bilateral = new MuscleExciter(excitorName);
+               bilateral.addTarget(left, 1.0);
+               bilateral.addTarget(right, 1.0);
+               addMuscleExciter(bilateral);
+               String fullName = muscleInfo.get(name).fullName;
+               muscleAbbreviations.put(excitorName, "Bilateral " + fullName);
+            }
+         }
       }
 
    }
 
    public Muscle findMuscle(String name) {
       for (Muscle m : myMuscles) {
-	 if (name.compareTo(m.getName()) == 0) return m;
+         if (name.compareTo(m.getName()) == 0) return m;
       }
       return null;
    }
@@ -988,8 +988,8 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void addMuscle(String name) {
       Muscle m = findMuscle(name);
       if (m == null) {
-	 System.err.println(name + " muscle not found.");
-	 return;
+         System.err.println(name + " muscle not found.");
+         return;
       }
       m.setFirstPoint(myFrameMarkers.get(name + "_origin"));
       m.setSecondPoint(myFrameMarkers.get(name + "_insertion"));
@@ -999,7 +999,7 @@ public class JawModel extends MechModel implements ScalableUnits,
 
    public void detachMuscles() {
       for (Muscle m : myMuscles) {
-	 removeAxialSpring(m);
+         removeAxialSpring(m);
       }
    }
 
@@ -1010,8 +1010,8 @@ public class JawModel extends MechModel implements ScalableUnits,
    public static Point3d createRightSidePoint(Point3d leftSidePt) {
       Point3d rightSidePt = new Point3d();
       if (leftSidePt != null) {
-	 rightSidePt.set(leftSidePt);
-	 rightSidePt.x = -rightSidePt.x; // right-left mirrored in x-axis
+         rightSidePt.set(leftSidePt);
+         rightSidePt.x = -rightSidePt.x; // right-left mirrored in x-axis
       }
       return rightSidePt;
    }
@@ -1021,23 +1021,23 @@ public class JawModel extends MechModel implements ScalableUnits,
       double maxZ = pointList[0].z;
       int maxZindex = 0, k = 0;
       for (Point3d p : pointList) {
-	 if (p.z > maxZ) {
-	    maxZ = p.z;
-	    maxZindex = k;
-	 }
-	 k++;
+         if (p.z > maxZ) {
+            maxZ = p.z;
+            maxZindex = k;
+         }
+         k++;
       }
       return maxZindex;
    }
 
    public FrameMarker addFixedMarker(String bodyName, Point3d location,
-	 String markerName) {
+         String markerName) {
       // add marker at location for body
       RigidBody body = myRigidBodies.get(bodyName);
       if (body == null) {
-	 System.err.println("addFixedMarker Error: "
-	       + "body specified don't exist, can't create marker");
-	 return null;
+         System.err.println("addFixedMarker Error: "
+               + "body specified don't exist, can't create marker");
+         return null;
       }
       FrameMarker marker = new FrameMarker();
       addFrameMarker(marker, body, location);
@@ -1055,9 +1055,9 @@ public class JawModel extends MechModel implements ScalableUnits,
       Point3d com = new Point3d();
       RigidBody body = myRigidBodies.get(bodyName);
       if (body == null) {
-	 // System.err.println("addComMarker Error: "
-	 // + "body specified don't exist, can't create com marker");
-	 return;
+         // System.err.println("addComMarker Error: "
+         // + "body specified don't exist, can't create com marker");
+         return;
       }
       body.getCenterOfMass(com);
       FrameMarker comMarker = new FrameMarker();
@@ -1083,61 +1083,61 @@ public class JawModel extends MechModel implements ScalableUnits,
       String[] list = new String[] { "jaw"};
       ArrayList<String> bodyList = new ArrayList<String>();
       for (int i = 0; i < list.length; i++)
-	 bodyList.add(list[i]);
+         bodyList.add(list[i]);
       RenderProps fixedProps = RenderProps.createPointProps(null);
       fixedProps.setPointRadius(FIXED_PT_RADIUS);
       fixedProps.setPointColor(Color.WHITE);
       for (int i = 0; i < bodyList.size(); i++) {
-	 name = bodyList.get(i);
-	 body = myRigidBodies.get(name);
-	 try {
-	    pts = AmiraLandmarkReader.read(ArtisynthPath.getSrcRelativePath(
-		  JawModel.class, "geometry/" + name
-			+ "FixedMarkers.landmarkAscii"), CM_TO_MM);
-	 } catch (IOException e) {
-	    e.printStackTrace();
-	    return;
-	 }
+         name = bodyList.get(i);
+         body = myRigidBodies.get(name);
+         try {
+            pts = AmiraLandmarkReader.read(ArtisynthPath.getSrcRelativePath(
+                  JawModel.class, "geometry/" + name
+                        + "FixedMarkers.landmarkAscii"), CM_TO_MM);
+         } catch (IOException e) {
+            e.printStackTrace();
+            return;
+         }
 
-	 // find tmj point index for jaw
-	 int tmjPointIndex = -1;
-	 if (name.compareTo("jaw") == 0.0) {
-	    tmjPointIndex = findLargestZValue(pts);
-	 }
+         // find tmj point index for jaw
+         int tmjPointIndex = -1;
+         if (name.compareTo("jaw") == 0.0) {
+            tmjPointIndex = findLargestZValue(pts);
+         }
 
-	 for (int k = 0; k < pts.length; k++) {
-	    m = new FrameMarker();
-	    m.setRenderProps(fixedProps.clone());
-	    hasRightPair = true;
-	   
-	    addFrameMarker(m, body, pts[k]);
-	    m.transformGeometry (X);
-	    if (hasRightPair == true) {
-	       m = new FrameMarker();
-	       
-	       addFrameMarker(m, body, createRightSidePoint(pts[k]));
-	       
-	       m.transformGeometry (X);
-	       m.setRenderProps(fixedProps.clone());
-	       if (k == tmjPointIndex) {
-		  m.setName("rtmj");
-		  RenderProps.setPointRadius(m, CONTACT_PT_RADIUS);
-		  RenderProps.setPointColor(m, Color.BLUE);
-	       }
-	    }
+         for (int k = 0; k < pts.length; k++) {
+            m = new FrameMarker();
+            m.setRenderProps(fixedProps.clone());
+            hasRightPair = true;
+           
+            addFrameMarker(m, body, pts[k]);
+            m.transformGeometry (X);
+            if (hasRightPair == true) {
+               m = new FrameMarker();
+               
+               addFrameMarker(m, body, createRightSidePoint(pts[k]));
+               
+               m.transformGeometry (X);
+               m.setRenderProps(fixedProps.clone());
+               if (k == tmjPointIndex) {
+                  m.setName("rtmj");
+                  RenderProps.setPointRadius(m, CONTACT_PT_RADIUS);
+                  RenderProps.setPointColor(m, Color.BLUE);
+               }
+            }
 
-	 }
+         }
       }
 
       // add C1 marker
       body = myRigidBodies.get("sternum");
       if (body != null) {
-	 m = new FrameMarker();
-	 addFrameMarker(m, body, c1Point);
-	 m.transformGeometry (X);
-	 m.setName("C1point");
-	 m.setRenderProps(fixedProps.clone());
-	 RenderProps.setPointColor(m, Color.MAGENTA);
+         m = new FrameMarker();
+         addFrameMarker(m, body, c1Point);
+         m.transformGeometry (X);
+         m.setName("C1point");
+         m.setRenderProps(fixedProps.clone());
+         RenderProps.setPointColor(m, Color.MAGENTA);
       }
 
       // add COM markers
@@ -1152,10 +1152,10 @@ public class JawModel extends MechModel implements ScalableUnits,
       // add reference point for hyoid
       RigidBody hyoid = myRigidBodies.get("hyoid");
       if (hyoid != null) {
-	 m = new FrameMarker();
-	 addFrameMarker(m, hyoid, hyoidRefPos);
-	 m.transformGeometry (X);
-	 m.setName("hyoidRef");
+         m = new FrameMarker();
+         addFrameMarker(m, hyoid, hyoidRefPos);
+         m.transformGeometry (X);
+         m.setName("hyoidRef");
       }
 
    }
@@ -1186,11 +1186,11 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void setTransparency(boolean transparent) {
       myTransparencyP = transparent;
       for (RigidBody body : myRigidBodies) {
-	 if (body.getMesh() == null) {
-	    continue;
-	 }
-	 RenderProps.setAlpha(body, transparent ? transparentAlpha
-	       : opaqueAlpha);
+         if (body.getMesh() == null) {
+            continue;
+         }
+         RenderProps.setAlpha(body, transparent ? transparentAlpha
+               : opaqueAlpha);
       }
    }
 
@@ -1203,7 +1203,7 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void showMeshFaces(boolean facesVisible) {
       myRenderFacesP = facesVisible;
       for (RigidBody body : myRigidBodies) {
-	 RenderProps.setVisible(body, facesVisible);
+         RenderProps.setVisible(body, facesVisible);
       }
       return;
    }
@@ -1215,8 +1215,8 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void showMeshEdges(boolean edgesVisible) {
       myRenderEdgesP = edgesVisible;
       for (RigidBody body : myRigidBodies) {
-	 RenderProps.setDrawEdges(body, edgesVisible);
-	 RenderProps.setLineColor(body, Color.WHITE);
+         RenderProps.setDrawEdges(body, edgesVisible);
+         RenderProps.setLineColor(body, Color.WHITE);
       }
       return;
    }
@@ -1235,7 +1235,7 @@ public class JawModel extends MechModel implements ScalableUnits,
 
    public void setRigidBodyColor(Color newColor) {
       for (RigidBody rb : myRigidBodies) {
-	 RenderProps.setFaceColor(rb, newColor);
+         RenderProps.setFaceColor(rb, newColor);
       }
    }
 
@@ -1257,9 +1257,9 @@ public class JawModel extends MechModel implements ScalableUnits,
    public String getMuscleName(String shortName) {
       if (muscleInfo.get(shortName) != null) return muscleInfo.get(shortName).fullName;
       else if (muscleAbbreviations.get(shortName) != null) return muscleAbbreviations
-	    .get(shortName);
+            .get(shortName);
       else
-	 return "unknown";
+         return "unknown";
    }
 
 
@@ -1267,7 +1267,7 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void setEnableMuscles(boolean enabled) {
       enableMuscles = enabled;
       for (Muscle m : myMuscles) {
-	 m.setEnabled(enabled);
+         m.setEnabled(enabled);
       }
    }
 
@@ -1278,25 +1278,25 @@ public class JawModel extends MechModel implements ScalableUnits,
    public void showMarkers(String[] markersToShow) {
       FrameMarker m;
       for (int i = 0; i < markersToShow.length; i++) {
-	 // System.out.println("Show marker: " + markersToShow[i]);
-	 m = myFrameMarkers.get(markersToShow[i]);
-	 if (m != null) {
-	    RenderProps props = m.getRenderProps();
-	    if (props == null) {
-	       props = RenderProps.createLineProps(null);
-	    }
-	    props.setPointRadius(1.0);
-	    //props.setPointSlices(20);
-	    props.setPointColor(Color.PINK);
-	    m.setRenderProps(props);
-	 }
+         // System.out.println("Show marker: " + markersToShow[i]);
+         m = myFrameMarkers.get(markersToShow[i]);
+         if (m != null) {
+            RenderProps props = m.getRenderProps();
+            if (props == null) {
+               props = RenderProps.createLineProps(null);
+            }
+            props.setPointRadius(1.0);
+            //props.setPointSlices(20);
+            props.setPointColor(Color.PINK);
+            m.setRenderProps(props);
+         }
       }
    }
 
    public void showMasseterMarkers() {
       String markersToShow[] = new String[] { "lsm_insertion", "rsm_insertion",
-	    "ldm_insertion", "rdm_insertion", "lsm_origin", "rsm_origin",
-	    "ldm_origin", "rdm_origin" };
+            "ldm_insertion", "rdm_insertion", "lsm_origin", "rsm_origin",
+            "ldm_origin", "rdm_origin" };
       showMarkers(markersToShow);
    }
 
@@ -1317,28 +1317,28 @@ public class JawModel extends MechModel implements ScalableUnits,
       XBodyToCom.mul(body.getPose()); // XBodyToCom = XWorldToCom * XBodyToWorld
 
       for (FrameMarker m : myFrameMarkers) {
-	 if (m.getFrame() == body) {
-	    boolean muscleAttachedToMarker = false;
-	    for (int i = 0; i < myAxialSprings.size(); i++) {
-	       AxialSpring s = myAxialSprings.get(i);
-	       if (s instanceof Muscle) {
-		  if (s.getFirstPoint() == m || s.getSecondPoint() == m) {
-		     muscleAttachedToMarker = true;
-		     break;
-		  }
-	       }
-	    }
-	    if (muscleAttachedToMarker) {
-	       // get wrench in coordinate frame at COM point (aligned with
-	       // world-frame)
-	       myTmpPos.transform(XBodyToCom, m.getLocation());
-	       jawMuscleWrench.f.add(m.getForce(), jawMuscleWrench.f);
-	       jawMuscleWrench.m.crossAdd(myTmpPos, m.getForce(),
-		     jawMuscleWrench.m);
+         if (m.getFrame() == body) {
+            boolean muscleAttachedToMarker = false;
+            for (int i = 0; i < myAxialSprings.size(); i++) {
+               AxialSpring s = myAxialSprings.get(i);
+               if (s instanceof Muscle) {
+                  if (s.getFirstPoint() == m || s.getSecondPoint() == m) {
+                     muscleAttachedToMarker = true;
+                     break;
+                  }
+               }
+            }
+            if (muscleAttachedToMarker) {
+               // get wrench in coordinate frame at COM point (aligned with
+               // world-frame)
+               myTmpPos.transform(XBodyToCom, m.getLocation());
+               jawMuscleWrench.f.add(m.getForce(), jawMuscleWrench.f);
+               jawMuscleWrench.m.crossAdd(myTmpPos, m.getForce(),
+                     jawMuscleWrench.m);
 
-	       // System.out.println(m.getName () + " -- f = " + m.getForce ());
-	    }
-	 }
+               // System.out.println(m.getName () + " -- f = " + m.getForce ());
+            }
+         }
       }
       return jawMuscleWrench;
    }
@@ -1373,8 +1373,8 @@ public class JawModel extends MechModel implements ScalableUnits,
       VectorTracingProbe vecProbe = null;
       Property jawCom = getProperty("jawComPosition");
       if (traceableName.equals("jawMuscleForce")) {
-	  vecProbe = new VectorTracingProbe(this, getProperty("jawMuscleForce"),
-	     jawCom, 1.0);
+          vecProbe = new VectorTracingProbe(this, getProperty("jawMuscleForce"),
+             jawCom, 1.0);
       } else if (traceableName.equals("jawMuscleMoment")) {
          vecProbe =  new VectorTracingProbe(this, getProperty("jawMuscleMoment"),
             jawCom, 1.0);
@@ -1422,28 +1422,28 @@ public class JawModel extends MechModel implements ScalableUnits,
 
       RigidTransform3d XMeshToCom = new RigidTransform3d();
       if (body.getMesh() != null) {
-	 PolygonalMesh mesh = body.getMesh();
-	 // XMeshToCom.mulInverseRight (mesh.getMeshToWorld (), XComToWorld);
-	 XMeshToCom.invert(XComToWorld);
-	 mesh.transform(XMeshToCom);
-	 body.setMesh(mesh, null);
+         PolygonalMesh mesh = body.getMesh();
+         // XMeshToCom.mulInverseRight (mesh.getMeshToWorld (), XComToWorld);
+         XMeshToCom.invert(XComToWorld);
+         mesh.transform(XMeshToCom);
+         body.setMesh(mesh, null);
       }
 
       for (FrameMarker mrk : mech.frameMarkers()) {
-	 if (mrk.getFrame() == body) {
-	    // System.out.println("transforming " + mrk.getName ());
-	    Point3d loc = new Point3d();
-	    mrk.getLocation(loc);
-	    loc.transform(XMeshToCom);
-	    mrk.setLocation(loc);
-	 }
+         if (mrk.getFrame() == body) {
+            // System.out.println("transforming " + mrk.getName ());
+            Point3d loc = new Point3d();
+            mrk.getLocation(loc);
+            loc.transform(XMeshToCom);
+            mrk.setLocation(loc);
+         }
       }
 
       for (BodyConnector con : mech.bodyConnectors()) {
-	 if (con.getBodyA() == body) {
-	    System.out.println("jaw con - " + con.getName());
-	    con.transformGeometry(XComToWorld);
-	 }
+         if (con.getBodyA() == body) {
+            System.out.println("jaw con - " + con.getName());
+            con.transformGeometry(XComToWorld);
+         }
       }
 
       return XMeshToCom;

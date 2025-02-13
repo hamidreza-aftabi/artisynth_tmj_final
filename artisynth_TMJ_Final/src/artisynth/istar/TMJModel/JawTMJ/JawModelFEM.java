@@ -75,16 +75,17 @@ import artisynth.istar.TMJModel.JawTMJ.JawModel;
 public class JawModelFEM extends JawModel{
   
    
+   
    double PCAscaling = 1;
    
-  
    protected String recType ="bright";
    
+   protected double defaultScarK = 0;
+
    protected boolean useFEMDisc = false;
    
    protected boolean usePlate = false;
 
-   protected double defaultScarK = 0;
 
    FrameMarker ml;
    FrameMarker mr;
@@ -94,14 +95,7 @@ public class JawModelFEM extends JawModel{
 
   public ArrayList<Muscle> myAttachedMuscles = new ArrayList<Muscle>();
    
-   /***Values for EF CONTACT WITHOUT FEM DISC ****/
-   
-   protected static  double  DEFAULT_E2_Not_CON = 10000000;
-   protected static  double  DEFAULT_E2 = DEFAULT_E2_Not_CON/unitConversion;    
-   protected static  double  DEFAULT_Thickness2 = 0.4; // mm   
-   protected static  double   DEFAULT_Damping2 = 150; 
-   protected static  double  DEFAULT_Nu2 = 0.49;
-   
+
 
    protected static double sphm_slack = 5.5;
    protected static double stm_slack =1.5;
@@ -170,77 +164,6 @@ public class JawModelFEM extends JawModel{
       return myProps;
    }
 
-   
-   static {
-      myProps.add("SphmSlack", "Sphm Slack Lengh", 5.5);
-      myProps.add("StmSlack", "Stm Slack Lengh", 1.5);
-      myProps.add("EFYoung","EF Young's Modulus", 6*450000);
-      myProps.add("EFThickness","EF Thickness", 0.4);
-      myProps.add("EFDamping","EF Damping", 150);
-      myProps.add("EFNu","EF NU", 0.49);
-    }
-   
-   
-   public double getSphmSlack() {
-      return sphm_slack;
-      
-   }
-   
-   public void setSphmSlack(double SphmSlack) {
-      sphm_slack = SphmSlack;
-      sphm_R.setRestLength (sphm_R.getLength () + sphm_slack);
-     
-   }
-  
-   
-   public double getStmSlack() {
-      return stm_slack;
-   }
-   
-   public void setStmSlack(double StmSlack) {
-      stm_slack = StmSlack;
-      stm_R.setRestLength (stm_R.getLength () + stm_slack);
-
-   }
-   
-
-   public double getEFYoung() {
-      return DEFAULT_E2_Not_CON;
-   }
-   
-   public void setEFYoung(double EFYoung) {
-      DEFAULT_E2_Not_CON = EFYoung;
-      
-   }
- 
-
-   public double getEFThickness() {
-      return DEFAULT_Thickness2;
-   }
-   
-   public void setEFThickness(double EFThickness) {
-      DEFAULT_Thickness2 = EFThickness;
-   }
-   
-   
-   public double getEFDamping() {
-      return DEFAULT_Damping2;
-   }
-   
-   public void setEFDamping(double EFDamping) {
-      DEFAULT_Damping2 = EFDamping;
-   }
-   
-   
-   public double getEFNu() {
-      return DEFAULT_Nu2;
-   }
-   
-   public void setEFNu(double EFNu) {
-      DEFAULT_Nu2 = EFNu;
-   }
-   
-   
 
 
    

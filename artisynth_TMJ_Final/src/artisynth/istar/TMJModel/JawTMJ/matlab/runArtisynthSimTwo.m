@@ -30,6 +30,7 @@ function loss = runArtisynthSimTwo(params)
     toggleComment(bodyList, 'screw1', 'remove');
     toggleComment(bodyList, 'donor_mesh1', 'remove');
 
+    resetMuscles();
 
     if defectType == "RB"
         
